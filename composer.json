@@ -1,0 +1,26 @@
+{
+  "name": "dantas/luthier-framework",
+  "description": "Framework PHP interno para construção de aplicações MVC",
+  "version": "0.0.1",
+  "type": "library",
+  "authors": [
+    {
+      "name": "equipe web",
+      "email": "examples@example.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {
+      "Luthier\\": "src/"
+    }
+  },
+  "scripts": {
+    "dev": "xdg-open 127.0.0.1:8811; php -S 127.0.0.1:8811;",
+    "test": "./vendor/bin/pest",
+    "coverage": "./vendor/bin/pest --coverage"
+  },
+  "require-dev": {
+    "pestphp/pest": "dev-master"
+  }
+}
