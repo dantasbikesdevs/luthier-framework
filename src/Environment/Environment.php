@@ -1,6 +1,6 @@
 <?php
 
-namespace Luthier\Utils;
+namespace Luthier\Environment;
 
 class Environment
 {
