@@ -15,7 +15,6 @@ class Luthier
       'is' => \Luthier\Http\Middleware\Is::class,
       'api' => \Luthier\Http\Middleware\Api::class,
       'can' => \Luthier\Http\Middleware\Can::class,
-      'cache' => \Luthier\Http\Middleware\Cache::class,
       'jwtAuth' => \Luthier\Http\Middleware\JWTAuth::class,
       'maintenance' => \Luthier\Http\Middleware\Maintenance::class,
       'checkLogged' => \Luthier\Http\Middleware\CheckLogged::class,
