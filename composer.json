@@ -21,6 +21,14 @@
     "coverage": "./vendor/bin/pest --coverage"
   },
   "require-dev": {
-    "pestphp/pest": "dev-master"
+    "pestphp/pest": "^1.21"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "require": {
+    "firebase/php-jwt": "dev-main"
   }
 }
