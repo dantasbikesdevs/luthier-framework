@@ -147,7 +147,7 @@ class Request
   /**
    * Método responsável por retornar informações do payload
    */
-  public function getPayload(?string $field): mixed
+  public function getPayload(?string $field = null): mixed
   {
     if ($field) return $this->payload[$field];
     return $this->payload;
