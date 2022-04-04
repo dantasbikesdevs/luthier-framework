@@ -2,6 +2,7 @@
 
 namespace Luthier\Http;
 
+use Cookie;
 use Exception;
 use Luthier\Http\Router;
 
@@ -62,7 +63,7 @@ class Request
     $this->queryParams = $_GET ?? [];
     $this->headers = getallheaders();
     $this->httpMethod = $_SERVER['REQUEST_METHOD'] ?? '';
-    $this->cookies = $_COOKIE ?? [];
+    $this->cookies = Cookie::getAll();
     $this->setUri();
     $this->setPostVars();
     $this->sanitize();
