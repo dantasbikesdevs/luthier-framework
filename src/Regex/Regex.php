@@ -18,12 +18,12 @@ class Regex
   /**
    * A expressão passa se o texto passado possuir a estrutura "xxx@xxx.xxx" não permitindo números após o "@"
    */
-  public static $validEmail = '/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$\/';
+  public static $validEmail = '/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/';
 
   /**
    * A expressão passa se o texto passado possuir mais de um espaço subsequente
    */
-  public static $contiguousBlankSpaces = '\/\s\s+/g';
+  public static $contiguousBlankSpaces = '/\s\s+/';
 
   private function __construct()
   {

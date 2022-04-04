@@ -1,22 +1,37 @@
 <?php
 
-dataset("assinaturas", function () {
+dataset("broken_signatures", function () {
   return [
-    "dantas",
-    "dantasdantasdantasdantasdantasda",
-    "dantasdantasdantasdantasdantas12",
-    "Dantasdantasdantasdantasdantas12",
+    "dantas", // Curta
+    "DANTASdantasdantasdantasdantas12", // Faltam símbolos
+    "DANTASdantasdantasdantasdantas@@", // Faltam números
+    "123456dantasdantasdantasdantas@@", // Faltam letras maiúsculas
+    "dantasdantasdantasdantasDANTASDA", // Faltam símbolos e números
+    "dantasdantasdantasdantasd@nt@sd@", // Faltam números e letras maiúsculas
+    "dantasdantasdantasdantasdantas12", // Faltam símbolos e letras maiúsculas
+    "dantasdantasdantasdantasdantasda", // Faltam símbolos, números e letras maiúsculas
   ];
 });
 
-dataset("senhas", function () {
+dataset("broken_passwords", function () {
+  return [
+    "dantas", // Muito curta
+    "dantas1A", // Faltam símbolos
+    "dantasD@", // Faltam números
+    "dantas1@", // Faltam letras maiúsculas
+    "dantasDA", // Faltam símbolos e números
+    "dantas11", // Faltam números e letras maiúsculas
+    "dantasD1", // Faltam símbolos e letras maiúsculas
+    "dantasda", // Faltam símbolos, números e letras maiúsculas
+  ];
+});
+
+dataset("invalid_emails", function () {
   return [
     "dantas",
-    "dantasda",
-    "dantasdA",
-    "dantasd2",
-    "dantasd@",
-    "dantas0@",
-    "dantasA@",
+    "dantasEletro.com",
+    "dantas@eletro",
+    "dantas@eletro.c",
+    "dantas@eletro.123",
   ];
 });

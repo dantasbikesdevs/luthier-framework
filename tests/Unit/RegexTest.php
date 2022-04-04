@@ -2,16 +2,24 @@
 
 use Luthier\Regex\Regex;
 
-test("verifica se a assinatura é muito fraca", function ($signature) {
-  $result = preg_match(pattern: Regex::$strongSignature, subject: $signature);
-  expect($result)->toBe(0);
+it("verifica se a assinatura é muito fraca", function ($signature) {
+  $this->assertDoesNotMatchRegularExpression(Regex::$strongSignature, $signature);
 })->with([
-  "assinaturas"
+  "broken_signatures"
 ]);
 
-test("verifica se a senha é muito fraca", function ($password) {
-  $result = preg_match(pattern: Regex::$strongPassword, subject: $password);
-  expect($result)->toBe(0);
+it("verifica se a senha é muito fraca", function ($password) {
+  $this->assertDoesNotMatchRegularExpression(Regex::$strongPassword, $password);
 })->with([
-  "senhas"
+  "broken_passwords"
 ]);
+
+it("verifica se os e-mails são válidos", function ($email) {
+  $this->assertDoesNotMatchRegularExpression(Regex::$validEmail, $email);
+})->with([
+  "invalid_emails"
+]);
+
+it("verifica se há espaços duplicados na string", function () {
+  $this->assertMatchesRegularExpression(Regex::$contiguousBlankSpaces, "a   b");
+});
