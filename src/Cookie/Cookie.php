@@ -47,7 +47,7 @@ class Cookie
   {
     $expires = time() + 1;
 
-    $domain = getenv("DOMAIN") ?? "";
+    $domain = $domain ?? getenv("DOMAIN") ?? "";
 
     setcookie($cookieName, "", $expires, $path, $domain, $secure, $httpOnly);
   }
