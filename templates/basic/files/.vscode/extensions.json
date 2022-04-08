@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    // Configurações do editor
+    "EditorConfig.EditorConfig",
+    // Formatador
+    "redhat.vscode-xml",
+    // Markdown preview
+    "bierner.markdown-preview-github-styles",
+    // Verificação gramátical
+    "streetsidesoftware.code-spell-checker",
+    "streetsidesoftware.code-spell-checker-portuguese-brazilian"
+  ]
+}

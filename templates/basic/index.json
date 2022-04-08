@@ -1,0 +1,24 @@
+{
+  "app": {
+    "Controller": ["ExampleController.php"],
+    "Exceptions": [".gitkeep"],
+    "Middleware": ["Example.php"],
+    "Model": {
+      "Repository": ["ExampleRepository.php"],
+      "Entity": ["ExampleEntity.php"]
+    },
+    "Utils": [".gitkeep"]
+  },
+  "config": ["index.php"],
+  "database": { "sqlScripts": ["Example.sql", "Example.md"], "0": "index.php" },
+  "routes": { "v1": ["index.php"] },
+  "docs": { "dev": ["README.md"], "user": ["README.md"] },
+  "public": ["index.php", ".htaccess"],
+  ".vscode": ["settings.json", "extensions.json"],
+  "0": ".env",
+  "1": ".env.example",
+  "2": ".editorconfig",
+  "3": ".gitignore",
+  "4": "composer.json",
+  "5": "README.md"
+}

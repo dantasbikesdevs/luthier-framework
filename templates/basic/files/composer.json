@@ -1,0 +1,17 @@
+{
+  "name": "luthier/project",
+  "description": "Luthier Project",
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  },
+  "scripts": {
+    "dev": "cd Public/; xdg-open 'http://127.0.0.1:8000'; php -S 127.0.0.1:8000",
+    "test": "./vendor/bin/pest",
+    "coverage": "./vendor/bin/pest --coverage"
+  },
+  "require": {
+    "firebase/php-jwt": "dev-main"
+  }
+}
