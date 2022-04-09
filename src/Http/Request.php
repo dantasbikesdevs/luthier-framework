@@ -3,7 +3,6 @@
 namespace Luthier\Http;
 
 use Cookie;
-use Exception;
 use Luthier\Http\Router;
 
 class Request
@@ -78,6 +77,7 @@ class Request
   {
     return $this->router;
   }
+
   /**
    * Método responsável por retornar o método HTTP da requisição
    */
@@ -152,107 +152,6 @@ class Request
   {
     if ($field) return $this->payload[$field];
     return $this->payload;
-  }
-
-  /**
-   * Função responsável pelas requisições de download
-   */
-  public function download($size, $filename): self
-  {
-    return $this;
-  }
-
-  /**
-   * Função responsável por configurar requisição para PDF
-   */
-  public function pdf(): self
-  {
-    $type = 'application/pdf';
-    $this->getRouter()->setContentType($type);
-    $this->contentType = $type;
-    return $this;
-  }
-
-  /**
-   * Função responsável por configurar requisição para JSON
-   */
-  public function json(): self
-  {
-    $type = 'application/json';
-    $this->getRouter()->setContentType($type);
-    $this->contentType = $type;
-    return $this;
-  }
-
-  /**
-   * Função responsável por configurar requisição para XML
-   */
-  public function xml(): self
-  {
-    $type = 'text/xml';
-    $this->getRouter()->setContentType($type);
-    $this->contentType = $type;
-    return $this;
-  }
-
-  /**
-   * Função responsável por enviar uma resposta ou erro
-   */
-  public function httpResponse(int $code, mixed $content): Response
-  {
-    $this->getRouter()->setContentType($this->contentType);
-    if ($code >= 400) {
-      throw new Exception($content, $code);
-    }
-    return new Response($code, $content, $this->contentType);
-  }
-
-  /**
-   * Função responsável por indicar sucesso na requisição
-   */
-  public function ok(mixed $content)
-  {
-    return $this->httpResponse(200, $content);
-  }
-
-  /**
-   * Função responsável por indicar sucesso na criação de conteúdo
-   */
-  public function created(mixed $content)
-  {
-    return $this->httpResponse(201, $content);
-  }
-
-  /**
-   * Função responsável por indicar requisição não autorizada
-   */
-  public function unauthorized(string $content)
-  {
-    return $this->httpResponse(401, $content);
-  }
-
-  /**
-   * Função responsável por indicar conflito na requisição
-   */
-  public function conflict(mixed $content)
-  {
-    return $this->httpResponse(409, $content);
-  }
-
-  /**
-   * Função responsável por indicar que um conteúdo não foi encontrado
-   */
-  public function notFound(mixed $content)
-  {
-    return $this->httpResponse(404, $content);
-  }
-
-  /**
-   * Função responsável por indicar erro no servidor
-   */
-  public function internalServerError(mixed $content)
-  {
-    return $this->httpResponse(500, $content);
   }
 
   /**

@@ -35,6 +35,11 @@ class Router
   private Request $request;
 
   /**
+   * Instância de Response
+   */
+  private Response $response;
+
+  /**
    * Tipo de conteúdo que está sendo retornado
    */
   private $contentType = 'application/json';
@@ -55,6 +60,7 @@ class Router
   public function __construct(string $url)
   {
     $this->request = new Request($this);
+    $this->response = new Response($this, 200, "");
     $this->url = $url;
     $this->setPrefix();
   }
@@ -275,25 +281,36 @@ class Router
       // ARGUMENTOS DA FUNÇÃO
       $args = [];
 
-      // REFLECTION
+      // Obtém os parâmetros do controller da rota e procura na lista de variáveis algo que corresponda aquilo
       $reflection = new ReflectionFunction($route['controller']);
+      // Com getParameters temos acesso ao array de objetos de ReflectionParameter
+      // Ex: fn($request, $response, $id) -> [ReflectionParameter, ReflectionParameter, ReflectionParameter]
       foreach ($reflection->getParameters() as $parameter) {
+        // A partir de ReflectionParameter podemos obter o nome do parâmetro
         $name = $parameter->getName();
+        // Criamos então o array de parâmetros do nosso controller ["request" => Request()]
         $args[$name] = $route['variables'][$name] ?? '';
       }
 
-      // RETORNA A EXECUÇÃO DA FILA DE MIDDLEWARES
-      return (new Middleware(
+      // Cria o objeto da fila de middlewares
+      $middlewareQueue = new Middleware(
         $route['middlewares'],
         $route['controller'],
         $args
-      ))->next($this->request);
-    } catch (Exception $e) {
-      return new Response(
-        $e->getCode() == 0 ? 500 : $e->getCode(),
-        $this->getErrorMessage($e),
-        $this->contentType
       );
+
+      // Retorna a execução da fila de middlewares
+      return $middlewareQueue->next($this->request, $this->response);
+    } catch (Exception $e) {
+      $httpCode = $e->getCode() == 0 ? 500 : $e->getCode();
+      $errorMessage = $this->getErrorMessage($e);
+
+      // Composição da resposta de erro
+      $response = new Response($this);
+      $response->setCode($httpCode);
+      $response->body($errorMessage);
+      $response->setContentType($this->contentType);
+      return $response;
     }
   }
 
@@ -425,7 +442,10 @@ class Router
           // VARIÁVEIS PROCESSADAS
           $keys = $methods[$httpMethod]['variables'];
           $methods[$httpMethod]['variables'] = array_combine($keys, $matches);
+
+          // Valores padrão para response e request
           $methods[$httpMethod]['variables']['request'] = $this->request;
+          $methods[$httpMethod]['variables']['response'] = $this->response;
 
           // RETORNO DOS PARÂMETROS DA ROTA
           return $methods[$httpMethod];
