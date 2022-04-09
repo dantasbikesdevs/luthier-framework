@@ -26,6 +26,7 @@ class Luthier
     //MIDDLEWARES PADRÕES (EXECUTADOS EM TODAS AS ROTAS)
     Middleware::setDefault([
       'maintenance',
+      'api'
     ]);
   }
 }
