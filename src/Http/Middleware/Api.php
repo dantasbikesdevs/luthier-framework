@@ -9,9 +9,9 @@ use Luthier\Http\Response;
 
 class Api implements IMiddleware
 {
-  public function handle(Request $request, Closure $next): Response
+  public function handle(Request $request, Response $response, Closure $next): Response
   {
-    $request->json();
-    return $next($request);
+    $response->asJson();
+    return $next($request, $response);
   }
 }

@@ -13,7 +13,7 @@ use Luthier\JwtService\JwtService;
 class JWT implements IMiddleware
 {
 
-  public function handle(Request $request, Closure $next): Response
+  public function handle(Request $request, Response $response, Closure $next): Response
   {
     $cookieJwt =  $request->getCookie("jwt") ?? "";
 
@@ -25,6 +25,6 @@ class JWT implements IMiddleware
       throw new Exception("Acesso não permitido.", 403);
     }
 
-    return $next($request);
+    return $next($request, $response);
   }
 }

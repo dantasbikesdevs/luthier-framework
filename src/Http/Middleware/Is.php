@@ -15,7 +15,7 @@ use Luthier\Http\Response;
 class Is implements IMiddleware
 {
 
-  public function handle(Request $request, Closure $next): Response
+  public function handle(Request $request, Response $response, Closure $next): Response
   {
 
     // Permissões exigidas na requisição
@@ -24,7 +24,7 @@ class Is implements IMiddleware
     // Tenta encontrar um campo de permissão no payload do usuário
     $userPermissions = $request->getPayload("is");
 
-    if (self::verify($requiredPermissions, $userPermissions)) return $next($request);
+    if (self::verify($requiredPermissions, $userPermissions)) return $next($request, $response);
 
     throw new Exception("Usuário não tem permissão para fazer essa ação!", 401);
   }

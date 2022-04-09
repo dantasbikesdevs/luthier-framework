@@ -15,13 +15,12 @@ use Luthier\Http\Response;
  */
 class Can implements IMiddleware
 {
-
-  public function handle(Request $request, Closure $next): Response
+  public function handle(Request $request, Response $response, Closure $next): Response
   {
     $roles = $request->roles();
     $userRoles = $request->getPayload("can");
 
-    if (self::verify($roles, $userRoles)) return $next($request);
+    if (self::verify($roles, $userRoles)) return $next($request, $response);
 
     throw new Exception("Usuário não tem permissão para fazer essa ação!", 401);
   }
