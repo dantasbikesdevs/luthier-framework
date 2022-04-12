@@ -1,5 +1,7 @@
 <?php
 
+namespace Luthier\Cookie;
+
 class Cookie
 {
   // O objetivo é que essa classe seja estática então não faz sentido ter um construtor
