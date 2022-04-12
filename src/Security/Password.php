@@ -3,7 +3,6 @@
 namespace Luthier\Security;
 
 use Exception;
-use Luthier\Regex\Regex;
 
 class Password
 {
@@ -32,7 +31,7 @@ class Password
   /**
    * Recebe um hash de uma senha, uma senha em texto puro e verifica se elas são correspondentes
    */
-  public static function verifyHash(string $password, string $hashedPassword)
+  public static function matches(string $password, string $hashedPassword)
   {
     /**
      * Talvez você se pergunte o porque de estarmos apenas encapsulando
@@ -47,17 +46,5 @@ class Password
      * nenhuma outra operação maluca.
      */
     return password_verify($password, $hashedPassword);
-  }
-
-  /**
-   * Recebe uma senha para validar e um número mínimo de caráteres para ela.
-   */
-  public static function validate(string $password, int $minLength = 8)
-  {
-    if ($minLength < 8) throw new Exception("Impossível configurar um tamanho mínimo tão baixo. Insira um número maior ou igual a oito.", 500);
-
-    if (strlen($password < $minLength) ||  !preg_match(Regex::$strongPassword, $password)) {
-      throw new Exception("Senha inválida. Uma boa senha tem no mínimo $minLength caracteres, um caractere especial ($*&@#), um número e uma letra maiúscula.", 400);
-    }
   }
 }

@@ -7,5 +7,5 @@ test("faz o hash de uma string e valida esse hash contra a string original", fun
 
   $hash = Password::createHash($pass);
 
-  $this->assertTrue(Password::verifyHash($pass, $hash));
+  $this->assertTrue(Password::matches($pass, $hash));
 });
