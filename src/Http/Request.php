@@ -111,7 +111,7 @@ class Request
   }
 
   /**
-   *  Método responsável por retornar os parãmetros POST($_POST) da requisição
+   *  Método responsável por retornar os parâmetros POST($_POST) da requisição
    */
   public function getPostVars($postValidated = null): array
   {
