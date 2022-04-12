@@ -1,6 +1,8 @@
 <?php
 
-namespace Luthier\Cookie;
+namespace Luthier\Http;
+
+use Exception;
 
 class Cookie
 {
