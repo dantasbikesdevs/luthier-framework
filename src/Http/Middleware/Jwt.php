@@ -8,7 +8,7 @@ use Throwable;
 use IMiddleware;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
-use Luthier\JwtService\JwtService;
+use Luthier\Security\Jwt as JwtService;
 
 class JWT implements IMiddleware
 {
@@ -18,7 +18,7 @@ class JWT implements IMiddleware
     $cookieJwt =  $request->getCookie("jwt") ?? "";
 
     try {
-      $payload = JwtService::decode($cookieJwt, getenv("JWT_KEY"));
+      $payload = JwtService::decode($cookieJwt);
       $request->setPayload($payload);
     } catch (Throwable $error) {
       if (getenv("ENV") == "DEV") throw new Exception("Acesso não permitido. Stacktrace: $error.", 403);

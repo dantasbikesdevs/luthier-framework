@@ -57,7 +57,7 @@ class Cli
           echo Colors::redText("👎 PASTA JÁ EXISTE    👉 $dirPath\n");
         } else {
           echo Colors::greenText("👌 PASTA FOI CRIADA   👉") . Colors::magentaText(" $dirPath\n");
-          // mkdir($dirPath);
+          mkdir($dirPath);
         }
 
         # Continua executando a função até encontrar um elemento sem itens
@@ -77,7 +77,7 @@ class Cli
           echo Colors::redText("👎 ARQUIVO JÁ EXISTE  👉 $filePath\n");
         } else {
           echo Colors::greenText("👌 ARQUIVO FOI CRIADO 👉") . Colors::cyanText(" $filePath\n");
-          // file_put_contents("$projectPath/$filePath", $content ?? "");
+          file_put_contents("$projectPath/$filePath", $content ?? "");
         }
       }
     }
