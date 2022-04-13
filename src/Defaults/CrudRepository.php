@@ -2,9 +2,6 @@
 
 namespace Luthier\Defaults;
 
-use Luthier\Http\Request;
-use Luthier\Http\Response;
-
 abstract class CrudRepository
 {
   public function create(mixed $object): mixed
