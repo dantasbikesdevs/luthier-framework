@@ -1,5 +1,7 @@
 <?php
 
+namespace Luthier\Utils;
+
 class Path
 {
 
