@@ -4,44 +4,19 @@ namespace Luthier\Defaults;
 
 abstract class CrudRepository
 {
-  public function create(mixed $object): mixed
-  {
-    return null;
-  }
+  abstract public function create(mixed $object): mixed;
 
-  public function createMany(mixed $objects): mixed
-  {
-    return null;
-  }
+  abstract public function createMany(array $objects): mixed;
 
-  public function find(mixed $parameter, string $by = "id"): mixed
-  {
-    return null;
-  }
+  abstract public function find(mixed $parameter, string $by = "id"): mixed;
 
-  public function findMany(array $parameter, string $by = "id"): mixed
-  {
-    return null;
-  }
+  abstract public function findMany(array $parameter = [], string $by = "id"): mixed;
 
-  public function update(mixed $parameter, mixed $args, string $by = "id"): mixed
-  {
-    return null;
-  }
+  abstract public function update(mixed $parameter, mixed $args, string $by = "id"): mixed;
 
-  public function updateMany(array $parameter, array $args, string $by = "id"): mixed
-  {
-    return null;
-  }
+  abstract public function updateMany(array $parameter, array $args, string $by = "id"): mixed;
 
+  abstract public function delete(mixed $parameter, string $by = "id"): mixed;
 
-  public function delete(mixed $parameter, string $by = "id"): mixed
-  {
-    return null;
-  }
-
-  public function deleteMany(array $parameter, string $by = "id"): mixed
-  {
-    return null;
-  }
+  abstract public function deleteMany(array $parameter, string $by = "id"): mixed;
 }

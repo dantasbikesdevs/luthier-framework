@@ -7,43 +7,19 @@ use Luthier\Http\Response;
 
 abstract class CrudController
 {
-  public function create(Request $request, Response $response): Response
-  {
-    return $response;
-  }
+  abstract public function create(Request $request, Response $response): Response;
 
-  public function createMany(Request $request, Response $response): Response
-  {
-    return $response;
-  }
+  abstract public function createMany(Request $request, Response $response): Response;
 
-  public function get(Request $request, Response $response, int $id): Response
-  {
-    return $response;
-  }
+  abstract public function get(Request $request, Response $response, int $id): Response;
 
-  public function getMany(Request $request, Response $response): Response
-  {
-    return $response;
-  }
+  abstract public function getMany(Request $request, Response $response): Response;
 
-  public function update(Request $request, Response $response, int $id): Response
-  {
-    return $response;
-  }
+  abstract public function update(Request $request, Response $response, int $id): Response;
 
-  public function updateMany(Request $request, Response $response, array $ids): Response
-  {
-    return $response;
-  }
+  abstract public function updateMany(Request $request, Response $response): Response;
 
-  public function delete(Request $request, Response $response, int $id): Response
-  {
-    return $response;
-  }
+  abstract public function delete(Request $request, Response $response, int $id): Response;
 
-  public function deleteMany(Request $request, Response $response, array $ids): Response
-  {
-    return $response;
-  }
+  abstract public function deleteMany(Request $request, Response $response): Response;
 }
