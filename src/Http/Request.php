@@ -2,7 +2,7 @@
 
 namespace Luthier\Http;
 
-use Cookie;
+use Luthier\Http\Cookie;
 use Luthier\Http\Router;
 
 class Request
@@ -105,9 +105,32 @@ class Request
   /**
    * Método responsável por retornar os parâmetros da URL($_GET) da requisição
    */
-  public function getQueryParams(): array
+  public function getAnyQueryParams(): array
   {
     return $this->queryParams;
+  }
+
+  /**
+   * Método responsável por retornar os parâmetros da URL($_GET) da requisição
+   */
+  public function getQueryParams(array $validParamNames): array
+  {
+    $params = $this->queryParams;
+    $validQueryParams = [];
+
+    // Ex: ?nome=dev -> ["nome" => "dev"]
+    foreach ($params as $name => $value) {
+      $name = strtolower($name);
+
+      // Checa se o parâmetro passado esta na lista dos parâmetros válidos
+      $isValid = in_array($name, $validParamNames);
+
+      if ($isValid && $value) {
+        $validQueryParams[] = ["field" => $name, "value" => $value];
+      }
+    }
+
+    return $validQueryParams;
   }
 
   /**
