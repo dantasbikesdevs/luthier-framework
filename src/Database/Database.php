@@ -201,7 +201,7 @@ class Database
   /**
    * Método responsável por executar uma consulta no banco
    */
-  public function select(string $fields = '*', array $wheres = [], array $inner = [], ?string $order = null, ?string $limit = null)
+  public function select(string $fields = '*', array $where = [], array $inner = [], ?string $order = null, ?string $limit = null)
   {
     // DADOS DA QUERY
     if (count($inner)) {
@@ -215,26 +215,26 @@ class Database
       $inner = '';
     }
 
-    $where = !empty($wheres) ? 'WHERE ' : '';
+    $whereStatement = !empty($where) ? 'WHERE ' : '';
 
-    if (is_array($wheres)) {
-      foreach ($wheres as $key => $value) {
-        $where .= $value . ' AND ';
+    if (is_array($where)) {
+      foreach ($where as $key => $value) {
+        $whereStatement .= $value . ' AND ';
       }
-      $where = substr($where, 0, -4);
+      $where = substr($whereStatement, 0, -4);
     } else {
-      $where .= $wheres;
+      $whereStatement .= $where;
     }
 
-    if (!strlen($where)) {
-      $where = '';
+    if (!strlen($whereStatement)) {
+      $whereStatement = '';
     }
 
     $order = strlen($order) ? 'ORDER BY ' . $order : '';
     $limit = strlen($limit) ? 'LIMIT ' . $limit : '';
 
     // MONTA A QUERY
-    $query = "SELECT $fields  FROM  $this->table " . $inner . "$where  $order  $limit";
+    $query = "SELECT $fields  FROM  $this->table " . $inner . "$whereStatement  $order  $limit";
 
     // EXECUTA A QUERY
     $result = $this->execute($query);
