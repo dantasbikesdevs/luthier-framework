@@ -1,7 +1,7 @@
 {
   "name": "dantas/luthier",
   "description": "Framework PHP interno para construção de aplicações MVC",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "library",
   "authors": [
     {
