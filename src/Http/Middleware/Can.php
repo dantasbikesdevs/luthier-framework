@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace Luthier\Http\Middleware;
 
-use App\Models\Entity\User;
 use Closure;
 use Exception;
-use IMiddleware;
+use Luthier\Http\Middleware\IMiddleware;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
 

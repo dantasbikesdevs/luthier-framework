@@ -151,7 +151,7 @@ class Router
 
   public function prepareParams(&$params)
   {
-    $middlewares = $this->getMiddlewares();
+    $middlewares = $this->getMiddlewares() ?? [];
     if (count($middlewares)) {
       $params['middlewares'] = $params['middlewares'] ?? [];
       $params['middlewares'] = array_merge($params['middlewares'], $middlewares);
@@ -270,22 +270,24 @@ class Router
   public function run(): Response
   {
     try {
-      // OBTÉM A ROTA ATUAL
+      // Obtém a rota atual
       $route = $this->getRoute();
 
-      // VERIFICA O CONTROLADOR
+      // Verifica se tem um controlador
       if (!isset($route['controller'])) {
         throw new Exception('A URL não pode ser processada', 500);
       }
 
-      // ARGUMENTOS DA FUNÇÃO
+      // Argumentos do controlador
       $args = [];
 
       // Obtém os parâmetros do controller da rota e procura na lista de variáveis algo que corresponda aquilo
       $reflection = new ReflectionFunction($route['controller']);
+
       // Com getParameters temos acesso ao array de objetos de ReflectionParameter
       // Ex: fn($request, $response, $id) -> [ReflectionParameter, ReflectionParameter, ReflectionParameter]
       foreach ($reflection->getParameters() as $parameter) {
+
         // A partir de ReflectionParameter podemos obter o nome do parâmetro
         $name = $parameter->getName();
         // Criamos então o array de parâmetros do nosso controller ["request" => Request()]
@@ -381,7 +383,7 @@ class Router
   {
     $middlewares = $this->currentMiddlewares;
     $this->currentMiddlewares = [];
-    return count($middlewares) ? $middlewares : NULL;
+    return count($middlewares) ? $middlewares : null;
   }
 
   /**

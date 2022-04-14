@@ -3,7 +3,7 @@
 namespace Luthier\Http\Middleware;
 
 use Exception;
-use IMiddleware;
+use Luthier\Http\Middleware\IMiddleware;
 use Luthier\Http\Response;
 use Luthier\Http\Request;
 

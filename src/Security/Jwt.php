@@ -30,7 +30,7 @@ class Jwt
   public static function encode(array $payload)
   {
     try {
-      return JWT::encode($payload, self::$signature, 'HS256');
+      return FirebaseJwt::encode($payload, self::$signature, 'HS256');
     } catch (\Throwable $error) {
       throw $error;
     }
@@ -43,7 +43,7 @@ class Jwt
   public static function decode(string $jwt)
   {
     try {
-      $decodedPayloadObject = JWT::decode($jwt, new Key(self::$signature, 'HS256'));
+      $decodedPayloadObject = FirebaseJwt::decode($jwt, new Key(self::$signature, 'HS256'));
       return (array) $decodedPayloadObject;
     } catch (\Throwable $error) {
       throw $error;
@@ -57,8 +57,9 @@ class Jwt
       "tooShort" => "Assinatura muito pequena. Cria uma maior e mais forte.",
     ];
 
+
     if (strlen($signature) < 32) throw new Exception($errorMessages["fragile"]);
-    if (!preg_match(Regex::$strongSignature, $signature)) throw new Exception($errorMessages["tooShort"]);
+    if (preg_match(Regex::$strongSignature, $signature)) throw new Exception($errorMessages["tooShort"]);
 
     return $signature;
   }

@@ -1,5 +1,8 @@
 <?php
 
+namespace Luthier\Http\Middleware;
+
+use Closure;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
 

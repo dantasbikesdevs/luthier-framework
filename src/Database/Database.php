@@ -308,6 +308,7 @@ class Database
       );
 
       $this->connection = new PDO($config, self::$user, self::$pass);
+
       $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e) {
       throw new \Exception('Database ERROR: ' . $e->getMessage());

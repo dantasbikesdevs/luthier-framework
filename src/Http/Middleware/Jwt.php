@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Exception;
+use Luthier\Http\Middleware\IMiddleware;
 use Throwable;
-use IMiddleware;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
 use Luthier\Security\Jwt as JwtService;

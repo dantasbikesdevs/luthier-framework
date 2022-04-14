@@ -17,7 +17,7 @@ class Path
   /**
    * Método que pega diversos arquivos de um path
    */
-  function getMultipleFiles(string $path)
+  public static function getMultipleFiles(string $path)
   {
     $firstPath  = glob($path . '/*.php');
     $secondPath = glob($path . '/*/*.php');

@@ -4,7 +4,7 @@ namespace Luthier\Http\Middleware;
 
 use Exception;
 use Closure;
-use IMiddleware;
+use Luthier\Http\Middleware\IMiddleware;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
 
