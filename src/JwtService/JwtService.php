@@ -9,19 +9,26 @@ use Luthier\Regex\Regex;
 
 class JwtService
 {
+  private static string $signature;
+
   private function __construct()
   {
+  }
+
+  public static function config(string $signature)
+  {
+    self::validateSignature($signature);
+    self::$signature = $signature;
   }
 
   /**
    * Recebe o conteúdo do payload como um array associativo e assina o JWT com uma chave segura passada
    * como $signature.
    */
-  public static function encode(array $payload, string $signature)
+  public static function encode(array $payload)
   {
     try {
-      $validSignature = self::validateSignature($signature);
-      return JWT::encode($payload, $validSignature, 'HS256');
+      return JWT::encode($payload, self::$signature, 'HS256');
     } catch (\Throwable $error) {
       throw $error;
     }
@@ -31,10 +38,10 @@ class JwtService
    * Valida um JWT com base no seu conteúdo e a chave original com a que foi assinado ($signature).
    * Retorna o conteúdo do payload como um array associativo.
    */
-  public static function decode(string $jwt, string $signature)
+  public static function decode(string $jwt)
   {
     try {
-      $decodedPayloadObject = JWT::decode($jwt, new Key($signature, 'HS256'));
+      $decodedPayloadObject = JWT::decode($jwt, new Key(self::$signature, 'HS256'));
       return (array) $decodedPayloadObject;
     } catch (\Throwable $error) {
       throw $error;
