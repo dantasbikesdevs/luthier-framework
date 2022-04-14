@@ -9,10 +9,7 @@ use Luthier\Regex\Regex;
 
 class Jwt
 {
-  /**
-   * Assinatura usada para assinar e validar JWTs
-   */
-  private static $signature;
+  private static string $signature;
 
   private function __construct()
   {
@@ -33,7 +30,7 @@ class Jwt
   public static function encode(array $payload)
   {
     try {
-      return FirebaseJwt::encode($payload, self::$signature, 'HS256');
+      return JWT::encode($payload, self::$signature, 'HS256');
     } catch (\Throwable $error) {
       throw $error;
     }
@@ -46,7 +43,7 @@ class Jwt
   public static function decode(string $jwt)
   {
     try {
-      $decodedPayloadObject = FirebaseJwt::decode($jwt, new Key(self::$signature, 'HS256'));
+      $decodedPayloadObject = JWT::decode($jwt, new Key(self::$signature, 'HS256'));
       return (array) $decodedPayloadObject;
     } catch (\Throwable $error) {
       throw $error;

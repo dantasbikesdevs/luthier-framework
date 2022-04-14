@@ -21,9 +21,9 @@ class Database
   private static string $host;
 
   /**
-   * Nome do banco de dados
+   * Caminho para o banco de dados
    */
-  private static string $name;
+  private static string $path;
 
   /**
    * Usuário do banco
@@ -34,11 +34,6 @@ class Database
    * Senha de acesso ao banco de dados
    */
   private static string $pass;
-
-  /**
-   * Porta de acesso ao banco
-   */
-  private static int $port;
 
   /**
    * Nome da tabela a ser manipulada
@@ -53,13 +48,13 @@ class Database
   /**
    * Método responsável por configurar a classe
    */
-  public static function config(string $host, string $name, string $user, string $pass, int $port = 3306)
+  public static function config(string $driver, string $host, string $path, string $user, string $pass)
   {
+    self::$driver = $driver;
+    self::$path = $path;
     self::$host = $host;
-    self::$name = $name;
     self::$user = $user;
     self::$pass = $pass;
-    self::$port = $port;
   }
 
   /**
@@ -306,9 +301,13 @@ class Database
   private function setConnection()
   {
     try {
-      $config = ConfigDatabase::getConnectionString();
-      $user = ConfigDatabase::databaseUser();
-      $this->connection = new PDO($config, $user['user'], $user['pass']);
+      $config = self::connectionAsString(
+        self::$host,
+        self::$path,
+        self::$driver
+      );
+
+      $this->connection = new PDO($config, self::$user, self::$pass);
       $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e) {
       throw new \Exception('Database ERROR: ' . $e->getMessage());
@@ -327,5 +326,13 @@ class Database
   private function getLimit(Pagination $pagination)
   {
     return $pagination->getLimit();
+  }
+
+  /**
+   * Gera a string de conexão
+   */
+  private static function connectionAsString($host, $path, $driver = "firebird")
+  {
+    return "$driver:dbname=${host}:${path};charset=utf8;dialect=3;";
   }
 }
