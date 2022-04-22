@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace Luthier\Http\Middleware;
 
 use Closure;
 use Exception;
