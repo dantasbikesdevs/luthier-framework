@@ -45,7 +45,7 @@ class Response
   /**
    * Adiciona coisas ao corpo da resposta. Aqui vai o conteúdo que deseja enviar ao cliente.
    */
-  public function body(mixed $content)
+  public function send(mixed $content)
   {
     $this->content = $content;
     return $this;
@@ -150,7 +150,7 @@ class Response
     // Compõe o objeto de resposta
     $response = new Response($this->router);
     $response->setCode($code);
-    $response->body($content);
+    $response->send($content);
     $response->setContentType($this->contentType);
 
     return $response;
