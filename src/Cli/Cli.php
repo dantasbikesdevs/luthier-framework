@@ -95,7 +95,7 @@ class Cli
     echo match ($framework) {
       "pest" => InstallTest::pest(),
       "phppunit" =>  InstallTest::phpUnit(),
-      "codecetion" =>  InstallTest::codeception(),
+      "codeception" =>  InstallTest::codeception(),
       default => InstallTest::pest()
     };
   }
