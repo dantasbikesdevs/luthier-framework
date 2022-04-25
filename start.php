@@ -1,11 +1,4 @@
 <?php
-// Instala as dependências do projeto caso elas já não tenham sido instaladas
-$ls = shell_exec("ls ./LuthierFramework");
-if (!str_contains($ls, "vendor")) {
-  echo "\n\n\n\033[107m\033[31m >>>>>>>>>> INSTALANDO DEPENDÊNCIAS DO FRAMEWORK %>\033[0m\033[49m\n\n\n";
-  system("composer install --working-dir=LuthierFramework");
-}
-
 // Prossegue com a execução do instalador
 require_once __DIR__ . "/vendor/autoload.php";
 
@@ -45,9 +38,10 @@ Output::charByChar("SELECIONE UMA OPÇÃO", 5, $colors);
 Output::output("[1] - CRIAR ESQUELETO DO PROJETO NA PASTA ATUAL ($path)", "\n", $colors);
 Output::output("[*] - SAIR SEM FAZER NADA", "\n", $colors);
 $result = trim(readline(">>> "));
+
 $projectStructure = file_get_contents(__DIR__ . "/templates/basic/index.json");
 $projectStructureArray = json_decode($projectStructure, associative: true);
-$userProjectPath = dirname(__DIR__, 1);
+$userProjectPath = dirname(__DIR__, 3);
 
 $choose = match ($result) {
   "1" => (new Cli("basic"))->startProject("", $projectStructureArray, $userProjectPath),
