@@ -48,7 +48,7 @@ class Response
   public function send(mixed $content)
   {
     $this->content = $content;
-    return $this;
+    return $this->httpResponse($this->httpCode, $this->content);
   }
 
   /**
@@ -162,49 +162,138 @@ class Response
   /**
    * Função responsável por indicar sucesso na requisição
    */
-  public function ok()
+  public function ok(): Response
   {
-    return $this->httpResponse(200, $this->content);
+    $this->setCode(200);
+    return $this;
   }
 
   /**
    * Função responsável por indicar sucesso na criação de conteúdo
    */
-  public function created(mixed $content)
+  public function created(): Response
   {
-    return $this->httpResponse(201, $content);
+    $this->setCode(201);
+    return $this;
   }
 
   /**
-   * Função responsável por indicar requisição não autorizada
+   * Função responsável por indicar que um recurso foi movido permanentemente
    */
-  public function unauthorized(string $content)
+  public function movedPermanently(): Response
   {
-    return $this->httpResponse(401, $content);
+    $this->setCode(301);
+    return $this;
   }
 
   /**
-   * Função responsável por indicar conflito na requisição
+   * Função responsável por indicar que você esta sendo redirecionado
    */
-  public function conflict(mixed $content)
+  public function seeOther(): Response
   {
-    return $this->httpResponse(409, $content);
+    $this->setCode(303);
+    return $this;
+  }
+
+  /**
+   * Recurso movido permanentemente
+   */
+  public function permanentRedirect(): Response
+  {
+    $this->setCode(308);
+    return $this;
+  }
+
+
+  /**
+   * Requisição mal formada
+   */
+  public function badRequest(): Response
+  {
+    $this->setCode(400);
+    return $this;
+  }
+
+  /**
+   * Requisição não autorizada
+   */
+  public function unauthorized(): Response
+  {
+    $this->setCode(401);
+    return $this;
+  }
+
+  /**
+   * O servidor não autorizou a emissão de um resposta.
+   */
+  public function paymentRequired(): Response
+  {
+    $this->setCode(402);
+    return $this;
+  }
+
+  /**
+   * O servidor recebeu a requisição e foi capaz de identificar o autor, porém não autorizou a emissão de um resposta.
+   */
+  public function forbidden(): Response
+  {
+    $this->setCode(403);
+    return $this;
   }
 
   /**
    * Função responsável por indicar que um conteúdo não foi encontrado
    */
-  public function notFound(mixed $content)
+  public function notFound(): Response
   {
-    return $this->httpResponse(404, $content);
+    $this->setCode(404);
+    return $this;
+  }
+
+  /**
+   * O servidor recebeu a requisição e se nega a enviar uma resposta por conta do protocolo não ser suportado ou
+   * por conta de um user-agent ruim, por exemplo.
+   */
+  public function notAcceptable(): Response
+  {
+    $this->setCode(405);
+    return $this;
+  }
+
+  /**
+   * O servidor recebeu a requisição e demorou demais para processá-la
+   */
+  public function requestTimeout(): Response
+  {
+    $this->setCode(408);
+    return $this;
+  }
+
+  /**
+   * Função responsável por indicar conflito na requisição
+   */
+  public function conflict(): Response
+  {
+    $this->setCode(409);
+    return $this;
+  }
+
+  /**
+   * Função responsável por indicar conflito na requisição
+   */
+  public function unsupportedMediaType(): Response
+  {
+    $this->setCode(415);
+    return $this;
   }
 
   /**
    * Função responsável por indicar erro no servidor
    */
-  public function internalServerError(mixed $content)
+  public function internalServerError(): Response
   {
-    return $this->httpResponse(500, $content);
+    $this->setCode(500);
+    return $this;
   }
 
   /**
