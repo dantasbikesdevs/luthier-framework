@@ -150,7 +150,7 @@ class Response
     // Compõe o objeto de resposta
     $response = new Response($this->router);
     $response->setCode($code);
-    $response->send($content);
+    $response->setContent($content);
     $response->setContentType($this->contentType);
 
     return $response;
@@ -257,6 +257,16 @@ class Response
   public function notAcceptable(): Response
   {
     $this->setCode(405);
+    return $this;
+  }
+
+  /**
+   * O servidor recebeu a requisição e se nega a enviar uma resposta por conta do protocolo não ser suportado ou
+   * por conta de um user-agent ruim, por exemplo.
+   */
+  protected function setContent(mixed $content): Response
+  {
+    $this->content = $content;
     return $this;
   }
 
