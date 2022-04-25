@@ -212,13 +212,13 @@ class Database
 
     $whereStatement = !empty($where) ? 'WHERE ' : '';
 
-    if (is_array($where)) {
+    if (count($where) > 1) {
       foreach ($where as $key => $value) {
         $whereStatement .= $value . ' AND ';
       }
       $where = substr($whereStatement, 0, -4);
     } else {
-      $whereStatement .= $where;
+      $whereStatement .= $where[0];
     }
 
     if (!strlen($whereStatement)) {
