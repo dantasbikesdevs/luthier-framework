@@ -310,7 +310,7 @@ class Router
       // Composição da resposta de erro
       $response = new Response($this);
       $response->setCode($httpCode);
-      $response->send($errorMessage);
+      $response->setContent($errorMessage);
       $response->setContentType($this->contentType);
       return $response;
     }

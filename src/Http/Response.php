@@ -144,7 +144,7 @@ class Response
 
     // Caso haja erro
     if ($code >= 400) {
-      throw new Exception($content, $code);
+      throw new Exception($content["error"], $code);
     }
 
     // Compõe o objeto de resposta
@@ -152,9 +152,7 @@ class Response
     $response->setCode($code);
     $response->setContent($content);
     $response->setContentType($this->contentType);
-
     return $response;
-    return new Response($this->router, $code, $content, $this->contentType);
   }
 
   // * Códigos de resposta HTTP. Última coisa a ser colocada na resposta.
@@ -264,7 +262,7 @@ class Response
    * O servidor recebeu a requisição e se nega a enviar uma resposta por conta do protocolo não ser suportado ou
    * por conta de um user-agent ruim, por exemplo.
    */
-  protected function setContent(mixed $content): Response
+  public function setContent(mixed $content): Response
   {
     $this->content = $content;
     return $this;
