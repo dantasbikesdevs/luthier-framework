@@ -191,7 +191,7 @@ class Database
   }
 
   /**
-   * Método responsável por executar uma consulta no banco
+   * Método responsável por executar uma consulta no banco. Todos os campos são opcionais então procure sempre usar parâmetros nomeados.
    */
   public function select(string $fields = '*', array $where = [], array $inner = [], ?string $order = null, ?string $limit = null)
   {
@@ -200,6 +200,7 @@ class Database
       $inners = array_keys($inner);
       $ons = array_values($inner);
       unset($inner);
+
       for ($i = 0; $i < count($inners); $i++) {
         $inner .= count($inners) ? 'LEFT JOIN ' . $inners[$i] . ' ON ' . $ons[$i] . ' ' : '';
       }
@@ -207,15 +208,35 @@ class Database
       $inner = '';
     }
 
+    // Inicia o where quando se tem ao menos um item
     $whereStatement = !empty($where) ? 'WHERE ' : '';
+
+    // Armazena os valores dos wheres
+    $whereValues = [];
 
     if (count($where) > 1) {
       foreach ($where as $key => $value) {
+
+        [$whereField, $whereOperator, $whereValue] = preg_split("/[\s]+/", $value[0], 3);
+
+        $whereValues[] = $whereValue;
+
+        $whereStatement .= "$whereField $whereOperator ?";
         $whereStatement .= $value . ' AND ';
       }
       $where = substr($whereStatement, 0, -4);
     } else {
-      $whereStatement .= $where[0];
+      /**
+       * Separa uma "where string" em três partes
+       * 0 => campo
+       * 1 => operador lógico
+       * 2 => valor
+       */
+      [$whereField, $whereOperator, $whereValue] = preg_split("/[\s]+/", $where[0], 3);
+
+      $whereValues[] = $whereValue;
+
+      $whereStatement .= "$whereField $whereOperator ?";
     }
 
     if (!strlen($whereStatement)) {
@@ -229,12 +250,15 @@ class Database
     $query = "SELECT $fields  FROM  $this->table " . $inner . "$whereStatement  $order  $limit";
 
     // EXECUTA A QUERY
-    $result = $this->execute($query);
+    $result = $this->execute($query, $whereValues);
 
     while ($finalResult = $result->fetchAll(PDO::FETCH_ASSOC)) {
       return $finalResult;
     }
   }
+
+
+
 
   /**
    * Método responsável por executar uma consulta no banco
@@ -304,9 +328,10 @@ class Database
         self::$driver
       );
 
-      $this->connection = new PDO($config, self::$user, self::$pass);
-
-      $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $this->connection = new PDO($config, self::$user, self::$pass, [
+        PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+      ]);
     } catch (PDOException $e) {
       throw new \Exception('Database ERROR: ' . $e->getMessage());
     }
