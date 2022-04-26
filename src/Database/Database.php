@@ -155,7 +155,7 @@ class Database
   /**
    * Método responsável por inserir dados no banco. Recebe valores no formato de um array associativo [ field => value ] e retorna o ID do item inserido
    */
-  public function insert(array $values, $cod = null)
+  public function insert(mixed $values, $cod = "ID")
   {
     $values = self::getValuesOfObjects($values);
     // DADOS DA QUERY
@@ -165,10 +165,7 @@ class Database
     // MONTA A QUERY
     $query = 'INSERT INTO ' . $this->table . ' (' . implode(',', $fields) . ') VALUES (' . implode(',', $binds) . ') ' . $return;
     // EXECUTA O INSERT
-    if ($cod) {
-      return $this->execute($query, array_values($values))->fetchObject()->$cod;
-    }
-    return $this->execute($query, array_values($values));
+    return $this->execute($query, array_values($values))->fetchObject()->$cod;
   }
 
   /**
