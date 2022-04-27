@@ -3,11 +3,12 @@
 namespace Luthier\Database;
 
 use App\Database\ConfigDatabase;
+use IDatabase;
 use \PDOException;
 use \PDO;
 use PDOStatement;
 
-class Database
+class Database implements IDatabase
 {
 
   /**
@@ -60,7 +61,7 @@ class Database
   /**
    * Define a tabela e instancia e conexão
    */
-  public function __construct(?string $tableName = null, $application = false)
+  public function __construct(?string $tableName = null)
   {
     $this->table = $tableName;
     $this->setConnection();
@@ -74,6 +75,14 @@ class Database
   public function getConnection(): PDO
   {
     return $this->connection;
+  }
+
+  /**
+   * Retorna o nome da tabela
+   */
+  public function getTableName(): string
+  {
+    return $this->table;
   }
 
   /**
@@ -256,9 +265,6 @@ class Database
       return $finalResult;
     }
   }
-
-
-
 
   /**
    * Método responsável por executar uma consulta no banco
