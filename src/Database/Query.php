@@ -3,8 +3,6 @@
 namespace Luthier\Database;
 
 use Exception;
-use Luthier\Database\Database;
-use Luthier\Utils\Transform;
 
 class Query
 {
@@ -13,18 +11,24 @@ class Query
   private $forceOperation;
   private array $queryStore;
 
-  public function __construct(Database $database)
+  public function __construct(?string $table = null)
   {
-    $this->database = $database;
-    $this->tableName = $table ?? $database->getTableName();
+    $this->tableName = $table;
   }
 
+  /* Obtém uma query string e seus valores*/
+  public function __get($name)
+  {
+    if ($name == "query") {
+      return $this->getSql();
+    }
+  }
 
   /**
    * Indica a tabela na qual as operações serão realizadas. Se omitido as operações serão executadas com a tabela
    * definida na criação do objeto Database. Adicione mais operações antes de executar a query com o método run().
    */
-  public function withTable(string $tableName)
+  public function from(string $tableName)
   {
     $this->tableName = $tableName;
     return $this;
@@ -34,7 +38,7 @@ class Query
    * Inicia query de select. Recebe os campos desejados (por padrão seleciona todos) e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function select(mixed $fields = "*")
+  public function select(mixed $fields = "*", ?int $first = null, ?int $skip = null)
   {
     if (is_array($fields)) {
       $fields = implode(', ', $fields);
@@ -42,7 +46,18 @@ class Query
 
     $table = $this->tableName;
 
+    // Default
     $query = "SELECT $fields from |$table|";
+
+    // Ex: SELECT FIRST 10 * FROM products
+    if ($first) {
+      $query = "SELECT FIRST $first $fields from |$table|";
+
+      if ($skip) {
+        // Ex: SELECT FIRST 10 SKIP 30 * FROM products
+        $query = "SELECT FIRST $first SKIP $skip $fields from |$table|";
+      }
+    }
 
     $this->addToQueryStore($query);
 
@@ -172,15 +187,97 @@ class Query
   public function returning(array $fields = ["id"])
   {
     $implodedFields = implode(',', $fields);
+    $query = "returning $implodedFields";
 
-    $this->query .= "returning $implodedFields";
+    $this->addToQueryStore($query);
     return $this;
+  }
+
+  /**
+   * Une os resultados de duas tabelas em uma determinada condição. Para executar adicione o método run() no final.
+   * Exemplo: (new Query("client"))->select()->joinWith(table: "receipt", on: "mainTable.id = thatTable.client_id")->run();
+   *
+   * Isso resulta em um query assim: "SELECT * FROM client JOIN receipt ON client.id = receipt.client_id"
+   */
+  public function joinWith(string $table, string $on, string $type = "")
+  {
+    $mainTable = $this->tableName;
+
+    // Caso o usuário use esta notação para se relatar as tabelas principal e secundária
+    $on = preg_replace("mainTable", $mainTable, $on);
+    $on = preg_replace("thatTable", $table, $on);
+
+    $query = "$type JOIN $table ON $on";
+
+    // Ex: mainTable INNER JOIN thatTable ON mainTable.field = thatTable.field;
+    $this->addToQueryStore($query);
+    return $this;
+  }
+
+  /**
+   * Une os resultados de duas tabelas em uma determinada condição. Para executar adicione o método run() no final.
+   * Exemplo: (new Query("client"))->select()->innerJoinWith(table: "receipt", on: "mainTable.id = thatTable.client_id")->run();
+   *
+   * Isso resulta em um query assim: "SELECT * FROM client INNER JOIN receipt ON client.id = receipt.client_id"
+   */
+  public function innerJoinWith(string $table, string $on)
+  {
+    $this->joinWith($table, $on, "INNER");
+    return $this;
+  }
+
+  /**
+   * Une os resultados de duas tabelas em uma determinada condição. Para executar adicione o método run() no final.
+   * Exemplo: (new Query("client"))->select()->leftJoinWith(table: "receipt", on: "mainTable.id = thatTable.client_id")->run();
+   *
+   * Isso resulta em um query assim: "SELECT * FROM client left JOIN receipt ON client.id = receipt.client_id"
+   */
+  public function leftJoinWith(string $table, string $on)
+  {
+    $this->joinWith($table, $on, "LEFT");
+    return $this;
+  }
+
+
+  /**
+   * Une os resultados de duas tabelas em uma determinada condição. Para executar adicione o método run() no final.
+   * Exemplo: (new Query("client"))->select()->innerJoinWith(table: "receipt", on: "mainTable.id = thatTable.client_id")->run();
+   *
+   * Isso resulta em um query assim: "SELECT * FROM client INNER JOIN receipt ON client.id = receipt.client_id"
+   */
+  public function rightJoinWith(string $table, string $on)
+  {
+    $this->joinWith($table, $on, "INNER");
+    return $this;
+  }
+
+  /**
+   * Une os resultados de duas tabelas em uma determinada condição. Para executar adicione o método run() no final.
+   * Exemplo: (new Query("client"))->select()->innerJoinWith(table: "receipt", on: "mainTable.id = thatTable.client_id")->run();
+   *
+   * Isso resulta em um query assim: "SELECT * FROM client INNER JOIN receipt ON client.id = receipt.client_id"
+   */
+  public function fullJoinWith(string $table, string $on)
+  {
+    $this->joinWith($table, $on, "INNER");
+    return $this;
+  }
+
+  // TODO: LeftJoin
+  // TODO: RightJoin
+
+  /**
+   * Retorna a query SQL e os seus valores em ordem ["query" => "select ? from table", "values" => "*"]
+   */
+  public function getSql()
+  {
+    $queryTemplate =  implode(" ", $this->queryStore);
+    return $this->extractQueryData($queryTemplate);
   }
 
   /**
    * Pula guarda de proteção contra operações arriscadas. Recebe uma justificativa que será armazenada no log, juntamente com a query executada.
    */
-
   public function forceDangerousCommand(string $justification)
   {
     $this->forceOperation = true;
@@ -193,11 +290,9 @@ class Query
    */
   public function run()
   {
-    $queryData = $this->extractQueryData($this->query);
-    echo "\n\n\n";
-    print_r($queryData);
-    echo "\n\n\n";
-    exit;
+    $this->database = new DatabaseSingleton();
+    $queryData = $this->getSql();
+    return $this->database->executeStatement($queryData["query"], $queryData["values"]);
   }
 
   // ! PRIVATE METHODS
