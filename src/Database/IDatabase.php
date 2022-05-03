@@ -1,24 +1,18 @@
 <?php
 
+namespace Luthier\Database;
+
+use PDO;
+
 interface IDatabase
 {
   /**
    * Método responsável por configurar a classe
    */
-  public static function config(string $driver, string $host, string $path, string $user, string $pass);
-
-  /**
-   * Define a tabela e instancia a conexão
-   */
-  public function __construct(?string $tableName = null);
+  public static function init(DatabaseManager $databaseManager, DatabaseUser $user): DatabaseSingleton;
 
   /**
    * Retorna a conexão realizada com a tabela pelo PDO
    */
-  public function getConnection(): PDO;
-
-  /**
-   * Retorna o nome da tabela
-   */
-  public function getTableName(): string;
+  public static function getInstance(): PDO;
 }
