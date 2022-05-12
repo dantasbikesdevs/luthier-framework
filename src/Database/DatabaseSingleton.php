@@ -64,6 +64,11 @@ class DatabaseSingleton implements IDatabase
     return self::$instance;
   }
 
+  private function __clone()
+  {
+    return $this->__construct();
+  }
+
   // ! APIS PÚBLICAS
 
   /**
@@ -72,33 +77,6 @@ class DatabaseSingleton implements IDatabase
   public static function getInstance(): PDO
   {
     return self::$connection;
-  }
-
-  // * TRANSACTIONS
-
-  /**
-   * Inicia uma transação com o bando de dados (Precisa de um commit / rollback)
-   */
-  public function beginTransaction()
-  {
-    $this->connection->setAttribute(\PDO::ATTR_AUTOCOMMIT, 0);
-    return $this->connection->beginTransaction();
-  }
-
-  /**
-   * Dá rollback em uma transação com o bando de dados (Precisa ser chamado depois de beginTransaction)
-   */
-  public function rollback()
-  {
-    $this->connection->rollBack();
-  }
-
-  /**
-   * Dá commit em uma transação com o bando de dados (Precisa ser chamado depois de beginTransaction)
-   */
-  public function commit()
-  {
-    $this->connection->commit();
   }
 
   // * KERNEL
