@@ -41,7 +41,9 @@ $result = trim(readline(">>> "));
 
 $projectStructure = file_get_contents(__DIR__ . "/templates/basic/index.json");
 $projectStructureArray = json_decode($projectStructure, associative: true);
-$userProjectPath = dirname(__DIR__, 3);
+
+// ~/vendor/dantas/luthier/start.php
+$userProjectPath = dirname(__DIR__, 4);
 
 $choose = match ($result) {
   "1" => (new Cli("basic"))->startProject("", $projectStructureArray, $userProjectPath),
