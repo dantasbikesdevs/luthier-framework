@@ -6,7 +6,7 @@ use \PDOException;
 use \PDO;
 use PDOStatement;
 
-class Database
+class DatabaseDeprecated
 {
 
   /**
