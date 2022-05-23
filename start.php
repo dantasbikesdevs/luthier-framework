@@ -1,6 +1,6 @@
 <?php
 // Prossegue com a execução do instalador
-require_once __DIR__ . "/vendor/autoload.php";
+require_once __DIR__ . "/../../autoload.php";
 
 use Luthier\Cli\Colors\Colors;
 use Luthier\Cli\Cli;
