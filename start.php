@@ -33,7 +33,7 @@ Output::output($startMessage, "\n", $colors);
 Output::output("V $changelogFirstLine", "\n", $colors);
 
 // MENU - PROJECT SKELETON
-$path = dirname(__DIR__, 4);
+$path = dirname(__DIR__, 3);
 Output::charByChar("SELECIONE UMA OPÇÃO", 5, $colors);
 Output::output("[1] - CRIAR ESQUELETO DO PROJETO NA PASTA ATUAL ($path)", "\n", $colors);
 Output::output("[*] - SAIR SEM FAZER NADA", "\n", $colors);
@@ -46,7 +46,7 @@ $apiProjectStructure = file_get_contents(__DIR__ . "/templates/api/index.json");
 $apiProjectStructureArray = json_decode($apiProjectStructure, associative: true);
 
 // ~/vendor/dantas/luthier/start.php
-$userProjectPath = dirname(__DIR__, 4);
+$userProjectPath = dirname(__DIR__, 3);
 
 $choose = match ($result) {
   "1" => (new Cli("basic"))->startProject("", $basicProjectStructureArray, $userProjectPath),
