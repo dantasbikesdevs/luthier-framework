@@ -14,7 +14,7 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "web@10.168.2.176:/srv/versionamento/git/web-luthier-frame/.git"
+      "url": "web@10.168.2.176:/srv/versionamento/git/web-luthier-frame-v1/.git"
     }
   ],
   "require": {
