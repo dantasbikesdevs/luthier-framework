@@ -1,10 +1,10 @@
 <?php
 
-namespace Luthier\Http\Middleware;
+namespace Luthier\Http\Middlewares;
 
 use Exception;
 use Closure;
-use Luthier\Http\Middleware\IMiddleware;
+use Luthier\Http\Middlewares\IMiddleware;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
 

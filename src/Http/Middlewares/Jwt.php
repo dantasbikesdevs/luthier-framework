@@ -1,24 +1,24 @@
 <?php
 
-namespace Luthier\Http\Middleware;
+namespace Luthier\Http\Middlewares;
 
 use Closure;
 use Exception;
-use Luthier\Http\Middleware\IMiddleware;
+use Luthier\Http\Middlewares\IMiddleware;
 use Throwable;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
 use Luthier\Security\Jwt as JwtService;
 
-class JWT implements IMiddleware
+class Jwt implements IMiddleware
 {
 
   public function handle(Request $request, Response $response, Closure $next): Response
   {
-    $cookieJwt =  $request->getCookie("jwt") ?? "";
+    $jwt = $request->getHeader("Authorization") ?? $request->getCookie("jwt") ?? "";
 
     try {
-      $payload = JwtService::decode($cookieJwt);
+      $payload = JwtService::decode($jwt);
       $request->setPayload($payload);
     } catch (Throwable $error) {
       if (getenv("ENV") == "DEV") throw new Exception("Acesso não permitido. Stacktrace: $error.", 403);

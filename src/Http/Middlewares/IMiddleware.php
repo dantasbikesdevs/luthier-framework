@@ -1,6 +1,6 @@
 <?php
 
-namespace Luthier\Http\Middleware;
+namespace Luthier\Http\Middlewares;
 
 use Closure;
 use Luthier\Http\Request;

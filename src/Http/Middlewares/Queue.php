@@ -1,9 +1,9 @@
 <?php
 
-namespace Luthier\Http\Middleware;
+namespace Luthier\Http\Middlewares;
 
 use Exception;
-use Luthier\Http\Middleware\IMiddleware;
+use Luthier\Http\Middlewares\IMiddleware;
 use Luthier\Http\Response;
 use Luthier\Http\Request;
 
@@ -74,7 +74,7 @@ class Queue
 
     // Se o middleware passado não estiver presente na lista de middlewares criada com a função setMap nós retornamos um erro
     if (!isset(self::$map[$middleware])) {
-      $response->internalServerError('Problemas ao processar um middleware');
+      return $response->internalServerError()->send('Problemas ao processar um middleware');
     }
 
     // A fila recebe a atual instância deste objeto (reutilizando as propriedades)
@@ -90,7 +90,7 @@ class Queue
       return $queue->next($request, $response);
     };
 
-    // Cria um objeto com a classe que corresponde ao middleware cadastrado no $map0
+    // Cria um objeto com a classe que corresponde ao middleware cadastrado no $map
     $actualMiddleware = new self::$map[$middleware];
 
     // Executa o middleware apenas de ele implementar IMiddleware
@@ -99,7 +99,6 @@ class Queue
     }
 
     // Executado apenas quando o middleware não implementa a interface desejada
-    $middlewareName = key($middleware);
-    throw new Exception("Todos os middlewares devem implementar IMiddleware. Erro acontecendo ao interpretar middleware $middlewareName", 500);
+    throw new Exception("Todos os middlewares devem implementar IMiddleware. Erro acontecendo ao interpretar middleware $middleware", 500);
   }
 }
