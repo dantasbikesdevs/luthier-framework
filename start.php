@@ -32,27 +32,7 @@ Output::charByChar($message, 5, $colors);
 Output::output($startMessage, "\n", $colors);
 Output::output("V $changelogFirstLine", "\n", $colors);
 
-// MENU - PROJECT SKELETON
-$path = dirname(__DIR__, 3);
-Output::charByChar("SELECIONE UMA OPÇÃO", 5, $colors);
-Output::output("[1] - CRIAR ESQUELETO DO PROJETO NA PASTA ATUAL ($path)", "\n", $colors);
-Output::output("[*] - SAIR SEM FAZER NADA", "\n", $colors);
-$result = trim(readline(">>> "));
-
-$basicProjectStructure = file_get_contents(__DIR__ . "/templates/basic/index.json");
-$basicProjectStructureArray = json_decode($basicProjectStructure, associative: true);
-
-$apiProjectStructure = file_get_contents(__DIR__ . "/templates/api/index.json");
-$apiProjectStructureArray = json_decode($apiProjectStructure, associative: true);
-
-// ~/vendor/dantas/luthier/start.php
-$userProjectPath = dirname(__DIR__, 3);
-
-$choose = match ($result) {
-  "1" => (new Cli("basic"))->startProject("", $basicProjectStructureArray, $userProjectPath),
-  "2" => (new Cli("api"))->startProject("", $apiProjectStructureArray, $userProjectPath),
-  default => Cli::exitPrompt()
-};
+menu($colors);
 
 // MENU - TESTING FRAMEWORK
 Output::charByChar("SELECIONE UM FRAMEWORK DE TESTES", 5, $colors);
@@ -66,3 +46,26 @@ $choose = match ($result) {
 };
 
 Output::separator("#", [Colors::$textWhite, Colors::$backgroundLightMagenta]);
+
+function menu($colors)
+{
+  // MENU - PROJECT SKELETON
+  $userProjectPath = dirname(__DIR__, 3);
+  $templatesPath = dirname(__DIR__) . "/luthier/templates";
+
+  Output::charByChar("SELECIONE UMA OPÇÃO", 5, $colors);
+  $dir = dir($templatesPath);
+  for ($i=1; $file = $dir->read() ; $i++) {
+    if($file == "." || $file == "..") continue;
+    Output::output("[$i] - CRIAR ESQUELETO DO PROJETO A PARTIR DO TEMPLATE ($file)", "\n", $colors);
+    $templates[$i] = $file;
+  }
+  Output::output("[*] - SAIR SEM FAZER NADA", "\n", $colors);
+  $result = trim(readline(">>> "));
+
+  if(!isset($templates[$result])) Cli::exitPrompt();
+
+  $templatePath = $templatesPath . DIRECTORY_SEPARATOR . $templates[$result] . "/files";
+
+  (new Cli($templates[$result]))->startProject($templatePath, $userProjectPath);
+}

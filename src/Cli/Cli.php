@@ -14,7 +14,7 @@ class Cli
   /**
    * Interpreta comando passados para este arquivo
    */
-  public function startProject($folder, array $array, string $projectPath)
+  public function startProject(string $templatePath, string $projectPath)
   {
     $errorColors = [Colors::$backgroundLightRed, Colors::$textRed];
     $initColors = [Colors::$backgroundCyan, Colors::$textWhite];
@@ -26,7 +26,7 @@ class Cli
 
     // Cria a estrutura do projeto
     try {
-      $this->create($folder, $array, $projectPath);
+      $this->create($templatePath, $projectPath);
     } catch (\Throwable $error) {
       Output::separator("-", $errorColors);
       $errorMessage = Colors::redText("Erro ao tentar gerar projeto :(");
@@ -43,41 +43,31 @@ class Cli
   }
 
   # Diretório raiz do projeto do usuário
-  private function create($folder, array $array, string $projectPath)
+  private function create(string $templatePath, string $projectPath)
   {
-    # Recebe um array de pastas e arquivos traduzidas de um JSON
-    foreach ($array as $key => $value) {
-      # Se value for um array significa que é uma pasta
-      if (is_array($value) && $value !== null) {
-        # Cria a pasta unindo o caminho anterior com o atual
-        $dirPath = "$projectPath/$folder$key";
+    $dir = dir($templatePath);
 
-        # Cria a pasta apenas se o diretório não estiver tomado
-        if (file_exists($dirPath) || is_dir($dirPath)) {
-          echo Colors::redText("👎 PASTA JÁ EXISTE    👉 $dirPath\n");
+    while ($file = $dir->read()) {
+      if($file == "." || $file == "..") continue;
+      $path = $templatePath . '/' . $file;
+      $userPath = $projectPath . '/' . $file;
+      if(is_dir($path)) {
+        if (file_exists($userPath)) {
+          echo Colors::redText("👎 PASTA JÁ EXISTE    👉 $userPath\n");
         } else {
-          echo Colors::greenText("👌 PASTA FOI CRIADA   👉") . Colors::magentaText(" $dirPath\n");
-          mkdir($dirPath);
-        }
-
-        # Continua executando a função até encontrar um elemento sem itens
-        if (count($value)) {
-          self::create($folder . $key . "/", $value, $projectPath);
+          echo Colors::greenText("👌 PASTA FOI CRIADA   👉") . Colors::magentaText(" $userPath\n");
+          mkdir($userPath);
+          $this->create($path, $userPath);
         }
       } else {
-        # Caso não seja um array é por que é um arquivo
-        $key = is_int($key) ? "" : $key;
-        $filename = $value === null ? "" : "$value";
-        $filePath = "$folder$key$filename";
-
-        $content = getPresetContent($filePath);
-
         # Cria os arquivos
-        if (file_exists($filePath) || is_dir($filePath)) {
-          echo Colors::redText("👎 ARQUIVO JÁ EXISTE  👉 $filePath\n");
+        $content = file_get_contents($path);
+
+        if (file_exists($userPath)) {
+          echo Colors::redText("👎 ARQUIVO JÁ EXISTE  👉 $userPath\n");
         } else {
-          echo Colors::greenText("👌 ARQUIVO FOI CRIADO 👉") . Colors::cyanText(" $filePath\n");
-          file_put_contents("$projectPath/$filePath", $content ?? "");
+          echo Colors::greenText("👌 ARQUIVO FOI CRIADO 👉") . Colors::cyanText(" $userPath\n");
+          file_put_contents($userPath, $content ?? "");
         }
       }
     }
