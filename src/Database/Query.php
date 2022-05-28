@@ -2,18 +2,21 @@
 
 namespace Luthier\Database;
 
+use App\Database\ApplicationDatabase;
 use Exception;
 
 class Query
 {
-  private string $tableName;
+  private ?string $tableName;
+  private $model;
   private $database;
+  private $config = [];
   private $forceOperation;
   private array $queryStore;
 
-  public function __construct(?string $table = null)
+  public function __construct(Database $database = null)
   {
-    $this->tableName = $table;
+    $this->database = is_null($database) ? ApplicationDatabase::getInstance() : $database;
   }
 
   /* Obtém uma query string e seus valores*/
@@ -31,6 +34,8 @@ class Query
   public function from(string $tableName)
   {
     $this->tableName = $tableName;
+    $from = " FROM " . $tableName;
+    $this->addToQueryStore($from);
     return $this;
   }
 
@@ -44,18 +49,16 @@ class Query
       $fields = implode(', ', $fields);
     }
 
-    $table = $this->tableName;
-
     // Default
-    $query = "SELECT $fields from |$table|";
+    $query = "SELECT $fields";
 
     // Ex: SELECT FIRST 10 * FROM products
     if ($first) {
-      $query = "SELECT FIRST $first $fields from |$table|";
+      $query = "SELECT FIRST $first $fields";
 
       if ($skip) {
         // Ex: SELECT FIRST 10 SKIP 30 * FROM products
-        $query = "SELECT FIRST $first SKIP $skip $fields from |$table|";
+        $query = "SELECT FIRST $first SKIP $skip $fields";
       }
     }
 
@@ -69,11 +72,11 @@ class Query
    * seus novos valores e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function insert(array $fieldsAndValues, ?string $tableName = null)
+  public function insert(mixed $fieldsAndValues, ?string $tableName = null)
   {
     $table = $tableName ?? $this->tableName;
 
-    $queryFields = array_keys($fieldsAndValues);
+    $queryFields = array_keys((array)$fieldsAndValues);
     $implodedFields = implode(',', $queryFields);
 
     /**
@@ -81,10 +84,10 @@ class Query
      * Em um array de valores assim: ["|1|", "|dev|", "|1.88|"]
      * E depois em uma string assim: "|1|, |dev|, |1.88|"
      */
-    $mappedValues = array_map(fn (mixed $value) => "|$value|", $fieldsAndValues);
+    $mappedValues = array_map(fn (mixed $value) => "|$value|", (array)$fieldsAndValues);
     $implodedValues = implode(',', $mappedValues);
 
-    $query = "INSERT INTO |$table| ($implodedFields) VALUES ($implodedValues)";
+    $query = "INSERT INTO $table ($implodedFields) VALUES ($implodedValues)";
 
     $this->addToQueryStore($query);
 
@@ -181,19 +184,6 @@ class Query
   }
 
   /**
-   * Adiciona uma ordenação aos resultados da query. Recebe um campo pelo qual ordenar e uma direção.
-   * Para executar adicione o método run() no final.
-   */
-  public function returning(array $fields = ["id"])
-  {
-    $implodedFields = implode(',', $fields);
-    $query = "returning $implodedFields";
-
-    $this->addToQueryStore($query);
-    return $this;
-  }
-
-  /**
    * Une os resultados de duas tabelas em uma determinada condição. Para executar adicione o método run() no final.
    * Exemplo: (new Query("client"))->select()->joinWith(table: "receipt", on: "mainTable.id = thatTable.client_id")->run();
    *
@@ -204,8 +194,8 @@ class Query
     $mainTable = $this->tableName;
 
     // Caso o usuário use esta notação para se relatar as tabelas principal e secundária
-    $on = preg_replace("mainTable", $mainTable, $on);
-    $on = preg_replace("thatTable", $table, $on);
+    // $on = preg_replace("mainTable", $mainTable, $on);
+    // $on = preg_replace("thatTable", $table, $on);
 
     $query = "$type JOIN $table ON $on";
 
@@ -267,6 +257,16 @@ class Query
   // TODO: RightJoin
 
   /**
+   * Cria uma query customizada. Recebe uma query com os valores não confiáveis entre pipes "|" e retorna um objeto Query.
+   * Para executar adicione o método run() no final.
+   */
+  public function customQuery(string $queryString)
+  {
+    $this->addToQueryStore($queryString);
+    return $this;
+  }
+
+  /**
    * Retorna a query SQL e os seus valores em ordem ["query" => "select ? from table", "values" => "*"]
    */
   public function getSql()
@@ -286,13 +286,59 @@ class Query
   }
 
   /**
+   * Marca se o resultado da consulta será baseado em um objeto de determinada classe ou não.
+   */
+  public function object($model = null)
+  {
+    $this->config["object"] = true;
+    $this->model = $model;
+    return $this;
+  }
+
+  /**
+   * Executa a query SQL retornando apenas o primeiro resultado.
+   */
+  public function first()
+  {
+    $queryData = $this->getSql();
+    $this->queryStore = [];
+    return $this->database->executeStatement($queryData["query"], $queryData["values"], false, $this->config["object"], $this->model);
+  }
+
+  /**
+   * Executa a query SQL retornando todos os resultados.
+   */
+  public function all()
+  {
+    $queryData = $this->getSql();
+    $this->queryStore = [];
+    return $this->database->executeStatement($queryData["query"], $queryData["values"], true, $this->config["object"] ?? null, $this->model);
+  }
+
+  /**
    * Executa a query SQL
    */
   public function run()
   {
-    $this->database = new DatabaseSingleton();
     $queryData = $this->getSql();
-    return $this->database->executeStatement($queryData["query"], $queryData["values"]);
+    $this->queryStore = [];
+    return $this->database->execute($queryData["query"], $queryData["values"]);
+  }
+
+   /**
+   * Adiciona uma ordenação aos resultados da query. Recebe um campo pelo qual ordenar e uma direção.
+   * Para executar adicione o método run() no final.
+   */
+  public function returning(array $fields = ["id"])
+  {
+    $implodedFields = implode(',', $fields);
+    $query = "returning $implodedFields";
+
+    $this->addToQueryStore($query);
+
+    $queryData = $this->getSql();
+    $this->queryStore = [];
+    return $this->database->execute($queryData["query"], $queryData["values"])->fetchObject()->$implodedFields;
   }
 
   // ! PRIVATE METHODS
@@ -328,6 +374,8 @@ class Query
     if (preg_match_all($patternVariable, $queryString, $matches)) {
       $cleanQueryString = preg_replace($patternVariable, '?', $queryString);
       $params = $matches[1];
+    } else {
+      $cleanQueryString = $queryString;
     }
 
     return [

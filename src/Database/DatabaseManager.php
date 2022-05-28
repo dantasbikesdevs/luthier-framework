@@ -19,11 +19,23 @@ class DatabaseManager
    */
   private string $path;
 
-  public function __construct(string $path, string $host, string $driver = "firebird")
+  /**
+   * Usuário do banco
+   */
+  private string $user;
+
+  /**
+   * Senha de acesso ao banco de dados
+   */
+  private string $password;
+
+  public function __construct(array $config)
   {
-    $this->driver = $driver;
-    $this->path = $path;
-    $this->host = $host;
+    $this->driver = $config["driver"];
+    $this->path = $config["path"];
+    $this->host = $config["host"];
+    $this->user = $config["user"];
+    $this->password = $config["password"];
   }
 
   public function getDriver()
@@ -39,5 +51,15 @@ class DatabaseManager
   public function getHost()
   {
     return $this->host;
+  }
+
+  public function getUser()
+  {
+    return $this->user;
+  }
+
+  public function getPassword()
+  {
+    return $this->password;
   }
 }

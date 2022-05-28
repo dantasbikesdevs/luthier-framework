@@ -9,10 +9,10 @@ interface IDatabase
   /**
    * Método responsável por configurar a classe
    */
-  public static function init(DatabaseManager $databaseManager, DatabaseUser $user): DatabaseSingleton;
+  public function __construct(DatabaseManager $databaseManager);
 
   /**
    * Retorna a conexão realizada com a tabela pelo PDO
    */
-  public static function getInstance(): PDO;
+  public function getConnection();
 }

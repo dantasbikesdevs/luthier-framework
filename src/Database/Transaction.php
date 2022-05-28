@@ -4,7 +4,6 @@ namespace Luthier\Database;
 
 use Closure;
 use PDO;
-use PhpParser\Node\Stmt\TryCatch;
 
 class Transaction
 {
@@ -13,13 +12,13 @@ class Transaction
 
   public function __construct(PDO $connection)
   {
-    $this->$connection = $connection;
+    $this->connection = $connection;
   }
 
   /**
    * Inicia uma transação com o bando de dados (Precisa de um commit / rollback)
    */
-  public function beginTransaction()
+  public function begin()
   {
     if ($this->hasActiveTransaction) {
       return false;
@@ -31,7 +30,7 @@ class Transaction
   }
 
   /**
-   * Dá rollback em uma transação com o bando de dados (Precisa ser chamado depois de beginTransaction)
+   * Dá rollback em uma transação com o bando de dados (Precisa ser chamado depois de begin)
    */
   public function rollback()
   {
@@ -45,7 +44,7 @@ class Transaction
   }
 
   /**
-   * Dá commit em uma transação com o bando de dados (Precisa ser chamado depois de beginTransaction)
+   * Dá commit em uma transação com o bando de dados (Precisa ser chamado depois de begin)
    */
   public function commit()
   {
@@ -66,12 +65,14 @@ class Transaction
   {
     try {
       // Tenta executar uma ação no banco de dados
-      $databaseAction();
+      $result = $databaseAction();
       $this->commit();
+      return $result;
     } catch (\Throwable $th) {
       // Dá rollback antes de lançar o erro
       $this->rollback();
       throw $th;
     }
+    return $result;
   }
 }
