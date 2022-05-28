@@ -9,12 +9,13 @@
   "scripts": {
     "dev": "cd public/; xdg-open 'http://127.0.0.1:8383'; php -S 127.0.0.1:8383",
     "test": "./vendor/bin/pest",
-    "coverage": "./vendor/bin/pest --coverage"
+    "coverage": "./vendor/bin/pest --coverage",
+    "start": "php ./vendor/dantas/luthier/start.php"
   },
   "repositories": [
     {
       "type": "vcs",
-      "url": "web@10.168.2.176:/srv/versionamento/git/web-luthier-frame-v1/.git"
+      "url": "andre@10.168.2.176:/srv/versionamento/git/web-luthier-frame-v1/.git"
     }
   ],
   "require": {
@@ -23,5 +24,10 @@
   },
   "require-dev": {
     "pestphp/pest": "^1.21"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
   }
 }

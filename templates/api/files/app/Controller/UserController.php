@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Model\Entity\UserEntity;
-use App\Model\Repository\UserRepository;
+use App\Models\Entity\UserEntity;
+use App\Repositories\UserRepository;
 use App\Utils\Validate;
 use Luthier\Http\Cookie;
 use Luthier\Http\Request;
@@ -13,11 +13,38 @@ use Luthier\Security\Password;
 
 class UserController
 {
-  private $repository;
+  /**
+   * Repositório de usuários.
+   */
+  private UserRepository $repository;
 
   public function __construct()
   {
     $this->repository = new UserRepository();
+  }
+
+  public function findOne(Request $request, Response $response, int $id)
+  {
+    Validate::notEmpty($id);
+
+    $user = $this->repository->findOne($id);
+
+    if (!$user) {
+      return $response->notFound()->send(["error" => "Usuário não encontrado."]);
+    }
+
+    return $response->ok()->send($user);
+  }
+
+  public function findAll(Request $request, Response $response)
+  {
+    $users = $this->repository->findAll();
+
+    if (!$users) {
+      return $response->notFound()->send(["error" => "Nenhum usuário foi encontrado."]);
+    }
+
+    return $response->ok()->send($users);
   }
 
   /**
@@ -32,7 +59,7 @@ class UserController
     Validate::email($email);
     Validate::password($password);
 
-    [$userId, $user, $hashedPassword] = $this->repository->findOneByEmail($email);
+    $user = $this->repository->findOneByEmail($email);
 
     $unauthorizedMessage = "Login não permitido. Credenciais incorretas.";
 
@@ -40,12 +67,12 @@ class UserController
       return $response->unauthorized()->send(["error" => $unauthorizedMessage]);
     }
 
-    $isValid = Password::matches($password, $hashedPassword);
+    $isValid = Password::matches($password, $user->getPassword());
 
     if (!$isValid) return $response->unauthorized()->send(["error" => $unauthorizedMessage]);
 
     $payload = [
-      "id" => $userId,
+      "id" => $user->getId(),
       "username" => $user->getName(),
     ];
 
@@ -57,7 +84,6 @@ class UserController
     $jwt = Jwt::encode($payload);
 
     Cookie::send(["jwt" => $jwt]);
-
 
     return $response->send($body)->ok();
   }
@@ -80,24 +106,31 @@ class UserController
 
     $user = $this->repository->findOneByEmail($email);
 
-    $unauthorizedMessage = "Usuário já existe. Faça login.";
+    $unauthorizedMessage = "Este e-mail já está em uso. Tente outro.";
 
     if ($user) {
       return $response->unauthorized()->send(["error" => $unauthorizedMessage]);
     }
 
-    $newUser = new UserEntity($username, $email, $age);
+    $dataUser = [
+      "NAME" => $username,
+      "AGE" => $age,
+      "EMAIL" => $email,
+      "PASSWORD" => Password::createHash($password),
+    ];
 
-    [$createdUser, $userId]  = $this->repository->create($newUser, $password);
+    $newUser = new UserEntity($dataUser);
+
+    $user = $this->repository->create($newUser);
 
     $payload = [
-      "id" => $userId,
-      "username" => $createdUser->getName(),
+      "id" => $user->getId(),
+      "username" => $user->getName(),
     ];
 
     $body = [
       "is_logged" => true,
-      "name" => $createdUser->getName(),
+      "name" => $user->getName(),
     ];
 
     $jwt = Jwt::encode($payload);
@@ -105,6 +138,54 @@ class UserController
     Cookie::send(["jwt" => $jwt]);
 
     return $response->ok()->send($body);
+  }
+
+  public function update(Request $request, Response $response) {
+    $data = $request->getPostVars();
+    $username = $data["name"];
+    $age      = $data["age"];
+    $email    = $data["email"];
+    $password = $data["password"];
+
+    Validate::notEmpty($username);
+    Validate::notEmpty($age);
+    Validate::email($email);
+    Validate::password($password);
+
+    $user = $this->repository->findOne($email);
+
+    $unauthorizedMessage = "Este e-mail já está em uso. Tente outro.";
+
+    if ($user) {
+      return $response->unauthorized()->send(["error" => $unauthorizedMessage]);
+    }
+
+    $dataUser = [
+      "NAME"     => $username,
+      "AGE"      => $age,
+      "EMAIL"    => $email,
+      "PASSWORD" => Password::createHash($password),
+    ];
+
+    $newUser = new UserEntity($dataUser);
+
+    $user = $this->repository->create($newUser);
+
+    $payload = [
+      "id"       => $user->getId(),
+      "username" => $user->getName(),
+    ];
+
+    $body = [
+      "is_logged" => true,
+      "name" => $user->getName(),
+    ];
+
+    $jwt = Jwt::encode($payload);
+
+    Cookie::send(["jwt" => $jwt]);
+
+    return $response->ok()->send("Usuário atualizado com sucesso.");
   }
 
   /**

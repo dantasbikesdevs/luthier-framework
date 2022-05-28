@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . "/../vendor/autoload.php";
-require_once __DIR__ . "/../config/index.php";
+require_once __DIR__ . "/../config/config.php";
 
 use \Luthier\Http\Router;
 use \Luthier\Utils\Path;

@@ -18,7 +18,7 @@ $router->get("/", [
 ]);
 
 // Grupo
-$router->group("/user", function (Router &$router) {
+$router->group("/users", function (Router &$router) {
   $userController = new UserController();
 
   $router->post("/login", [
@@ -29,39 +29,19 @@ $router->group("/user", function (Router &$router) {
     fn (Request $request, Response $response) => $userController->signUp($request, $response)
   ]);
 
+  $router->middlewares(["luthier:jwt"])->put("/{id}", [
+    fn (Request $request, Response $response, $id) => $userController->update($request, $response, $id)
+  ]);
+
   $router->get("/logout", [
     fn (Request $request, Response $response) => $userController->signOut($request, $response)
   ]);
-});
 
-// Middleware + Rota única
-$router->middlewares(["jwt"])->get("/hi", [
-  function (Request $request, Response $response) {
-    return $response->ok()->send(["status" => "sucesso"]);
-  }
-]);
-
-// Middlewares + Grupo
-$router->middlewares(["jwt"])->group("/secrets", function (Router &$router) {
-  $secretsController = new SecretsController();
-
-  $router->get("/", [
-    fn (Request $request, Response $response) => $secretsController->getMany($request, $response)
+  $router->middlewares(["luthier:jwt"])->get("/", [
+    fn (Request $request, Response $response) => $userController->findAll($request, $response)
   ]);
 
-  $router->get("/{id}", [
-    fn (Request $request, Response $response, int $id) => $secretsController->getOne($request, $response, $id)
-  ]);
-
-  $router->put("/{id}", [
-    fn (Request $request, Response $response, int $id) => $secretsController->update($request, $response, $id)
-  ]);
-
-  $router->post("/", [
-    fn (Request $request, Response $response) => $secretsController->create($request, $response)
-  ]);
-
-  $router->delete("/{id}", [
-    fn (Request $request, Response $response, int $id) => $secretsController->delete($request, $response, $id)
+  $router->middlewares(['luthier:jwt'])->is([])->get("/{id}", [
+    fn (Request $request, Response $response, $id) => $userController->findOne($request, $response, $id)
   ]);
 });
