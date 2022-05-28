@@ -5,7 +5,7 @@ namespace Luthier\Http;
 use \Closure;
 use \Exception;
 use \ReflectionFunction;
-use \Luthier\Http\Middleware\Queue as Middleware;
+use \Luthier\Http\Middlewares\Queue as Middleware;
 
 class Router
 {
@@ -134,7 +134,7 @@ class Router
    */
   public function is(array $permissions): self
   {
-    $this->middlewares(['jwtAuth', 'is']);
+    $this->middlewares(['luthier:jwt', 'luthier:is']);
     $this->permissions = $permissions;
     return $this;
   }
@@ -144,7 +144,7 @@ class Router
    */
   public function can(array $roles): self
   {
-    $this->middlewares(['jwtAuth', 'can']);
+    $this->middlewares(['luthier:jwt', 'luthier:can']);
     $this->roles = $roles;
     return $this;
   }
@@ -278,6 +278,7 @@ class Router
         throw new Exception('A URL não pode ser processada', 500);
       }
 
+
       // Argumentos do controlador
       $args = [];
 
@@ -303,9 +304,9 @@ class Router
 
       // Retorna a execução da fila de middlewares
       return $middlewareQueue->next($this->request, $this->response);
-    } catch (Exception $e) {
-      $httpCode = $e->getCode() == 0 ? 500 : $e->getCode();
-      $errorMessage = $this->getErrorMessage($e);
+    } catch (Exception $error) {
+      $httpCode = $error->getCode() == 0 ? 500 : $error->getCode();
+      $errorMessage = $this->getErrorMessage($error, $httpCode);
 
       // Composição da resposta de erro
       $response = new Response($this);
@@ -319,11 +320,11 @@ class Router
   /**
    * Retorna a mensagem de erro
    */
-  public function getErrorMessage(Exception $error)
+  public function getErrorMessage(Exception $error, int $httpCode)
   {
     return match ($this->contentType) {
       'application/json' => [
-        'status' => $error->getCode(),
+        'status' => $httpCode,
         'error'  => $error->getMessage()
       ],
       default => $error->getMessage()

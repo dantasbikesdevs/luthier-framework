@@ -2,6 +2,7 @@
 
 namespace Luthier\Http;
 
+use App\Models\Entity\UserEntity;
 use Luthier\Http\Cookie;
 use Luthier\Http\Router;
 
@@ -43,6 +44,11 @@ class Request
   private array $payload = [];
 
   /**
+   * Usuário autenticado da requisição
+   */
+  private UserEntity $user;
+
+  /**
    * Cabeçalhos da requisição
    */
   private array $headers = [];
@@ -59,13 +65,12 @@ class Request
   {
     // Objeto da classe router que é injetado na requisição
     $this->router = $router;
-    $this->queryParams = $_GET ?? [];
     $this->headers = getallheaders();
     $this->httpMethod = $_SERVER['REQUEST_METHOD'] ?? '';
     $this->cookies = Cookie::getAll();
     $this->setUri();
     $this->setPostVars();
-    $this->sanitize();
+    $this->setQueryParams();
   }
 
   // ! API PÚBLICA
@@ -97,9 +102,17 @@ class Request
   /**
    * Método responsável por retornar os Headers da requisição
    */
-  public function getHeaders(): array
+  public function getAllHeaders(): array
   {
     return $this->headers;
+  }
+
+  /**
+   * Método responsável por retornar os Headers da requisição
+   */
+  public function getHeader($header): ?string
+  {
+    return $this->headers[$header] ?? null;
   }
 
   /**
@@ -157,7 +170,7 @@ class Request
    */
   public function getCookie(string $cookieName): ?string
   {
-    return $this->cookies[$cookieName];
+    return $this->cookies[$cookieName] ?? null;
   }
 
   /**
@@ -166,6 +179,24 @@ class Request
   public function setPayload(array $fields)
   {
     $this->payload = $fields;
+  }
+
+  /**
+   * Método responsável por setar o usuário autenticado da requisição
+   */
+  public function setUser(UserEntity $user)
+  {
+    $this->user = $user;
+
+    return $this;
+  }
+
+  /**
+   * Método responsável por retornar o usuário autenticado da requisição
+   */
+  public function getUser(): UserEntity
+  {
+    return $this->user;
   }
 
   /**
@@ -215,7 +246,17 @@ class Request
     $postVars = $_POST ?? [];
     $json = file_get_contents('php://input');
     $jsonVars = json_decode($json, true) ?? [];
-    $this->postVars = array_merge($jsonVars, $postVars);
+    $postVars = array_merge($jsonVars, $postVars);
+    $this->postVars = $this->sanitize($postVars);
+  }
+
+  /**
+   * Método responsável por definir os parâmetros ($_GET) da URL
+   */
+  private function setQueryParams()
+  {
+    $queryParams = $_GET ?? [];
+    $this->queryParams = $this->sanitize($queryParams);
   }
 
   /**
@@ -229,21 +270,33 @@ class Request
   }
 
   /**
-   * Método responsável por limpar os dados do post, evitando injection, e deixando todos em UPPER
+   * Método responsável por limpar os dados do post, evitando injection e XSS
    */
-  private function sanitize()
-  {
-    foreach ($this->postVars as $key => $value) {
-      $cleanValue = $value;
-      if (isset($cleanValue)) {
-        $cleanValue = strip_tags(trim($cleanValue));
-        $cleanValue = htmlentities($cleanValue, ENT_NOQUOTES);
-        $cleanValue = html_entity_decode($cleanValue, ENT_NOQUOTES, 'UTF-8');
-      }
-      unset($this->postVars[$key]);
-      $this->postVars[$key] = $cleanValue;
+  private function sanitize($params): array
+    {
+        $patterns[] = '/;/';
+        $patterns[] = '/--/';
+        $patterns[] = '/"/';
+        $patterns[] = "/'/";
+
+        foreach ($params as $key => $value) {
+            $cleanValue = $value;
+            if(is_array($cleanValue)) {
+                $this->sanitize($cleanValue);
+            } else {
+                if (isset($cleanValue)) {
+                    $cleanValue = strip_tags(trim($cleanValue));
+                    $cleanValue = htmlentities($cleanValue, ENT_NOQUOTES);
+                    $cleanValue = html_entity_decode($cleanValue, ENT_NOQUOTES, 'UTF-8');
+                    $cleanValue = preg_replace($patterns, ' ', $cleanValue);
+                }
+                unset($params[$key]);
+                $params[$key] = $cleanValue;
+            }
+        }
+
+        return $params;
     }
-  }
 
   /**
    * Método responsável por garantir que os parâmetros tenham conteúdo

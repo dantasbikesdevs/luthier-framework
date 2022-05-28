@@ -143,8 +143,8 @@ class Response
     $this->getRouter()->setContentType($this->contentType);
 
     // Caso haja erro
-    if ($code >= 400) {
-      throw new Exception($content["error"], $code);
+    if ($code >= 500) {
+      throw new Exception($content, $code);
     }
 
     // Compõe o objeto de resposta
@@ -323,7 +323,7 @@ class Response
     http_response_code($this->httpCode);
     // Cria cada headers
     foreach ($this->headers as $key => $value) {
-      header($key . ':' . $value);
+      header($key . ': ' . $value);
     }
   }
 }
