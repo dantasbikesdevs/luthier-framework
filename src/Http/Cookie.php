@@ -19,7 +19,7 @@ class Cookie
     if (sizeof($cookie) > 1) throw new Exception("Apenas um cookie pode ser passado para esta função ['nome' => 'valor']");
 
     // Pega uma notação de data "10.d" e converte em timestamps Unix
-    [$number, $symbol] = preg_split(".", $duration);
+    [$number, $symbol] = preg_split("/./", $duration);
 
     $number = (int) $number;
 
