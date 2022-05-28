@@ -59,7 +59,7 @@ class Jwt
 
 
     if (strlen($signature) < 32) throw new Exception($errorMessages["tooShort"]);
-    if (!preg_match(Regex::$strongSignature, $signature)) throw new Exception($errorMessages["fragile"]);
+    if (preg_match(Regex::$strongSignature, $signature)) throw new Exception($errorMessages["fragile"]);
 
     return $signature;
   }

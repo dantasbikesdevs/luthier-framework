@@ -2,6 +2,7 @@
 
 namespace Luthier\Http\Middlewares;
 
+use App\Models\Entity\UserEntity;
 use Exception;
 use Closure;
 use Luthier\Http\Middlewares\IMiddleware;
@@ -20,18 +21,21 @@ class Is implements IMiddleware
 
     // Permissões exigidas na requisição
     $requiredPermissions = $request->permissions();
+    $user                = $request->getUser();
 
-    // Tenta encontrar um campo de permissão no payload do usuário
-    $userPermissions = $request->getPayload("is");
-
-    if (self::verify($requiredPermissions, $userPermissions)) return $next($request, $response);
+    if (self::verify($requiredPermissions, $user)) return $next($request, $response);
 
     throw new Exception("Usuário não tem permissão para fazer essa ação!", 401);
   }
 
-  public static function verify(array $permissions, array $userPermissions)
+  public static function verify(array $permissions, UserEntity $user)
   {
-    foreach ($permissions as $permission) {
+    /** LÓGICA DE VERIFICAR REGRAS */
+    $userPermissions = array_map(function ($permission) {
+      return $permission['NAME'];
+    }, $user->getPermissions());
+
+    foreach($permissions as $permission) {
       return in_array($permission, $userPermissions);
     }
   }

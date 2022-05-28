@@ -2,6 +2,7 @@
 
 namespace Luthier\Http\Middlewares;
 
+use App\Repositories\UserRepository;
 use Closure;
 use Exception;
 use Luthier\Http\Middlewares\IMiddleware;
@@ -15,16 +16,26 @@ class Jwt implements IMiddleware
 
   public function handle(Request $request, Response $response, Closure $next): Response
   {
-    $jwt = $request->getHeader("Authorization") ?? $request->getCookie("jwt") ?? "";
+    $cookieJwtName = getenv("JWT_COOKIE_NAME");
+    $jwt =  $request->getCookie($cookieJwtName) ?? $request->getHeader("Authorization");
+    $jwt = !empty($jwt) ? str_replace('Bearer ', '', $jwt) : '';
 
     try {
       $payload = JwtService::decode($jwt);
       $request->setPayload($payload);
+      
+      $user = self::auth($payload);
+      $request->setUser($user);
     } catch (Throwable $error) {
-      if (getenv("ENV") == "DEV") throw new Exception("Acesso não permitido. Stacktrace: $error.", 403);
       throw new Exception("Acesso não permitido.", 403);
     }
 
     return $next($request, $response);
+  }
+
+  public static function auth($payload)
+  {
+    $user = (new UserRepository)->getUserJWT($payload);
+    return $user;
   }
 }

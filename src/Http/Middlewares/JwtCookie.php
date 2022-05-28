@@ -15,13 +15,17 @@ class JwtCookie implements IMiddleware
 
   public function handle(Request $request, Response $response, Closure $next): Response
   {
-    $cookieJwt =  $request->getCookie("NID") ?? "";
+    $cookieJwtName = getenv("JWT_COOKIE_NAME");
+    $cookieJwt =  $request->getCookie($cookieJwtName);
+    $cookieJwt = !empty($cookieJwt) ? str_replace('Bearer ', '', $cookieJwt) : '';
 
     try {
       $payload = JwtService::decode($cookieJwt);
       $request->setPayload($payload);
+      
+      $user = Jwt::auth($payload);
+      $request->setUser($user);
     } catch (Throwable $error) {
-      if (getenv("ENV") == "DEV") throw new Exception("Acesso não permitido. Stacktrace: $error.", 403);
       throw new Exception("Acesso não permitido.", 403);
     }
 
