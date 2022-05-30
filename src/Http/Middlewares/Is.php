@@ -23,6 +23,8 @@ class Is implements IMiddleware
     $requiredPermissions = $request->permissions();
     $user                = $request->getUser();
 
+    if(is_array($user)) throw new Exception("Usuário não está autenticado!", 401);
+
     if (self::verify($requiredPermissions, $user)) return $next($request, $response);
 
     throw new Exception("Usuário não tem permissão para fazer essa ação!", 401);
