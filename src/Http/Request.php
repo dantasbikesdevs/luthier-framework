@@ -46,7 +46,7 @@ class Request
   /**
    * Usuário autenticado da requisição
    */
-  private UserEntity $user;
+  private UserEntity | array $user = [];
 
   /**
    * Cabeçalhos da requisição
@@ -194,7 +194,7 @@ class Request
   /**
    * Método responsável por retornar o usuário autenticado da requisição
    */
-  public function getUser(): UserEntity
+  public function getUser(): UserEntity | array
   {
     return $this->user;
   }
@@ -213,7 +213,7 @@ class Request
    */
   public function permissions()
   {
-    return $this->router->getParamsRoute('permissions');
+    return $this->router->getParamsRoute('permissions') ?? [];
   }
 
   /**
