@@ -4,14 +4,14 @@ namespace Luthier\Database;
 
 use App\Database\ApplicationDatabase;
 use Exception;
+use stdClass;
 
 class Query
 {
   private ?string $tableName;
-  private $model;
-  private $database;
-  private $config = [];
-  private $forceOperation;
+  private mixed $model = null;
+  private Database $database;
+  private bool $forceOperation = false;
   private array $queryStore;
 
   public function __construct(Database $database = null)
@@ -100,11 +100,11 @@ class Query
    * Para executar adicione o método run() no final. Essa query não será executada sem where a menos que seja
    * removidas as guardas com forceDangerousCommand.
    */
-  public function update(array $fieldsAndValues, ?string $tableName = null)
+  public function update(mixed $fieldsAndValues, ?string $tableName = null)
   {
     $table = $tableName ?? $this->tableName;
 
-    $queryFields = array_keys($fieldsAndValues);
+    $queryFields = array_keys((array)$fieldsAndValues);
 
     /**
      * Transforma um array de valores como este: ["age" => 18, "position" => "dev", "power" => 1.88]
@@ -288,9 +288,8 @@ class Query
   /**
    * Marca se o resultado da consulta será baseado em um objeto de determinada classe ou não.
    */
-  public function object($model = null)
+  public function asObject($model = stdClass::class)
   {
-    $this->config["object"] = true;
     $this->model = $model;
     return $this;
   }
@@ -302,7 +301,7 @@ class Query
   {
     $queryData = $this->getSql();
     $this->queryStore = [];
-    return $this->database->executeStatement($queryData["query"], $queryData["values"], false, $this->config["object"], $this->model);
+    return $this->database->executeStatement($queryData["query"], $queryData["values"], false, $this->model);
   }
 
   /**
@@ -312,7 +311,7 @@ class Query
   {
     $queryData = $this->getSql();
     $this->queryStore = [];
-    return $this->database->executeStatement($queryData["query"], $queryData["values"], true, $this->config["object"] ?? null, $this->model);
+    return $this->database->executeStatement($queryData["query"], $queryData["values"], true, $this->model);
   }
 
   /**

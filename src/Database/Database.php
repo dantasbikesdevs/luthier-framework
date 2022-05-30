@@ -5,6 +5,7 @@ namespace Luthier\Database;
 use Exception;
 use PDO;
 use PDOException;
+use stdClass;
 
 /**
  * Necessário para se conectar com um banco real. Neste caso usamos um singleton para evitar sobrecargas de conexões com o banco.
@@ -78,19 +79,21 @@ class Database implements IDatabase
   /**
    * Método responsável por executar queries dentro do banco de dados que possuem retorno
    */
-  public function executeStatement(string $query, array $params = [], $all = true, $object = false, $model = false)
+  public function executeStatement(string $query, array $params = [], $all = true, $model = stdClass::class)
   {
-
     try {
       // Essa etapa previne SQLi
       $statement = $this->connection->prepare($query);
       $statement->execute($params);
-      if ($all && $object && !is_null($model)) return $statement->fetchAll(PDO::FETCH_CLASS, $model);
-      if ($all && $object) return $statement->fetchAll(PDO::FETCH_OBJ);
-      if ($all) return $statement->fetchAll(PDO::FETCH_ASSOC);
 
-      if (!$all && $object && !is_null($model)) return $statement->fetchObject($model);
-      if (!$all && $object) return $statement->fetch(PDO::FETCH_OBJ);
+      $hasModel = !is_null($model);
+
+      if ($all) {
+        if ($hasModel) return $statement->fetchAll(PDO::FETCH_CLASS, $model);
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+      }
+
+      if ($hasModel) return $statement->fetchObject($model);
       return $statement->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
       switch ($e->getCode()) {
