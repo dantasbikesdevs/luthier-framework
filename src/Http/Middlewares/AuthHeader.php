@@ -9,21 +9,21 @@ use Throwable;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
 use Luthier\Security\Jwt as JwtService;
+use Luthier\Security\Auth as AuthService;
 
-class JwtCookie implements IMiddleware
+class AuthCookie implements IMiddleware
 {
 
   public function handle(Request $request, Response $response, Closure $next): Response
   {
-    $cookieJwtName = getenv("JWT_COOKIE_NAME");
-    $cookieJwt =  $request->getCookie($cookieJwtName);
-    $cookieJwt = !empty($cookieJwt) ? str_replace('Bearer ', '', $cookieJwt) : '';
+    $headerJwt =  $request->getHeader("Authorization");
+    $headerJwt = !empty($headerJwt) ? str_replace('Bearer ', '', $headerJwt) : '';
 
     try {
-      $payload = JwtService::decode($cookieJwt);
+      $payload = JwtService::decode($headerJwt);
       $request->setPayload($payload);
-      
-      $user = Jwt::auth($payload);
+
+      $user = AuthService::authJWT($payload);
       $request->setUser($user);
     } catch (Throwable $error) {
       throw new Exception("Acesso não permitido.", 403);

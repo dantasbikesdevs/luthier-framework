@@ -108,19 +108,19 @@ class UserRepository extends Repository
       ->run();
   }
 
+  public function getUserJWT($payload) {
+    $user = $this->findOne($payload['id']);
+    $user = $this->setUserPermissions($user);
+    return $user;
+  }
+
   public function setUserPermissions(UserEntity $user): UserEntity {
     $roles       = (new RolesRepository)->findByUser($user);
     $permissions = (new PermissionsRepository)->findByUser($user);
 
     $user->setRoles($roles);
     $user->setPermissions($permissions);
-    
-    return $user;
-  }
 
-  public function getUserJWT($payload) {
-    $user = $this->findOne($payload['id']);
-    $user = $this->setUserPermissions($user);
     return $user;
   }
 }

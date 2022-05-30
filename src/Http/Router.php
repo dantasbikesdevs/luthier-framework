@@ -134,7 +134,7 @@ class Router
    */
   public function is(array $permissions): self
   {
-    $this->middlewares(['luthier:jwt', 'luthier:is']);
+    $this->middlewares(['luthier:auth', 'luthier:is']);
     $this->permissions = $permissions;
     return $this;
   }
@@ -144,7 +144,7 @@ class Router
    */
   public function can(array $roles): self
   {
-    $this->middlewares(['luthier:jwt', 'luthier:can']);
+    $this->middlewares(['luthier:auth', 'luthier:can']);
     $this->roles = $roles;
     return $this;
   }
@@ -173,8 +173,8 @@ class Router
 
     sort($params['middlewares']);
 
-    $this->indexFirst($params['middlewares'], 'jwtAuth');
-    $this->indexFirst($params['middlewares'], 'api');
+    $this->indexFirst($params['middlewares'], 'luthier:auth');
+    $this->indexFirst($params['middlewares'], 'luthier:api');
   }
 
   /**
@@ -261,7 +261,7 @@ class Router
   {
     // OBTÉM A ROTA ATUAL
     $route = $this->getRoute();
-    return $route[$param];
+    return $route[$param] ?? null;
   }
 
   /**
