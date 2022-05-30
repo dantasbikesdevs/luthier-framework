@@ -2,9 +2,7 @@
 
 namespace Luthier\Exceptions;
 
-use Exception;
-
-class ResponseException extends Exception
+class ResponseException extends AppException
 {
   public function __construct(string $message, int $code)
   {
