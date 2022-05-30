@@ -74,7 +74,7 @@ class Queue
 
     // Se o middleware passado não estiver presente na lista de middlewares criada com a função setMap nós retornamos um erro
     if (!isset(self::$map[$middleware])) {
-      return $response->internalServerError()->send('Problemas ao processar um middleware');
+      return $response->internalServerError('Problemas ao processar um middleware');
     }
 
     // A fila recebe a atual instância deste objeto (reutilizando as propriedades)

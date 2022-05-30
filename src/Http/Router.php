@@ -60,7 +60,7 @@ class Router
   public function __construct(string $url)
   {
     $this->request = new Request($this);
-    $this->response = new Response($this, 200, "");
+    $this->response = new Response("", 200);
     $this->url = $url;
     $this->setPrefix();
   }
@@ -278,7 +278,6 @@ class Router
         throw new Exception('A URL não pode ser processada', 500);
       }
 
-
       // Argumentos do controlador
       $args = [];
 
@@ -303,13 +302,16 @@ class Router
       );
 
       // Retorna a execução da fila de middlewares
-      return $middlewareQueue->next($this->request, $this->response);
+      $response = $middlewareQueue->next($this->request, $this->response);
+
+      if($response->getContent() instanceof Response) return $response->getContent();
+      return $response;
     } catch (Exception $error) {
       $httpCode = $error->getCode() == 0 ? 500 : $error->getCode();
       $errorMessage = $this->getErrorMessage($error, $httpCode);
 
       // Composição da resposta de erro
-      $response = new Response($this);
+      $response = new Response();
       $response->setCode($httpCode);
       $response->setContent($errorMessage);
       $response->setContentType($this->contentType);

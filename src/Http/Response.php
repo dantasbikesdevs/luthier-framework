@@ -26,54 +26,95 @@ class Response
   /**
    * Conteúdo do Response
    */
-  private mixed $content;
-
-  /**
-   * Router da página
-   */
-  private Router $router;
+  private mixed $content = "";
 
   /**
    *  Construtor define os valores
    */
-  public function __construct(Router $router)
+  public function __construct(mixed $content = "", int $httpCode = 200, array $headers = [])
   {
-    // Objeto da classe router que é injetado na requisição
-    $this->router = $router;
+    $this->setContent($content);
+    $this->setCode($httpCode);
+    $this->setHeaders($headers);
   }
 
   /**
    * Adiciona coisas ao corpo da resposta. Aqui vai o conteúdo que deseja enviar ao cliente.
    */
-  public function send(mixed $content)
+  public function send(mixed $content, int $code = 200)
+  {
+    $this->httpCode = $code;
+    $this->content = $content;
+    return $this->httpResponse();
+  }
+
+  /**
+   * O servidor recebeu a requisição e se nega a enviar uma resposta por conta do protocolo não ser suportado ou
+   * por conta de um user-agent ruim, por exemplo.
+   */
+  public function setContent(mixed $content): Response
   {
     $this->content = $content;
-    return $this->httpResponse($this->httpCode, $this->content);
+    return $this;
   }
 
   /**
-   * Método responsável por retornar o router
+   * Getter para o conteúdo da resposta
    */
-  public function getRouter(): Router
+  public function getContent(): mixed
   {
-    return $this->router;
+    return $this->content;
   }
 
   /**
-   * Método responsável por alterar o contentType do response
+   * Setter para o código da resposta
    */
-  public function setContentType($contentType)
+  public function setCode(int $code): Response
+  {
+    $this->httpCode = $code;
+    return $this;
+  }
+
+  /**
+   * Getter para o código da resposta
+   */
+  public function getCode(int $code): int
+  {
+    return $this->httpCode;
+  }
+
+  /**
+   * Método responsável por alterar o contentType da resposta
+   */
+  public function setContentType($contentType): Response
   {
     $this->contentType = $contentType;
-    $this->addHeader('Content-Type', $contentType);
+    return $this;
+  }
+
+  /**
+   * Getter para o contentType da resposta
+   */
+  public function getContentType(): string {
+    return $this->contentType;
   }
 
   /**
    * Método responsável por adicionar um registro nos Headers do response
    */
-  public function addHeader(string $key, string $value)
+  public function setHeaders(array $headers): Response
   {
-    $this->headers[$key] = $value;
+    foreach ($headers as $key => $value) {
+      $this->headers[$key] = $value;
+    }
+    return $this;
+  }
+
+  /**
+   * Getter para retornar um header
+   */
+  public function getHeader(string $header) {
+    return $this->headers[$header] ?? null;
   }
 
   /**
@@ -108,7 +149,6 @@ class Response
   public function asPdf(): self
   {
     $type = 'application/pdf';
-    $this->getRouter()->setContentType($type);
     $this->contentType = $type;
     return $this;
   }
@@ -119,7 +159,6 @@ class Response
   public function asJson(): self
   {
     $type = 'application/json';
-    $this->getRouter()->setContentType($type);
     $this->contentType = $type;
     return $this;
   }
@@ -130,7 +169,6 @@ class Response
   public function asXml(): self
   {
     $type = 'text/xml';
-    $this->getRouter()->setContentType($type);
     $this->contentType = $type;
     return $this;
   }
@@ -138,17 +176,27 @@ class Response
   /**
    * Função responsável por enviar uma resposta ou erro
    */
-  public function httpResponse(int $code, mixed $content): Response
+  public function httpResponse(): Response
   {
-    $this->getRouter()->setContentType($this->contentType);
+    $code = $this->httpCode;
+    $content = $this->content;
+
+    if(empty($content)) {
+      $code = 500;
+      $content = ["mensagem" => "Não foi possível encontrar o conteúdo da requisição."];
+    }
 
     // Caso haja erro
-    if ($code >= 500) {
-      throw new Exception($content, $code);
+    if ($code >= 500 || $code == 0) {
+      throw new Exception($content, 500);
     }
 
     // Compõe o objeto de resposta
-    $response = new Response($this->router);
+    if(!is_array($content) && !is_object($content)) {
+      $content = ["mensagem" => $content];
+    }
+
+    $response = new Response();
     $response->setCode($code);
     $response->setContent($content);
     $response->setContentType($this->contentType);
@@ -160,156 +208,153 @@ class Response
   /**
    * Função responsável por indicar sucesso na requisição
    */
-  public function ok(): Response
+  public function ok(mixed $content): Response
   {
     $this->setCode(200);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * Função responsável por indicar sucesso na criação de conteúdo
    */
-  public function created(): Response
+  public function created(mixed $content): Response
   {
     $this->setCode(201);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * Função responsável por indicar que um recurso foi movido permanentemente
    */
-  public function movedPermanently(): Response
+  public function movedPermanently(mixed $content): Response
   {
     $this->setCode(301);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * Função responsável por indicar que você esta sendo redirecionado
    */
-  public function seeOther(): Response
+  public function seeOther(mixed $content): Response
   {
     $this->setCode(303);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * Recurso movido permanentemente
    */
-  public function permanentRedirect(): Response
+  public function permanentRedirect(mixed $content): Response
   {
     $this->setCode(308);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
 
   /**
    * Requisição mal formada
    */
-  public function badRequest(): Response
+  public function badRequest(mixed $content): Response
   {
     $this->setCode(400);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * Requisição não autorizada
    */
-  public function unauthorized(): Response
+  public function unauthorized(mixed $content): Response
   {
     $this->setCode(401);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * O servidor não autorizou a emissão de um resposta.
    */
-  public function paymentRequired(): Response
+  public function paymentRequired(mixed $content): Response
   {
     $this->setCode(402);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * O servidor recebeu a requisição e foi capaz de identificar o autor, porém não autorizou a emissão de um resposta.
    */
-  public function forbidden(): Response
+  public function forbidden(mixed $content): Response
   {
     $this->setCode(403);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * Função responsável por indicar que um conteúdo não foi encontrado
    */
-  public function notFound(): Response
+  public function notFound(mixed $content): Response
   {
     $this->setCode(404);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * O servidor recebeu a requisição e se nega a enviar uma resposta por conta do protocolo não ser suportado ou
    * por conta de um user-agent ruim, por exemplo.
    */
-  public function notAcceptable(): Response
+  public function notAcceptable(mixed $content): Response
   {
     $this->setCode(405);
-    return $this;
-  }
-
-  /**
-   * O servidor recebeu a requisição e se nega a enviar uma resposta por conta do protocolo não ser suportado ou
-   * por conta de um user-agent ruim, por exemplo.
-   */
-  public function setContent(mixed $content): Response
-  {
     $this->content = $content;
-    return $this;
+    return $this->httpResponse();
   }
 
   /**
    * O servidor recebeu a requisição e demorou demais para processá-la
    */
-  public function requestTimeout(): Response
+  public function requestTimeout(mixed $content): Response
   {
     $this->setCode(408);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * Função responsável por indicar conflito na requisição
    */
-  public function conflict(): Response
+  public function conflict(mixed $content): Response
   {
     $this->setCode(409);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * Função responsável por indicar conflito na requisição
    */
-  public function unsupportedMediaType(): Response
+  public function unsupportedMediaType(mixed $content): Response
   {
     $this->setCode(415);
-    return $this;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   /**
    * Função responsável por indicar erro no servidor
    */
-  public function internalServerError(): Response
+  public function internalServerError(mixed $content): Response
   {
     $this->setCode(500);
-    return $this;
-  }
-
-  /**
-   * Setter para o código da resposta
-   */
-  public function setCode(int $code)
-  {
-    $this->httpCode = $code;
+    $this->content = $content;
+    return $this->httpResponse();
   }
 
   // ! MÉTODOS INTERNOS
@@ -321,6 +366,10 @@ class Response
   {
     // Status
     http_response_code($this->httpCode);
+
+    $contentType = $this->getHeader("Content-Type");
+    if(!$contentType) $this->setHeaders(['Content-Type' => $this->getContentType()]);
+
     // Cria cada headers
     foreach ($this->headers as $key => $value) {
       header($key . ': ' . $value);
