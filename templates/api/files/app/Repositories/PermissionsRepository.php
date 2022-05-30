@@ -68,7 +68,7 @@ class PermissionsRepository extends Repository
 
   public function findByUser(UserEntity $user){
     $id = $user->getId();
-    return $this->queryBuilder->select("DISTINCT *")
+    return $this->queryBuilder->select("p.*")
       ->from("$this->tableName p")
       ->innerJoinWith("$this->tableRelation up", "up.ID_PERMISSION = p.ID")
       ->where("up.ID_USER = |$id|")
