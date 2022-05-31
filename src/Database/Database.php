@@ -62,7 +62,8 @@ class Database implements IDatabase
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
       ]);
     } catch (PDOException $e) {
-      throw new Exception('Erro ao tentar conexão com o banco de dados: ' . $e->getMessage());
+      if (getenv("ENV") == "DEV") throw new Exception('Erro ao tentar conexão com o banco de dados: ' . $e->getMessage());
+      throw new Exception('Erro ao realizar operação. Consulte a equipe responsável.');
     }
   }
 
@@ -100,7 +101,8 @@ class Database implements IDatabase
         case 23000:
           throw new Exception('Dados já existentes!');
         default:
-          throw new Exception('Erro em operação com o banco de dados: ' . $e->getMessage() . "\n ...QUERY: ${query}");
+          if (getenv("ENV") == "DEV") throw new Exception('Erro ao tentar conexão com o banco de dados: ' . $e->getMessage());
+          throw new Exception('Erro ao realizar operação. Consulte a equipe responsável.');
       }
     }
   }
@@ -120,7 +122,8 @@ class Database implements IDatabase
         case 23000:
           throw new Exception('Dados já existentes!');
         default:
-          throw new Exception('Erro em operação com o banco de dados: ' . $e->getMessage() . "\n ...QUERY: ${query}");
+          if (getenv("ENV") == "DEV") throw new Exception('Erro em operação com o banco de dados: ' . $e->getMessage());
+          throw new Exception('Erro ao realizar operação. Consulte a equipe responsável.');
       }
     }
   }
