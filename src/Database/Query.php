@@ -4,6 +4,7 @@ namespace Luthier\Database;
 
 use App\Database\ApplicationDatabase;
 use Exception;
+use Luthier\Utils\Transform;
 use stdClass;
 
 class Query
@@ -76,6 +77,10 @@ class Query
   {
     $table = $tableName ?? $this->tableName;
 
+    if(is_object($fieldsAndValues)) {
+      $fieldsAndValues = Transform::objectToArray($fieldsAndValues);
+    }
+    
     $queryFields = array_keys((array)$fieldsAndValues);
     $implodedFields = implode(',', $queryFields);
 
@@ -104,16 +109,20 @@ class Query
   {
     $table = $tableName ?? $this->tableName;
 
-    $queryFields = array_keys((array)$fieldsAndValues);
+    if(is_object($fieldsAndValues)) {
+      $fieldsAndValues = Transform::objectToArray($fieldsAndValues);
+    }
+
+    $queryFields = array_keys($fieldsAndValues);
 
     /**
      * Transforma um array de valores como este: ["age" => 18, "position" => "dev", "power" => 1.88]
      * Em um array de valores assim: ["age = |18|", "position = |dev|", "power = |1.88|"]
      */
-    $mappedValues = array_map(fn (string $field, mixed $value) => "|$field| = |$value|", $queryFields, $fieldsAndValues);
+    $mappedValues = array_map(fn (string $field, mixed $value) => " $field = |$value|", $queryFields, $fieldsAndValues);
     $implodedValues = implode(',', $mappedValues);
 
-    $query = "UPDATE |$table| SET $implodedValues";
+    $query = "UPDATE $table SET $implodedValues";
 
     $this->addToQueryStore($query);
     return $this;
