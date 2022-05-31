@@ -273,30 +273,24 @@ class Request
    * Método responsável por limpar os dados do post, evitando injection e XSS
    */
   private function sanitize($params): array
-    {
-        $patterns[] = '/;/';
-        $patterns[] = '/--/';
-        $patterns[] = '/"/';
-        $patterns[] = "/'/";
+  {
+    $patterns[] = '/;/';
+    $patterns[] = '/--/';
+    $patterns[] = '/"/';
+    $patterns[] = "/'/";
 
-        foreach ($params as $key => $value) {
-            $cleanValue = $value;
-            if(is_array($cleanValue)) {
-                $this->sanitize($cleanValue);
-            } else {
-                if (isset($cleanValue)) {
-                    $cleanValue = strip_tags(trim($cleanValue));
-                    $cleanValue = htmlentities($cleanValue, ENT_NOQUOTES);
-                    $cleanValue = html_entity_decode($cleanValue, ENT_NOQUOTES, 'UTF-8');
-                    $cleanValue = preg_replace($patterns, ' ', $cleanValue);
-                }
-                unset($params[$key]);
-                $params[$key] = $cleanValue;
-            }
-        }
-
-        return $params;
+    foreach ($params as $key => $value) {
+      $cleanValue = $value;
+      if (is_array($cleanValue)) {
+        $this->sanitize($cleanValue);
+      } else if (isset($cleanValue)) {
+        $cleanValue = preg_replace($patterns, ' ', $cleanValue);
+        $params[$key] = $cleanValue;
+      }
     }
+
+    return $params;
+  }
 
   /**
    * Método responsável por garantir que os parâmetros tenham conteúdo
