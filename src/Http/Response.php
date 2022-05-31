@@ -3,30 +3,36 @@
 namespace Luthier\Http;
 
 use Exception;
+use Luthier\Utils\Transform;
 use Luthier\Xml\XmlParser;
 
 class Response
 {
 
   /**
-   * Código do Status HTTP
+   * Código do Status HTTP da resposta
    */
   private int $httpCode = 200;
 
   /**
-   * Cabeçalhos da requisição
+   * Cabeçalhos da resposta
    */
   private array $headers = [];
 
   /**
    * Tipo de conteúdo que está sendo retornado
    */
-  private string $contentType = 'application/json';
+  private string $contentType = "application/json";
 
   /**
-   * Conteúdo do Response
+   * Conteúdo da resposta
    */
   private mixed $content = "";
+
+  /**
+   * Charset da resposta
+   */
+  private string $charset = "utf-8";
 
   /**
    *  Construtor define os valores
@@ -44,7 +50,7 @@ class Response
   public function send(mixed $content, int $code = 200)
   {
     $this->httpCode = $code;
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -54,12 +60,13 @@ class Response
    */
   public function setContent(mixed $content): Response
   {
+    $content = $this->sanitize($content);
     $this->content = $content;
     return $this;
   }
 
   /**
-   * Getter para o conteúdo da resposta
+   * Getter para  o conteúdo da resposta
    */
   public function getContent(): mixed
   {
@@ -78,7 +85,7 @@ class Response
   /**
    * Getter para o código da resposta
    */
-  public function getCode(int $code): int
+  public function getCode(): int
   {
     return $this->httpCode;
   }
@@ -95,7 +102,8 @@ class Response
   /**
    * Getter para o contentType da resposta
    */
-  public function getContentType(): string {
+  public function getContentType(): string
+  {
     return $this->contentType;
   }
 
@@ -113,8 +121,26 @@ class Response
   /**
    * Getter para retornar um header
    */
-  public function getHeader(string $header) {
+  public function getHeader(string $header)
+  {
     return $this->headers[$header] ?? null;
+  }
+
+  /**
+   * Método responsável por alterar o charset da resposta
+   */
+  public function setCharset(string $charset): Response
+  {
+    $this->charset = $charset;
+    return $this;
+  }
+
+  /**
+   * Getter para o charset da resposta
+   */
+  public function getCharset(): string
+  {
+    return $this->charset;
   }
 
   /**
@@ -181,7 +207,7 @@ class Response
     $code = $this->httpCode;
     $content = $this->content;
 
-    if(empty($content)) {
+    if (empty($content)) {
       $code = 500;
       $content = ["mensagem" => "Não foi possível encontrar o conteúdo da requisição."];
     }
@@ -192,7 +218,7 @@ class Response
     }
 
     // Compõe o objeto de resposta
-    if(!is_array($content) && !is_object($content)) {
+    if (!is_array($content) && !is_object($content)) {
       $content = ["mensagem" => $content];
     }
 
@@ -211,7 +237,7 @@ class Response
   public function ok(mixed $content): Response
   {
     $this->setCode(200);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -221,7 +247,7 @@ class Response
   public function created(mixed $content): Response
   {
     $this->setCode(201);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -231,7 +257,7 @@ class Response
   public function movedPermanently(mixed $content): Response
   {
     $this->setCode(301);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -241,7 +267,7 @@ class Response
   public function seeOther(mixed $content): Response
   {
     $this->setCode(303);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -251,7 +277,7 @@ class Response
   public function permanentRedirect(mixed $content): Response
   {
     $this->setCode(308);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -262,7 +288,7 @@ class Response
   public function badRequest(mixed $content): Response
   {
     $this->setCode(400);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -272,7 +298,7 @@ class Response
   public function unauthorized(mixed $content): Response
   {
     $this->setCode(401);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -282,7 +308,7 @@ class Response
   public function paymentRequired(mixed $content): Response
   {
     $this->setCode(402);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -292,7 +318,7 @@ class Response
   public function forbidden(mixed $content): Response
   {
     $this->setCode(403);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -302,7 +328,7 @@ class Response
   public function notFound(mixed $content): Response
   {
     $this->setCode(404);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -313,7 +339,7 @@ class Response
   public function notAcceptable(mixed $content): Response
   {
     $this->setCode(405);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -323,7 +349,7 @@ class Response
   public function requestTimeout(mixed $content): Response
   {
     $this->setCode(408);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -333,7 +359,7 @@ class Response
   public function conflict(mixed $content): Response
   {
     $this->setCode(409);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -343,7 +369,7 @@ class Response
   public function unsupportedMediaType(mixed $content): Response
   {
     $this->setCode(415);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
@@ -353,11 +379,47 @@ class Response
   public function internalServerError(mixed $content): Response
   {
     $this->setCode(500);
-    $this->content = $content;
+    $this->setContent($content);
     return $this->httpResponse();
   }
 
   // ! MÉTODOS INTERNOS
+  /**
+   * Método responsável por sanitizar a resposta para o cliente
+   */
+  private function sanitize(mixed $content): mixed
+  {
+    if (is_object($content)) {
+      $content = Transform::objectToArray($content);
+    }
+
+    if (!is_array($content)) {
+      return $this->cleanValue($content);
+    }
+
+    foreach ($content as $key => $value) {
+      $cleanValue = $value;
+      if (is_array($cleanValue)) {
+        $this->sanitize($cleanValue);
+      } else if (isset($cleanValue)){
+        $cleanValue = $this->cleanValue($cleanValue);
+        $content[$key] = $cleanValue;
+      }
+    }
+
+    return $content;
+  }
+
+  /**
+   * Método responsável por "limpar" a string recebida
+   */
+  private function cleanValue(string $value): string
+  {
+    $cleanValue = strip_tags(trim($value));
+    $cleanValue = htmlspecialchars($cleanValue);
+
+    return $cleanValue;
+  }
 
   /**
    * Método responsável por enviar os headers ao navegador
@@ -368,7 +430,7 @@ class Response
     http_response_code($this->httpCode);
 
     $contentType = $this->getHeader("Content-Type");
-    if(!$contentType) $this->setHeaders(['Content-Type' => $this->getContentType()]);
+    if (!$contentType) $this->setHeaders(['Content-Type' => $this->getContentType()]);
 
     // Cria cada headers
     foreach ($this->headers as $key => $value) {
