@@ -10,6 +10,7 @@ use Luthier\Database\Query;
 use Luthier\Database\Transaction;
 use App\Repositories\PermissionsRepository;
 use App\Repositories\RolesRepository;
+use Exception;
 
 class UserRepository extends Repository
 {
@@ -53,13 +54,11 @@ class UserRepository extends Repository
 
     // Exemplo - Problema: passar argumento para função anônima...
     // Possível solução: Receber um array como segundo parâmetro com os argumentos da função anônima.
-    $user = $transaction->panicRollback(function () use ($id) {
-      return $this->queryBuilder->select()
-        ->from($this->tableName)
-        ->where("$this->primaryKey = |$id|")
-        ->object($this->model)
-        ->first();
-    });
+    $user = $this->queryBuilder->select()
+      ->from($this->tableName)
+      ->where("$this->primaryKey = |$id|")
+      ->asObject($this->model)
+      ->first();
 
     return $user;
   }
@@ -68,7 +67,7 @@ class UserRepository extends Repository
   {
     return $this->queryBuilder->select()
       ->from($this->tableName)
-      ->object($this->model)
+      ->asObject($this->model)
       ->all();
   }
 
@@ -80,7 +79,7 @@ class UserRepository extends Repository
     $user = $this->queryBuilder->select()
       ->from($this->tableName)
       ->where("EMAIL = |$email|")
-      ->object($this->model)
+      ->asObject($this->model)
       ->first();
 
     if (!$user) return [];
@@ -103,6 +102,14 @@ class UserRepository extends Repository
 
   public function update($user, int $id)
   {
+    $checkEmail = $this->findOneByEmail($user->getEmail());
+
+    if($checkEmail && $checkEmail->getId() != $id) {
+      throw new \Exception("Este e-mail já está em uso. Tente outro.");
+    }
+
+    $user = $this->findOne($id);
+
     return $this->queryBuilder->update($user, $this->tableName)
       ->where("$this->primaryKey = |$id|")
       ->run();
@@ -110,8 +117,11 @@ class UserRepository extends Repository
 
   public function getUserJWT($payload) {
     $user = $this->findOne($payload['id']);
-    $user = $this->setUserPermissions($user);
-    return $user;
+
+    if(!$user) return [];
+
+    $userWithPermissions = $this->setUserPermissions($user);
+    return $userWithPermissions;
   }
 
   public function setUserPermissions(UserEntity $user): UserEntity {

@@ -27,6 +27,7 @@ header("Access-Control-Allow-Headers: *");
 # Constantes globais
 define('LUTHIER_URL', getenv('URL'));
 define('PROJECT_ROOT', __DIR__ . "/../");
+define('JWT_COOKIE_NAME', getenv("JWT_COOKIE_NAME"));
 
 # Configura a conexão com o banco de dados
 $config = databaseConfig($env);

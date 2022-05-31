@@ -30,10 +30,10 @@ class UserController
     $user = $this->repository->findOne($id);
 
     if (!$user) {
-      return $response->notFound()->send(["error" => "Usuário não encontrado."]);
+      return $response->notFound("Usuário não foi encontrado.");
     }
 
-    return $response->ok()->send($user);
+    return $response->ok($user);
   }
 
   public function findAll(Request $request, Response $response)
@@ -41,10 +41,10 @@ class UserController
     $users = $this->repository->findAll();
 
     if (!$users) {
-      return $response->notFound()->send(["error" => "Nenhum usuário foi encontrado."]);
+      return $response->notFound("Nenhum usuário foi encontrado.");
     }
 
-    return $response->ok()->send($users);
+    return $response->ok($users);
   }
 
   /**
@@ -64,12 +64,12 @@ class UserController
     $unauthorizedMessage = "Login não permitido. Credenciais incorretas.";
 
     if (!$user) {
-      return $response->unauthorized()->send(["error" => $unauthorizedMessage]);
+      return $response->unauthorized($unauthorizedMessage);
     }
 
     $isValid = Password::matches($password, $user->getPassword());
 
-    if (!$isValid) return $response->unauthorized()->send(["error" => $unauthorizedMessage]);
+    if (!$isValid) return $response->unauthorized($unauthorizedMessage);
 
     $payload = [
       "id" => $user->getId(),
@@ -85,7 +85,7 @@ class UserController
 
     Cookie::send(["jwt" => $jwt]);
 
-    return $response->send($body)->ok();
+    return $response->ok($body);
   }
 
   /**
@@ -109,7 +109,7 @@ class UserController
     $unauthorizedMessage = "Este e-mail já está em uso. Tente outro.";
 
     if ($user) {
-      return $response->unauthorized()->send(["error" => $unauthorizedMessage]);
+      return $response->unauthorized($unauthorizedMessage);
     }
 
     $dataUser = [
@@ -137,10 +137,11 @@ class UserController
 
     Cookie::send(["jwt" => $jwt]);
 
-    return $response->ok()->send($body);
+    return $response->ok($body);
   }
 
-  public function update(Request $request, Response $response) {
+  public function update(Request $request, Response $response, int $id)
+  {
     $data = $request->getPostVars();
     $username = $data["name"];
     $age      = $data["age"];
@@ -152,40 +153,45 @@ class UserController
     Validate::email($email);
     Validate::password($password);
 
-    $user = $this->repository->findOne($email);
+    try {
+      $user = $this->repository->findOne($id);
 
-    $unauthorizedMessage = "Este e-mail já está em uso. Tente outro.";
+      if (!$user) {
+        return $response->notFound("Usuário não foi encontrado.");
+      }
 
-    if ($user) {
-      return $response->unauthorized()->send(["error" => $unauthorizedMessage]);
+      $newPassword = empty($password) ? $user->getPassword() : Password::createHash($password);
+
+      $user->setName($username);
+      $user->setAge($age);
+      $user->setEmail($email);
+      $user->setPassword($newPassword);
+
+      $update = $this->repository->update($user, $id);
+
+      echo '<pre>';
+      print_r($update);
+      echo '<br>';
+      echo '</pre>';exit;
+
+      $payload = [
+        "id"       => $user->getId(),
+        "username" => $user->getName(),
+      ];
+
+      $body = [
+        "is_logged" => true,
+        "name" => $user->getName(),
+      ];
+
+      $jwt = Jwt::encode($payload);
+
+      Cookie::send([JWT_COOKIE_NAME => $jwt]);
+
+      return $response->ok("Usuário atualizado com sucesso.");
+    } catch (\Exception $e) {
+      return $response->badRequest($e->getMessage());
     }
-
-    $dataUser = [
-      "NAME"     => $username,
-      "AGE"      => $age,
-      "EMAIL"    => $email,
-      "PASSWORD" => Password::createHash($password),
-    ];
-
-    $newUser = new UserEntity($dataUser);
-
-    $user = $this->repository->create($newUser);
-
-    $payload = [
-      "id"       => $user->getId(),
-      "username" => $user->getName(),
-    ];
-
-    $body = [
-      "is_logged" => true,
-      "name" => $user->getName(),
-    ];
-
-    $jwt = Jwt::encode($payload);
-
-    Cookie::send(["jwt" => $jwt]);
-
-    return $response->ok()->send("Usuário atualizado com sucesso.");
   }
 
   /**
@@ -195,12 +201,12 @@ class UserController
   {
     $request->setPayload([]);
 
-    Cookie::send(["jwt" => ""], "1.s");
+    Cookie::send([JWT_COOKIE_NAME => ""], "1.s");
 
     $body = [
       "is_logged" => false,
     ];
 
-    return $response->ok()->send($body);
+    return $response->ok($body);
   }
 }

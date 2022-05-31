@@ -57,7 +57,7 @@ class RolesRepository extends Repository
   public function findByUser(UserEntity $user){
     $id = $user->getId();
 
-    return $this->queryBuilder->select("r.*")
+    return $this->queryBuilder->select("DISTINCT r.*")
       ->from("$this->tableName r")
       ->innerJoinWith("$this->tableRelation ur", "ur.ID_ROLE = r.ID")
       ->where("ur.ID_USER = |$id|")

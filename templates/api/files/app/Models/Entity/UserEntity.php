@@ -4,13 +4,13 @@ namespace App\Models\Entity;
 
 class UserEntity extends Entity
 {
-  public ?int $ID;
+  private readonly ?int $ID;
   public string $NAME;
   public string $EMAIL;
-  private string $PASSWORD;
+  protected string $PASSWORD;
   public int $AGE;
-  private ?array $PERMISSIONS;
-  private ?array $ROLES;
+  protected ?array $PERMISSIONS;
+  protected ?array $ROLES;
 
   public function __construct($values = null)
   {
@@ -31,7 +31,7 @@ class UserEntity extends Entity
 
   public function setName(string $name)
   {
-    $this->NAME = $name;
+    $this->NAME = empty($name) ? $this->NAME : $name;
 
     return $this;
   }
@@ -43,7 +43,7 @@ class UserEntity extends Entity
 
   public function setEmail(string $email)
   {
-    $this->EMAIL = $email;
+    $this->EMAIL = empty($email) ? $this->EMAIL : $email;
 
     return $this;
   }
@@ -55,7 +55,7 @@ class UserEntity extends Entity
 
   public function setPassword(string $password)
   {
-    $this->PASSWORD = $password;
+    $this->PASSWORD = empty($password) ? $this->PASSWORD : $password;
 
     return $this;
   }
@@ -67,7 +67,7 @@ class UserEntity extends Entity
 
   public function setAge(int $age)
   {
-    $this->AGE = $age;
+    $this->AGE = empty($age) ? $this->AGE : $age;
 
     return $this;
   }

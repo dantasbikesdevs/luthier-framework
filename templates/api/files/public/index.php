@@ -1,7 +1,9 @@
 <?php
+
 require_once __DIR__ . "/../vendor/autoload.php";
 require_once __DIR__ . "/../config/config.php";
 
+use Luthier\Http\Response;
 use \Luthier\Http\Router;
 use \Luthier\Utils\Path;
 
@@ -15,4 +17,5 @@ foreach ($routes as $route) {
 }
 
 # Envia as respostas da rota
-$router->run()->sendResponses();
+$router->run()
+       ->sendResponses();
