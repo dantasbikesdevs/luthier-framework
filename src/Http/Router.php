@@ -6,6 +6,8 @@ use \Closure;
 use \Exception;
 use \ReflectionFunction;
 use \Luthier\Http\Middlewares\Queue as Middleware;
+use Luthier\Log\Log;
+use PDOException;
 
 class Router
 {
@@ -304,11 +306,20 @@ class Router
       // Retorna a execução da fila de middlewares
       $response = $middlewareQueue->next($this->request, $this->response);
 
-      if($response->getContent() instanceof Response) return $response->getContent();
+      if ($response->getContent() instanceof Response) return $response->getContent();
       return $response;
     } catch (Exception $error) {
       $httpCode = $error->getCode() == 0 ? 500 : $error->getCode();
       $errorMessage = $this->getErrorMessage($error, $httpCode);
+
+      if ($httpCode == 500) {
+        $errorMessage["error"] = "Não foi possível processar a requisição. Caso o erro persista, informe a equipe responsável.";
+
+        $logger = new Log("main");
+        $logger->error("Erro ao processar a requisição.", [
+          "exception" => $error
+        ]);
+      }
 
       // Composição da resposta de erro
       $response = new Response();
