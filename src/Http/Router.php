@@ -326,7 +326,6 @@ class Router
   {
     return match ($this->contentType) {
       'application/json' => [
-        'status' => $httpCode,
         'error'  => $error->getMessage()
       ],
       default => $error->getMessage()
