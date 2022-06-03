@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Database\ApplicationDatabase;
-use App\Repositories\Repository;
+use App\Repositories\AbstractRepository;
 use App\Models\Entity\UserEntity;
 use Luthier\Database\Database;
 use Luthier\Database\Query;
@@ -11,8 +11,9 @@ use Luthier\Database\Transaction;
 use App\Repositories\PermissionsRepository;
 use App\Repositories\RolesRepository;
 use Exception;
+use Luthier\Log\Log;
 
-class UserRepository extends Repository
+class UserRepository extends AbstractRepository
 {
   /**
    * Nome da tabela do repositório.
@@ -50,10 +51,6 @@ class UserRepository extends Repository
 
   public function findOne(int $id)
   {
-    $transaction = new Transaction($this->database->getConnection());
-
-    // Exemplo - Problema: passar argumento para função anônima...
-    // Possível solução: Receber um array como segundo parâmetro com os argumentos da função anônima.
     $user = $this->queryBuilder->select()
       ->from($this->tableName)
       ->where("$this->primaryKey = |$id|")
@@ -102,17 +99,25 @@ class UserRepository extends Repository
 
   public function update($user, int $id)
   {
-    $checkEmail = $this->findOneByEmail($user->getEmail());
+    try {
+      $checkEmail = $this->findOneByEmail($user->getEmail());
 
-    if($checkEmail && $checkEmail->getId() != $id) {
-      throw new \Exception("Este e-mail já está em uso. Tente outro.");
+      if($checkEmail && $checkEmail->getId() != $id) {
+        throw new \Exception("Este e-mail já está em uso. Tente outro.", 400);
+      }
+
+      return $this->queryBuilder->update($user, $this->tableName)
+        ->where("$this->primaryKey = |$id|")
+        ->run();
+    } catch(\Exception $error) {
+      $logger = new Log("main");
+      $logger->error("Erro ao atualizar o usuário {id}", [
+        "id"        => $user->getId(),
+        "exception" => $error
+      ]);
+
+      throw new \Exception($error->getMessage(), $error->getCode());
     }
-
-    $user = $this->findOne($id);
-
-    return $this->queryBuilder->update($user, $this->tableName)
-      ->where("$this->primaryKey = |$id|")
-      ->run();
   }
 
   public function getUserJWT($payload) {

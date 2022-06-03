@@ -2,8 +2,6 @@
 setlocale(LC_TIME, 'pt_BR', 'pt_BR.utf-8', 'portuguese');
 date_default_timezone_set('America/Sao_Paulo');
 
-require_once __DIR__ . "/../database/config.php";
-
 use App\Database\ApplicationDatabase;
 use Luthier\Database\DatabaseManager;
 use Luthier\Environment\Environment;
@@ -14,6 +12,9 @@ use Luthier\Http\Middlewares;
 $envPath = __DIR__ . "/../.env";
 $envObject = new Environment($envPath);
 $envObject->load();
+
+require_once __DIR__ . "/../database/config.php";
+require_once __DIR__ . "/logging.php";
 
 # Obtendo variável de ambiente que indica se estamos em desenvolvimento ou produção
 $env = getenv("ENV");
@@ -28,6 +29,7 @@ header("Access-Control-Allow-Headers: *");
 define('LUTHIER_URL', getenv('URL'));
 define('PROJECT_ROOT', __DIR__ . "/../");
 define('JWT_COOKIE_NAME', getenv("JWT_COOKIE_NAME"));
+define('LOGGING_CHANNELS', $channels);
 
 # Configura a conexão com o banco de dados
 $config = databaseConfig($env);

@@ -8,6 +8,7 @@ use App\Utils\Validate;
 use Luthier\Http\Cookie;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
+use Luthier\Log\Logger;
 use Luthier\Security\Jwt;
 use Luthier\Security\Password;
 
@@ -143,6 +144,7 @@ class UserController
   public function update(Request $request, Response $response, int $id)
   {
     $data = $request->getPostVars();
+
     $username = $data["name"];
     $age      = $data["age"];
     $email    = $data["email"];
@@ -167,26 +169,7 @@ class UserController
       $user->setEmail($email);
       $user->setPassword($newPassword);
 
-      $update = $this->repository->update($user, $id);
-
-      echo '<pre>';
-      print_r($update);
-      echo '<br>';
-      echo '</pre>';exit;
-
-      $payload = [
-        "id"       => $user->getId(),
-        "username" => $user->getName(),
-      ];
-
-      $body = [
-        "is_logged" => true,
-        "name" => $user->getName(),
-      ];
-
-      $jwt = Jwt::encode($payload);
-
-      Cookie::send([JWT_COOKIE_NAME => $jwt]);
+      $this->repository->update($user, $id);
 
       return $response->ok("Usuário atualizado com sucesso.");
     } catch (\Exception $e) {

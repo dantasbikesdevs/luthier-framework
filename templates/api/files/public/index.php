@@ -19,3 +19,4 @@ foreach ($routes as $route) {
 # Envia as respostas da rota
 $router->run()
        ->sendResponses();
+

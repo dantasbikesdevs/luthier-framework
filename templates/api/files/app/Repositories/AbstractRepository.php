@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Interfaces\IRepository;
 use Luthier\Database\Query;
 
-abstract class Repository implements IRepository
+abstract class AbstractRepository implements IRepository
 {
 
   /**
@@ -33,7 +33,7 @@ abstract class Repository implements IRepository
     return $this->queryBuilder->select()
       ->from($this->tableName)
       ->where("$this->primaryKey = |$id|")
-      ->object($this->model)
+      ->asObject($this->model)
       ->first();
   }
 
@@ -41,7 +41,7 @@ abstract class Repository implements IRepository
   {
     return $this->queryBuilder->select()
       ->from($this->tableName)
-      ->object($this->model)
+      ->asObject($this->model)
       ->all();
   }
 

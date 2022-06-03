@@ -2,11 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Repository;
+use App\Repositories\AbstractRepository;
 use App\Models\Entity\UserEntity;
 use Luthier\Database\Query;
 
-class RolesRepository extends Repository
+class RolesRepository extends AbstractRepository
 {
   /**
    * Nome da tabela do repositório.
@@ -57,7 +57,7 @@ class RolesRepository extends Repository
   public function findByUser(UserEntity $user){
     $id = $user->getId();
 
-    return $this->queryBuilder->select("DISTINCT r.*")
+    return $this->queryBuilder->select("r.*")
       ->from("$this->tableName r")
       ->innerJoinWith("$this->tableRelation ur", "ur.ID_ROLE = r.ID")
       ->where("ur.ID_USER = |$id|")

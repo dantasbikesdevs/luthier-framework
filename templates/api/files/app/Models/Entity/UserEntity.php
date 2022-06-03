@@ -4,13 +4,13 @@ namespace App\Models\Entity;
 
 class UserEntity extends Entity
 {
-  private readonly ?int $ID;
+  protected readonly ?int $ID;
   public string $NAME;
   public string $EMAIL;
   protected string $PASSWORD;
   public int $AGE;
-  protected ?array $PERMISSIONS;
-  protected ?array $ROLES;
+  protected array $PERMISSIONS;
+  protected array $ROLES;
 
   public function __construct($values = null)
   {
@@ -76,7 +76,7 @@ class UserEntity extends Entity
     return $this->ROLES;
   }
 
-  public function setRoles(?array $roles) {
+  public function setRoles(array $roles) {
     $this->ROLES = $roles;
   }
 
@@ -84,7 +84,7 @@ class UserEntity extends Entity
     return $this->PERMISSIONS;
   }
 
-  public function setPermissions(?array $permissions){
+  public function setPermissions(array $permissions){
     $this->PERMISSIONS = $permissions;
   }
 }
