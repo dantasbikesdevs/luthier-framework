@@ -110,12 +110,6 @@ class UserRepository extends AbstractRepository
         ->where("$this->primaryKey = |$id|")
         ->run();
     } catch(\Exception $error) {
-      $logger = new Log("main");
-      $logger->error("Erro ao atualizar o usuário {id}", [
-        "id"        => $user->getId(),
-        "exception" => $error
-      ]);
-
       throw new \Exception($error->getMessage(), $error->getCode());
     }
   }
