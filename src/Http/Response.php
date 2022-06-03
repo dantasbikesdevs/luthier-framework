@@ -2,7 +2,7 @@
 
 namespace Luthier\Http;
 
-use Exception;
+use Luthier\Exceptions\ResponseException;
 use Luthier\Utils\Transform;
 use Luthier\Xml\XmlParser;
 
@@ -27,7 +27,7 @@ class Response
   /**
    * Conteúdo da resposta
    */
-  private mixed $content = "";
+  private mixed $content;
 
   /**
    * Charset da resposta
@@ -160,7 +160,7 @@ class Response
   }
 
   /**
-   * Função responsável pelas requisições de download
+   * Método responsável pelas requisições de download
    */
   public function download($size, $filename): self
   {
@@ -170,7 +170,7 @@ class Response
   //* Tipos de conteúdo da resposta. Deve ser a penúltima coisa na composição da resposta.
 
   /**
-   * Função responsável por configurar requisição para PDF
+   * Método responsável por configurar requisição para PDF
    */
   public function asPdf(): self
   {
@@ -180,7 +180,7 @@ class Response
   }
 
   /**
-   * Função responsável por configurar requisição para JSON
+   * Método responsável por configurar requisição para JSON
    */
   public function asJson(): self
   {
@@ -190,7 +190,7 @@ class Response
   }
 
   /**
-   * Função responsável por configurar requisição para XML
+   * Método responsável por configurar requisição para XML
    */
   public function asXml(): self
   {
@@ -200,21 +200,17 @@ class Response
   }
 
   /**
-   * Função responsável por enviar uma resposta ou erro
+   * Método responsável por enviar uma resposta ou erro
    */
   public function httpResponse(): Response
   {
     $code = $this->httpCode;
     $content = $this->content;
 
-    if (empty($content)) {
-      $code = 500;
-      $content = ["mensagem" => "Não foi possível encontrar o conteúdo da requisição."];
-    }
-
     // Caso haja erro
-    if ($code >= 500 || $code == 0) {
-      throw new Exception($content, 500);
+    if ($code >= 400 || $code == 0) {
+      $code = $code == 0 ? 500 : $code;
+      throw new ResponseException($content, $code);
     }
 
     // Compõe o objeto de resposta
@@ -232,7 +228,7 @@ class Response
   // * Códigos de resposta HTTP. Última coisa a ser colocada na resposta.
 
   /**
-   * Função responsável por indicar sucesso na requisição
+   * Método responsável por indicar sucesso na requisição
    */
   public function ok(mixed $content): Response
   {
@@ -242,7 +238,7 @@ class Response
   }
 
   /**
-   * Função responsável por indicar sucesso na criação de conteúdo
+   * Método responsável por indicar sucesso na criação de conteúdo
    */
   public function created(mixed $content): Response
   {
@@ -252,7 +248,7 @@ class Response
   }
 
   /**
-   * Função responsável por indicar que um recurso foi movido permanentemente
+   * Método responsável por indicar que um recurso foi movido permanentemente
    */
   public function movedPermanently(mixed $content): Response
   {
@@ -262,12 +258,20 @@ class Response
   }
 
   /**
-   * Função responsável por indicar que você esta sendo redirecionado
+   * Método responsável por indicar que você esta sendo redirecionado
    */
-  public function seeOther(mixed $content): Response
+  public function seeOther(): Response
   {
     $this->setCode(303);
-    $this->setContent($content);
+    return $this->httpResponse();
+  }
+
+  /**
+   * Método responsável por indicar que a resposta não foi modificada
+   */
+  public function notModified(): Response
+  {
+    $this->setCode(304);
     return $this->httpResponse();
   }
 
@@ -323,7 +327,7 @@ class Response
   }
 
   /**
-   * Função responsável por indicar que um conteúdo não foi encontrado
+   * Método responsável por indicar que um conteúdo não foi encontrado
    */
   public function notFound(mixed $content): Response
   {
@@ -354,7 +358,7 @@ class Response
   }
 
   /**
-   * Função responsável por indicar conflito na requisição
+   * Método responsável por indicar conflito na requisição
    */
   public function conflict(mixed $content): Response
   {
@@ -364,7 +368,7 @@ class Response
   }
 
   /**
-   * Função responsável por indicar conflito na requisição
+   * Método responsável por indicar conflito na requisição
    */
   public function unsupportedMediaType(mixed $content): Response
   {
@@ -374,7 +378,7 @@ class Response
   }
 
   /**
-   * Função responsável por indicar erro no servidor
+   * Método responsável por indicar erro no servidor
    */
   public function internalServerError(mixed $content): Response
   {
