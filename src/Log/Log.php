@@ -84,7 +84,7 @@ class Log extends Logger
     Validate::paramsRequired([
       "path"  => $variables["path"] ?? null,
       "level" => $variables["level"] ?? null,
-    ]);
+    ], 500);
 
     $fileHandler = new StreamHandler(
       $variables["path"],
@@ -112,7 +112,7 @@ class Log extends Logger
       "from"     => $variables["from"] ?? null,
       "to"       => $variables["to"] ?? null,
       "subject"  => $variables["subject"] ?? null,
-    ]);
+    ], 500);
 
     $phpMailer           = new PHPMailer();
     $phpMailer->Host     = $variables["host"];
@@ -140,7 +140,7 @@ class Log extends Logger
       "apiKey"  => $variables["apiKey"] ?? null,
       "channel" => $variables["channel"] ?? null,
       "level"   => $variables["level"] ?? null
-    ]);
+    ], 500);
 
     $telegramHandler = new TelegramBotHandler(
       $variables["apiKey"],
