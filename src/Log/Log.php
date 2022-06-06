@@ -2,6 +2,8 @@
 
 namespace Luthier\Log;
 
+use App\Models\Entity\UserEntity;
+use Luthier\Http\Request;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\TelegramBotHandler;
@@ -30,10 +32,16 @@ class Log extends Logger
    */
   private string $timeFormat = "Y-m-d H:i:s";
 
+  /**
+   * Usuário autenticado que gerou o erro.
+   */
+  private ?UserEntity $user;
+
   public function __construct(string $channel = null, bool $default = true)
   {
     $this->channel  = $channel ?? "main";
     $this->channels = LOGGING_CHANNELS ?? [];
+    $this->user     = Request::getUser();
     parent::__construct($this->channel);
     if ($default) $this->loadSettings();
   }
@@ -45,23 +53,27 @@ class Log extends Logger
   {
     if (empty($this->channels)) return;
 
-    if (in_array($this->channel, $this->channels))
+    if (!isset($this->channels[$this->channel]))
       throw new InvalidArgumentException("Channel {$this->channel} not found in config/logging.php");
 
     $variables = $this->channels[$this->channel];
 
+    // Verifica se foi definido logs em arquivo para o canal informado e o inicia
     if (isset($variables["file"])) {
       $this->setFile($variables["file"]);
     }
 
+    // Verifica se foi definido logs em e-mail para o canal informado e o inicia
     if (isset($variables["email"])) {
       $this->setEmail($variables["email"]);
     }
 
+    // Verifica se foi definido logs no telegram para o canal informado e o inicia
     if (isset($variables["telegram"])) {
       $this->setTelegram($variables["telegram"]);
     }
 
+    // Seta processadores padrões de informações que irão sair no log
     $this->pushProcessor(function ($record) {
       $record["extra"]["REMOTE_ADDR"]        = $_SERVER["REMOTE_ADDR"];
       $record["extra"]["SERVER_PROTOCOL"]    = $_SERVER["SERVER_PROTOCOL"];
@@ -69,6 +81,7 @@ class Log extends Logger
       $record["extra"]["REQUEST_METHOD"]     = $_SERVER["REQUEST_METHOD"];
       $record["extra"]["HTTP_USER_AGENT"]    = $_SERVER["HTTP_USER_AGENT"];
       $record["extra"]["CONTENT_TYPE"]       = $_SERVER["CONTENT_TYPE"];
+      $record["extra"]["USER_ID"]            = $this->user->getId() ?? "No authenticated";
       return $record;
     });
     $this->pushProcessor(new \Monolog\Processor\PsrLogMessageProcessor());
