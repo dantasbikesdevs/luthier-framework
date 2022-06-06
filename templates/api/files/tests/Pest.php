@@ -24,8 +24,12 @@
 |
 */
 
+use App\Database\ApplicationDatabase;
+use Luthier\Database\DatabaseManager;
+use Luthier\Environment\Environment;
+
 expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
+  return $this->toBe(1);
 });
 
 /*
@@ -39,7 +43,23 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function loadEnv()
 {
-    // ..
+  $env = new Environment(__DIR__ . "/Fake/Env/.env");
+  $env->load();
+}
+
+function loadDatabase()
+{
+  loadEnv();
+
+  $data = [
+    "driver"   => getenv('DEV_DRIVER'),
+    "host"     => getenv('DEV_DB_HOST'),
+    "path"     => getenv('DEV_DB_PATH'),
+    "user"     => getenv('DEV_DB_USER'),
+    "password" => getenv('DEV_DB_PASSWORD')
+  ];
+  $databaseManager = new DatabaseManager($data);
+  ApplicationDatabase::init($databaseManager);
 }

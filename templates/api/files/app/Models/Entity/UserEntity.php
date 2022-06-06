@@ -4,7 +4,7 @@ namespace App\Models\Entity;
 
 class UserEntity extends Entity
 {
-  protected readonly ?int $ID;
+  public readonly ?int $ID;
   public string $NAME;
   public string $EMAIL;
   protected string $PASSWORD;

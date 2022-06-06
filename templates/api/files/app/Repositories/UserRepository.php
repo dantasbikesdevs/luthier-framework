@@ -103,13 +103,17 @@ class UserRepository extends AbstractRepository
       $checkEmail = $this->findOneByEmail($user->getEmail());
 
       if($checkEmail && $checkEmail->getId() != $id) {
-        throw new \Exception("Este e-mail já está em uso. Tente outro.", 400);
+        throw new \InvalidArgumentException("Este e-mail já está em uso. Tente outro.", 409);
       }
 
       return $this->queryBuilder->update($user, $this->tableName)
         ->where("$this->primaryKey = |$id|")
         ->run();
     } catch(\Exception $error) {
+      $logger = new Log("main");
+      $logger->error("Erro ao atualizar usuário", [
+        "exception" => $error
+      ]);
       throw new \Exception($error->getMessage(), $error->getCode());
     }
   }

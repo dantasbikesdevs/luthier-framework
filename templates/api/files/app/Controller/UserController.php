@@ -173,7 +173,7 @@ class UserController
 
       return $response->ok("Usuário atualizado com sucesso.");
     } catch (\Exception $e) {
-      return $response->badRequest($e->getMessage());
+      throw new \Exception($e->getMessage(), $e->getCode());
     }
   }
 
