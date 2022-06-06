@@ -9,7 +9,7 @@ use Luthier\Exceptions\AppException;
 class Auth {
   public static function authJWT($payload) {
     $user = (new UserRepository)->getUserJWT($payload);
-    if(!$user instanceof UserEntity) throw new AppException("Usuário não foi encontrado", 404);
+    if(!$user instanceof UserEntity) throw new AppException("Token inválido.", 404);
 
     return $user;
   }
