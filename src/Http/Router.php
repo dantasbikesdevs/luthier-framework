@@ -7,7 +7,6 @@ use \Exception;
 use \ReflectionFunction;
 use \Luthier\Http\Middlewares\Queue as Middleware;
 use Luthier\Log\Log;
-use PDOException;
 
 class Router
 {
@@ -62,7 +61,7 @@ class Router
   public function __construct(string $url)
   {
     $this->request = new Request($this);
-    $this->response = new Response("", 200);
+    $this->response = new Response();
     $this->url = $url;
     $this->setPrefix();
   }
