@@ -46,7 +46,7 @@ class Request
   /**
    * Usuário autenticado da requisição
    */
-  private UserEntity | array $user = [];
+  private static ?UserEntity $user = null;
 
   /**
    * Cabeçalhos da requisição
@@ -184,19 +184,17 @@ class Request
   /**
    * Método responsável por setar o usuário autenticado da requisição
    */
-  public function setUser(UserEntity $user)
+  public function setUser(UserEntity $user): void
   {
-    $this->user = $user;
-
-    return $this;
+    self::$user = $user;
   }
 
   /**
    * Método responsável por retornar o usuário autenticado da requisição
    */
-  public function getUser(): UserEntity | array
+  public static function getUser(): ?UserEntity
   {
-    return $this->user;
+    return self::$user;
   }
 
   /**
