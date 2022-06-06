@@ -78,6 +78,7 @@ class Log extends Logger
 
   /**
    * Seta o arquivo de log.
+   * @param array $variables[path, level]
    */
   private function setFile(array $variables): void
   {
@@ -101,6 +102,7 @@ class Log extends Logger
 
   /**
    * Seta o email de log.
+   * @param array $variables[host, port, username, password, from, to, subject, level]
    */
   private function setEmail(array $variables): void
   {
@@ -112,6 +114,7 @@ class Log extends Logger
       "from"     => $variables["from"] ?? null,
       "to"       => $variables["to"] ?? null,
       "subject"  => $variables["subject"] ?? null,
+      "level"    => $variables["level"] ?? null,
     ], 500);
 
     $phpMailer           = new PHPMailer();
@@ -133,6 +136,7 @@ class Log extends Logger
 
   /**
    * Seta o bot do Telegram de log.
+   * @param array $variables[apiKey, channel, level]
    */
   private function setTelegram(array $variables): void
   {
@@ -154,5 +158,14 @@ class Log extends Logger
       )
     );
     $this->pushHandler($telegramHandler);
+  }
+
+  /**
+   * Seta o formato do tempo.
+   * @param string $format
+   */
+  public function setTimeFormat(string $timeFormat): void
+  {
+    $this->timeFormat = $timeFormat;
   }
 }
