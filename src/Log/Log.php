@@ -3,7 +3,6 @@
 namespace Luthier\Log;
 
 use App\Models\Entity\UserEntity;
-use Luthier\Http\Request;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\TelegramBotHandler;
@@ -13,6 +12,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use \Psr\Log\InvalidArgumentException;
 use Luthier\Log\PHPMailerHandler;
 use Luthier\Utils\Validate;
+use Luthier\Http\Request;
+use Luthier\Log\LogManager;
 
 class Log extends Logger
 {
@@ -25,7 +26,7 @@ class Log extends Logger
   /**
    * Canais de Loggers definidos pelo usuário.
    */
-  private array $channels;
+  private static array $channels = [];
 
   /**
    * Formato para gravação do tempo.
@@ -37,10 +38,17 @@ class Log extends Logger
    */
   private ?UserEntity $user;
 
+  /**
+   * Método responsável por setar os canais definidos pelo usuário.
+   */
+  public static function config(LogManager $manager)
+  {
+    self::$channels = $manager->getChannels();
+  }
+
   public function __construct(string $channel = null, bool $default = true)
   {
     $this->channel  = $channel ?? "main";
-    $this->channels = LOGGING_CHANNELS ?? [];
     $this->user     = Request::getUser();
     parent::__construct($this->channel);
     if ($default) $this->loadSettings();
@@ -51,26 +59,27 @@ class Log extends Logger
    */
   private function loadSettings(): void
   {
-    if (empty($this->channels)) return;
+    if (empty(self::$channels))
+      throw new InvalidArgumentException("Nenhum canal de log foi definido.");
 
-    if (!isset($this->channels[$this->channel]))
+    $channel = self::$channels[$this->channel];
+
+    if (!isset($channel))
       throw new InvalidArgumentException("Channel {$this->channel} not found in config/logging.php");
 
-    $variables = $this->channels[$this->channel];
-
     // Verifica se foi definido logs em arquivo para o canal informado e o inicia
-    if (isset($variables["file"])) {
-      $this->setFile($variables["file"]);
+    if (isset($channel["file"])) {
+      $this->setFile($channel["file"]);
     }
 
     // Verifica se foi definido logs em e-mail para o canal informado e o inicia
-    if (isset($variables["email"])) {
-      $this->setEmail($variables["email"]);
+    if (isset($channel["email"])) {
+      $this->setEmail($channel["email"]);
     }
 
     // Verifica se foi definido logs no telegram para o canal informado e o inicia
-    if (isset($variables["telegram"])) {
-      $this->setTelegram($variables["telegram"]);
+    if (isset($channel["telegram"])) {
+      $this->setTelegram($channel["telegram"]);
     }
 
     // Seta processadores padrões de informações que irão sair no log
