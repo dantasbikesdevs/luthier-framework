@@ -11,6 +11,7 @@ use Luthier\Http\Response;
 use Luthier\Log\Logger;
 use Luthier\Security\Jwt;
 use Luthier\Security\Password;
+use PhpParser\Node\Expr\Exit_;
 
 class UserController
 {

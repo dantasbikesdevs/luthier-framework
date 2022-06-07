@@ -1,4 +1,5 @@
 <?php
+
 setlocale(LC_TIME, 'pt_BR', 'pt_BR.utf-8', 'portuguese');
 date_default_timezone_set('America/Sao_Paulo');
 
@@ -7,6 +8,8 @@ use Luthier\Database\DatabaseManager;
 use Luthier\Environment\Environment;
 use Luthier\Security\Jwt;
 use Luthier\Http\Middlewares;
+use Luthier\Log\Log;
+use Luthier\Log\LogManager;
 
 # Carrega as variáveis de ambiente presentes no arquivo .env na raiz
 $envPath = __DIR__ . "/../.env";
@@ -29,14 +32,17 @@ header("Access-Control-Allow-Headers: *");
 define('LUTHIER_URL', getenv('URL'));
 define('PROJECT_ROOT', __DIR__ . "/../");
 define('JWT_COOKIE_NAME', getenv("JWT_COOKIE_NAME"));
-define('LOGGING_CHANNELS', $channels);
+
+# Configura os canais de log
+$logManager = new LogManager($channels);
+Log::config($logManager);
 
 # Configura a conexão com o banco de dados
 $config = databaseConfig($env);
 $databaseManager = new DatabaseManager($config);
 ApplicationDatabase::init($databaseManager);
 
-// Configuração do JWT
+# Configuração do JWT
 $signature = getenv("JWT_KEY");
 Jwt::config($signature);
 
