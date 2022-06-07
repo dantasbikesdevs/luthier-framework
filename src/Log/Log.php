@@ -84,13 +84,13 @@ class Log extends Logger
 
     // Seta processadores padrões de informações que irão sair no log
     $this->pushProcessor(function ($record) {
-      $record["extra"]["REMOTE_ADDR"]        = $_SERVER["REMOTE_ADDR"];
-      $record["extra"]["SERVER_PROTOCOL"]    = $_SERVER["SERVER_PROTOCOL"];
-      $record["extra"]["REQUEST_URI"]        = $_SERVER["REQUEST_URI"];
-      $record["extra"]["REQUEST_METHOD"]     = $_SERVER["REQUEST_METHOD"];
-      $record["extra"]["HTTP_USER_AGENT"]    = $_SERVER["HTTP_USER_AGENT"];
-      $record["extra"]["CONTENT_TYPE"]       = $_SERVER["CONTENT_TYPE"];
-      $record["extra"]["USER_ID"]            = $this->user->getId() ?? "No authenticated";
+      $record["extra"]["REMOTE_ADDR"]        = $_SERVER["REMOTE_ADDR"] ?? "Not identified";
+      $record["extra"]["SERVER_PROTOCOL"]    = $_SERVER["SERVER_PROTOCOL"] ?? "Not identified";
+      $record["extra"]["REQUEST_URI"]        = $_SERVER["REQUEST_URI"] ?? "Not identified";
+      $record["extra"]["REQUEST_METHOD"]     = $_SERVER["REQUEST_METHOD"] ?? "Not identified";
+      $record["extra"]["HTTP_USER_AGENT"]    = $_SERVER["HTTP_USER_AGENT"] ?? "Not identified";
+      $record["extra"]["CONTENT_TYPE"]       = $_SERVER["CONTENT_TYPE"] ?? "Not identified";
+      $record["extra"]["USER_ID"]            = isset($this->user) ? $this->user->getId() : "No authenticated";
       return $record;
     });
     $this->pushProcessor(new \Monolog\Processor\PsrLogMessageProcessor());
