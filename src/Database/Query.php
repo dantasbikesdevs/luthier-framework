@@ -4,6 +4,7 @@ namespace Luthier\Database;
 
 use App\Database\ApplicationDatabase;
 use Exception;
+use Luthier\Regex\Regex;
 use Luthier\Utils\Transform;
 use stdClass;
 
@@ -77,10 +78,10 @@ class Query
   {
     $table = $tableName ?? $this->tableName;
 
-    if(is_object($fieldsAndValues)) {
+    if (is_object($fieldsAndValues)) {
       $fieldsAndValues = Transform::objectToArray($fieldsAndValues);
     }
-    
+
     $queryFields = array_keys((array)$fieldsAndValues);
     $implodedFields = implode(',', $queryFields);
 
@@ -109,7 +110,7 @@ class Query
   {
     $table = $tableName ?? $this->tableName;
 
-    if(is_object($fieldsAndValues)) {
+    if (is_object($fieldsAndValues)) {
       $fieldsAndValues = Transform::objectToArray($fieldsAndValues);
     }
 
@@ -194,18 +195,13 @@ class Query
 
   /**
    * Une os resultados de duas tabelas em uma determinada condição. Para executar adicione o método run() no final.
-   * Exemplo: (new Query("client"))->select()->joinWith(table: "receipt", on: "mainTable.id = thatTable.client_id")->run();
+   * Exemplo: (new Query("client c"))->select()->joinWith(table: "receipt r", on: "c.id = r.client_id")->run();
    *
    * Isso resulta em um query assim: "SELECT * FROM client JOIN receipt ON client.id = receipt.client_id"
    */
   public function joinWith(string $table, string $on, string $type = "")
   {
-    $mainTable = $this->tableName;
-
     // Caso o usuário use esta notação para se relatar as tabelas principal e secundária
-    // $on = preg_replace("mainTable", $mainTable, $on);
-    // $on = preg_replace("thatTable", $table, $on);
-
     $query = "$type JOIN $table ON $on";
 
     // Ex: mainTable INNER JOIN thatTable ON mainTable.field = thatTable.field;
@@ -281,7 +277,8 @@ class Query
   public function getSql()
   {
     $queryTemplate =  implode(" ", $this->queryStore);
-    return $this->extractQueryData($queryTemplate);
+    $cleanQueryTemplate = preg_replace(Regex::$contiguousBlankSpaces, " ", $queryTemplate);
+    return $this->extractQueryData($cleanQueryTemplate);
   }
 
   /**
@@ -333,7 +330,7 @@ class Query
     return $this->database->execute($queryData["query"], $queryData["values"]);
   }
 
-   /**
+  /**
    * Adiciona uma ordenação aos resultados da query. Recebe um campo pelo qual ordenar e uma direção.
    * Para executar adicione o método run() no final.
    */
