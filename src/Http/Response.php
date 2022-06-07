@@ -207,15 +207,12 @@ class Response
     $code = $this->httpCode;
     $content = $this->content;
 
-    // Caso haja erro
-    if ($code >= 400 || $code == 0) {
-      $code = $code == 0 ? 500 : $code;
-      throw new ResponseException($content, $code);
-    }
-
-    // Compõe o objeto de resposta
     if (!is_array($content) && !is_object($content)) {
-      $content = ["mensagem" => $content];
+      if ($code >=400) {
+        $content = ["error" => $content];
+      } else {
+        $content = ["message" => $content];
+      }
     }
 
     $response = new Response();
