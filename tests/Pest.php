@@ -24,6 +24,10 @@
 |
 */
 
+use Luthier\Log\Log;
+use Luthier\Log\LogManager;
+use Monolog\Level;
+
 expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
@@ -42,4 +46,17 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+function loadChannels() {
+  $channels = [
+    "main" => [
+      "file" => [
+        "path"  => getenv("LOG_MAIN_FILE"),
+        "level" => Level::Warning,
+      ]
+    ],
+  ];
+  $logManager = new LogManager($channels);
+  Log::config($logManager);
 }
