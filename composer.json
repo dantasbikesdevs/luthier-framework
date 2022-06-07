@@ -21,14 +21,14 @@
     "coverage": "./vendor/bin/pest --coverage"
   },
   "require-dev": {
-    "pestphp/pest": "^1.21"
+    "pestphp/pest": "^1.21",
+    "firebase/php-jwt": "dev-main",
+    "monolog/monolog": "^3.0",
+    "phpmailer/phpmailer": "^6.6"
   },
   "config": {
     "allow-plugins": {
       "pestphp/pest-plugin": true
     }
-  },
-  "require": {
-    "firebase/php-jwt": "dev-main"
   }
 }
