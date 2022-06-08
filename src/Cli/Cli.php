@@ -36,7 +36,7 @@ class Cli
 
     // Instala dependências do projeto do usuário
     system("composer install");
-    system("cd LuthierFramework; composer install");
+    system("cd web-luthier-frame-v1; composer install");
 
     // Mensagem final
     Output::separator("=", $dividerColors);
