@@ -47,9 +47,9 @@ class Response
   /**
    * Adiciona coisas ao corpo da resposta. Aqui vai o conteúdo que deseja enviar ao cliente.
    */
-  public function send(mixed $content, int $code = 200)
+  public function send(mixed $content, int $code = 200): Response
   {
-    $this->httpCode = $code;
+    $this->setCode($code);
     $this->setContent($content);
     return $this->httpResponse();
   }
@@ -202,7 +202,7 @@ class Response
   /**
    * Método responsável por enviar uma resposta ou erro
    */
-  public function httpResponse(): Response
+  private function httpResponse(): Response
   {
     $code = $this->httpCode;
     $content = $this->content;
@@ -229,9 +229,7 @@ class Response
    */
   public function ok(mixed $content): Response
   {
-    $this->setCode(200);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content);
   }
 
   /**
@@ -239,9 +237,7 @@ class Response
    */
   public function created(mixed $content): Response
   {
-    $this->setCode(201);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 201);
   }
 
   /**
@@ -249,27 +245,23 @@ class Response
    */
   public function movedPermanently(mixed $content): Response
   {
-    $this->setCode(301);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 301);
   }
 
   /**
    * Método responsável por indicar que você esta sendo redirecionado
    */
-  public function seeOther(): Response
+  public function seeOther(mixed $content): Response
   {
-    $this->setCode(303);
-    return $this->httpResponse();
+    return $this->send($content, 303);
   }
 
   /**
    * Método responsável por indicar que a resposta não foi modificada
    */
-  public function notModified(): Response
+  public function notModified(mixed $content): Response
   {
-    $this->setCode(304);
-    return $this->httpResponse();
+    return $this->send($content, 304);
   }
 
   /**
@@ -277,9 +269,7 @@ class Response
    */
   public function permanentRedirect(mixed $content): Response
   {
-    $this->setCode(308);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 308);
   }
 
 
@@ -288,9 +278,7 @@ class Response
    */
   public function badRequest(mixed $content): Response
   {
-    $this->setCode(400);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 400);
   }
 
   /**
@@ -298,9 +286,7 @@ class Response
    */
   public function unauthorized(mixed $content): Response
   {
-    $this->setCode(401);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 401);
   }
 
   /**
@@ -308,9 +294,7 @@ class Response
    */
   public function paymentRequired(mixed $content): Response
   {
-    $this->setCode(402);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 402);
   }
 
   /**
@@ -318,9 +302,7 @@ class Response
    */
   public function forbidden(mixed $content): Response
   {
-    $this->setCode(403);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 403);
   }
 
   /**
@@ -328,9 +310,7 @@ class Response
    */
   public function notFound(mixed $content): Response
   {
-    $this->setCode(404);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 404);
   }
 
   /**
@@ -339,9 +319,7 @@ class Response
    */
   public function notAcceptable(mixed $content): Response
   {
-    $this->setCode(405);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 405);
   }
 
   /**
@@ -349,9 +327,7 @@ class Response
    */
   public function requestTimeout(mixed $content): Response
   {
-    $this->setCode(408);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 408);
   }
 
   /**
@@ -359,9 +335,7 @@ class Response
    */
   public function conflict(mixed $content): Response
   {
-    $this->setCode(409);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 409);
   }
 
   /**
@@ -369,9 +343,7 @@ class Response
    */
   public function unsupportedMediaType(mixed $content): Response
   {
-    $this->setCode(415);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 415);
   }
 
   /**
@@ -379,9 +351,7 @@ class Response
    */
   public function internalServerError(mixed $content): Response
   {
-    $this->setCode(500);
-    $this->setContent($content);
-    return $this->httpResponse();
+    return $this->send($content, 500);
   }
 
   // ! MÉTODOS INTERNOS
