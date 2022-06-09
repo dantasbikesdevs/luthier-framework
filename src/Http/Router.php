@@ -53,7 +53,7 @@ class Router
   /**
    * Regras da rota
    */
-  private array $roles = [];
+  private array $rules = [];
 
   /**
    * Método responsável por iniciar a classe
@@ -94,7 +94,7 @@ class Router
   {
     $middlewares = $this->getMiddlewares();
     $permissions = $this->permissions();
-    $roles = $this->roles();
+    $rules = $this->rules();
     $router = new Router('');
     $callback($router);
 
@@ -102,7 +102,7 @@ class Router
       foreach ($methods as $method => $params) {
         $middlewares && $this->middlewares($middlewares);
         $permissions && $this->is($permissions);
-        $roles && $this->can($roles);
+        $rules && $this->can($rules);
         $this->prepareParams($params);
         $endpoint = $prefix != '' ? $this->mergeUri($prefix, $patternRoute) : $patternRoute;
         $this->routes[$endpoint][$method] = $params;
@@ -123,11 +123,11 @@ class Router
   /**
    * Regras de permissões da rota
    */
-  public function roles()
+  public function rules()
   {
-    $roles = $this->roles;
-    $this->roles = [];
-    return $roles;
+    $rules = $this->rules;
+    $this->rules = [];
+    return $rules;
   }
 
   /**
@@ -143,10 +143,10 @@ class Router
   /**
    * Adiciona verificação de permissão do usuário para executar uma ação (Ex: apagar)
    */
-  public function can(array $roles): self
+  public function can(array $rules): self
   {
     $this->middlewares(['luthier:auth', 'luthier:can']);
-    $this->roles = $roles;
+    $this->rules = $rules;
     return $this;
   }
 
@@ -158,10 +158,10 @@ class Router
       $params['middlewares'] = array_merge($params['middlewares'], $middlewares);
     }
 
-    $roles = $this->roles();
-    if (count($roles)) {
-      $params['roles'] = $params['roles'] ?? [];
-      $params['roles'] = array_merge($params['roles'], $roles);
+    $rules = $this->rules();
+    if (count($rules)) {
+      $params['rules'] = $params['rules'] ?? [];
+      $params['rules'] = array_merge($params['rules'], $rules);
     }
 
     $permissions = $this->permissions();

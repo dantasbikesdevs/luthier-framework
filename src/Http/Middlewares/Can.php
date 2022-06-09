@@ -17,25 +17,25 @@ class Can implements IMiddleware
 {
   public function handle(Request $request, Response $response, Closure $next): Response
   {
-    $requiredRoles = $request->roles();
+    $requiredRules = $request->rules();
     $user          = $request->getUser();
 
     if(is_array($user)) throw new Exception("Usuário não está autenticado!", 401);
-    
-    if (self::verify($requiredRoles, $user)) return $next($request, $response);
+
+    if (self::verify($requiredRules, $user)) return $next($request, $response);
 
     throw new Exception("Usuário não tem permissão para fazer essa ação!", 401);
   }
 
-  public static function verify(array $roles, UserEntity $user)
+  public static function verify(array $rules, UserEntity $user)
   {
     /** LÓGICA DE VERIFICAR REGRAS */
-    $userRoles = array_map(function ($role) {
+    $userRules = array_map(function ($role) {
       return $role['NAME'];
-    }, $user->getRoles());
+    }, $user->getRules());
 
-    foreach ($roles as $role) {
-      return in_array($role, $userRoles);
+    foreach ($rules as $role) {
+      return in_array($role, $userRules);
     }
   }
 }

@@ -384,8 +384,12 @@ class Response
   /**
    * Método responsável por "limpar" a string recebida
    */
-  private function cleanValue(string $value): string
+  private function cleanValue(mixed $value): mixed
   {
+    if(is_bool($value) || is_numeric($value)) {
+      return $value;
+    };
+
     $cleanValue = strip_tags(trim($value));
     $cleanValue = htmlspecialchars($cleanValue);
 

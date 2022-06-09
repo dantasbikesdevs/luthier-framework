@@ -217,9 +217,9 @@ class Request
   /**
    * Função responsável por pegar os papéis do usuário
    */
-  public function roles()
+  public function rules()
   {
-    return $this->router->getParamsRoute('roles');
+    return $this->router->getParamsRoute('rules');
   }
 
   /**
