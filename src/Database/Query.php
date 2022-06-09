@@ -4,6 +4,7 @@ namespace Luthier\Database;
 
 use App\Database\ApplicationDatabase;
 use Exception;
+use Luthier\Reflection\Reflection;
 use Luthier\Regex\Regex;
 use Luthier\Utils\Transform;
 use stdClass;
@@ -74,23 +75,24 @@ class Query
    * seus novos valores e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function insert(mixed $fieldsAndValues, ?string $tableName = null)
+  public function insert(array | object $fieldsAndValues, ?string $tableName = null)
   {
     $table = $tableName ?? $this->tableName;
 
-    if (is_object($fieldsAndValues)) {
-      $fieldsAndValues = Transform::objectToArray($fieldsAndValues);
+    if(is_object($fieldsAndValues)) {
+      $fieldsAndValues = Reflection::getValuesObjectNoReadOnly($fieldsAndValues);
     }
-
-    $queryFields = array_keys((array)$fieldsAndValues);
-    $implodedFields = implode(',', $queryFields);
-
+    
     /**
      * Transforma um array de valores como este: [1, "dev", 1.88]
      * Em um array de valores assim: ["|1|", "|dev|", "|1.88|"]
      * E depois em uma string assim: "|1|, |dev|, |1.88|"
      */
-    $mappedValues = array_map(fn (mixed $value) => "|$value|", (array)$fieldsAndValues);
+    foreach ($fieldsAndValues as $key => $value) {
+      $queryFields[] = $key;
+      $mappedValues[] = "|$value|";
+    }
+    $implodedFields = implode(',', $queryFields);
     $implodedValues = implode(',', $mappedValues);
 
     $query = "INSERT INTO $table ($implodedFields) VALUES ($implodedValues)";
@@ -106,22 +108,22 @@ class Query
    * Para executar adicione o método run() no final. Essa query não será executada sem where a menos que seja
    * removidas as guardas com forceDangerousCommand.
    */
-  public function update(mixed $fieldsAndValues, ?string $tableName = null)
+  public function update(array | object $fieldsAndValues, ?string $tableName = null)
   {
     $table = $tableName ?? $this->tableName;
 
-    if (is_object($fieldsAndValues)) {
-      $fieldsAndValues = Transform::objectToArray($fieldsAndValues);
+    if(is_object($fieldsAndValues)) {
+      $fieldsAndValues = Reflection::getValuesObjectNoReadOnly($fieldsAndValues);
     }
-
-    $queryFields = array_keys($fieldsAndValues);
 
     /**
      * Transforma um array de valores como este: ["age" => 18, "position" => "dev", "power" => 1.88]
      * Em um array de valores assim: ["age = |18|", "position = |dev|", "power = |1.88|"]
      */
-    $mappedValues = array_map(fn (string $field, mixed $value) => " $field = |$value|", $queryFields, $fieldsAndValues);
-    $implodedValues = implode(',', $mappedValues);
+    foreach ($fieldsAndValues as $key => $value) {
+      $queryFields[] = "$key = |$value|";
+    }
+    $implodedValues = implode(',', $queryFields);
 
     $query = "UPDATE $table SET $implodedValues";
 
