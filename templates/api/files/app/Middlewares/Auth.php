@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Luthier\Http\Middlewares;
+namespace App\Middlewares;
 
 use App\Models\Entity\UserEntity;
 use App\Repositories\UserRepository;

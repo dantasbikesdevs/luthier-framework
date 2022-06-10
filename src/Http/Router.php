@@ -135,7 +135,7 @@ class Router
    */
   public function is(array $permissions): self
   {
-    $this->middlewares(['luthier:auth', 'luthier:is']);
+    $this->middlewares(['auth', 'is']);
     $this->permissions = $permissions;
     return $this;
   }
@@ -145,7 +145,7 @@ class Router
    */
   public function can(array $rules): self
   {
-    $this->middlewares(['luthier:auth', 'luthier:can']);
+    $this->middlewares(['auth', 'can']);
     $this->rules = $rules;
     return $this;
   }
@@ -174,7 +174,7 @@ class Router
 
     sort($params['middlewares']);
 
-    $this->indexFirst($params['middlewares'], 'luthier:auth');
+    $this->indexFirst($params['middlewares'], 'auth');
     $this->indexFirst($params['middlewares'], 'luthier:api');
   }
 
