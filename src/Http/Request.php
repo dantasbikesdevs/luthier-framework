@@ -270,7 +270,7 @@ class Request
   /**
    * Método responsável por limpar os dados do post, evitando injection e XSS
    */
-  private function sanitize($params): array
+  private function sanitize(array $params): array
   {
     $patterns[] = '/;/';
     $patterns[] = '/--/';
@@ -282,7 +282,10 @@ class Request
       if (is_array($cleanValue)) {
         $this->sanitize($cleanValue);
       } else if (isset($cleanValue)) {
-        $cleanValue = preg_replace($patterns, ' ', $cleanValue);
+        if(is_string($cleanValue)) {
+          $cleanValue = trim($cleanValue);
+          $cleanValue = preg_replace($patterns, '', $cleanValue);
+        }
         $params[$key] = $cleanValue;
       }
     }

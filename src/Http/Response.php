@@ -386,7 +386,7 @@ class Response
    */
   private function cleanValue(mixed $value): mixed
   {
-    if(is_bool($value) || is_numeric($value)) {
+    if(!is_string($value)) {
       return $value;
     };
 
