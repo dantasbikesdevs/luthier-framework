@@ -1,34 +1,27 @@
 {
-  "name": "dantas/luthier",
-  "description": "Framework PHP interno para construção de aplicações MVC",
-  "version": "0.1.0",
-  "type": "library",
-  "authors": [
-    {
-      "name": "equipe web",
-      "email": "examples@example.com"
-    }
-  ],
-  "minimum-stability": "stable",
+  "name": "luthier/project",
+  "description": "Luthier Project",
   "autoload": {
     "psr-4": {
-      "Luthier\\": "src/"
+      "App\\": "app/"
     }
   },
   "scripts": {
-    "dev": "xdg-open 127.0.0.1:8811; php -S 127.0.0.1:8811;",
+    "dev": "cd public/; xdg-open 'http://127.0.0.1:8383'; php -S 127.0.0.1:8383",
     "test": "./vendor/bin/pest",
     "coverage": "./vendor/bin/pest --coverage"
   },
-  "require-dev": {
-    "pestphp/pest": "^1.21",
-    "firebase/php-jwt": "dev-main",
-    "monolog/monolog": "^3.0",
-    "phpmailer/phpmailer": "^6.6"
-  },
-  "config": {
-    "allow-plugins": {
-      "pestphp/pest-plugin": true
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "main@10.168.2.176:/srv/versionamento/git/web-luthier-frame-v1/.git"
     }
+  ],
+  "require": {
+    "firebase/php-jwt": "dev-main",
+    "dantas/luthier": "dev-main"
+  },
+  "require-dev": {
+    "pestphp/pest": "^1.21"
   }
 }
