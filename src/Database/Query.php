@@ -80,7 +80,7 @@ class Query
     $table = $tableName ?? $this->tableName;
 
     if(is_object($fieldsAndValues)) {
-      $fieldsAndValues = Reflection::getValuesObjectNoReadOnly($fieldsAndValues);
+      $fieldsAndValues = Reflection::getValuesObject($fieldsAndValues);
     }
 
     /**
@@ -113,7 +113,7 @@ class Query
     $table = $tableName ?? $this->tableName;
 
     if(is_object($fieldsAndValues)) {
-      $fieldsAndValues = Reflection::getValuesObjectNoReadOnly($fieldsAndValues);
+      $fieldsAndValues = Reflection::getValuesObject($fieldsAndValues);
     }
 
     /**
