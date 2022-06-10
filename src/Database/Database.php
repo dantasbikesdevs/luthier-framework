@@ -1,8 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Luthier\Database;
 
 use Exception;
+use Luthier\Exceptions\DatabaseException;
 use PDO;
 use PDOException;
 use stdClass;
@@ -62,8 +65,8 @@ class Database implements IDatabase
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
       ]);
     } catch (PDOException $e) {
-      if (getenv("ENV") == "DEV") throw new Exception('Erro ao tentar conexão com o banco de dados: ' . $e->getMessage());
-      throw new Exception('Erro ao realizar operação. Consulte a equipe responsável.');
+      if (getenv("ENV") == "DEV") throw new DatabaseException('Erro ao tentar conexão com o banco de dados: ' . $e->getMessage());
+      throw new DatabaseException('Erro ao realizar operação. Consulte a equipe responsável.');
     }
   }
 
@@ -99,10 +102,10 @@ class Database implements IDatabase
     } catch (PDOException $e) {
       switch ($e->getCode()) {
         case 23000:
-          throw new Exception('Dados já existentes!');
+          throw new DatabaseException('Dados já existentes!');
         default:
-          if (getenv("ENV") == "DEV") throw new Exception('Erro ao tentar conexão com o banco de dados: ' . $e->getMessage());
-          throw new Exception('Erro ao realizar operação. Consulte a equipe responsável.');
+          if (getenv("ENV") == "DEV") throw new DatabaseException('Erro ao tentar conexão com o banco de dados: ' . $e->getMessage());
+          throw new DatabaseException('Erro ao realizar operação. Consulte a equipe responsável.');
       }
     }
   }
@@ -120,10 +123,10 @@ class Database implements IDatabase
     } catch (PDOException $e) {
       switch ($e->getCode()) {
         case 23000:
-          throw new Exception('Dados já existentes!');
+          throw new DatabaseException('Dados já existentes!');
         default:
-          if (getenv("ENV") == "DEV") throw new Exception('Erro em operação com o banco de dados: ' . $e->getMessage());
-          throw new Exception('Erro ao realizar operação. Consulte a equipe responsável.');
+          if (getenv("ENV") == "DEV") throw new DatabaseException('Erro em operação com o banco de dados: ' . $e->getMessage());
+          throw new DatabaseException('Erro ao realizar operação. Consulte a equipe responsável.');
       }
     }
   }
