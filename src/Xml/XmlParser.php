@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Luthier\Xml;
 
@@ -41,7 +41,7 @@ class XmlParser
 
     /**
      * Inclui headers e propriedades em elementos XML que estão sendo gerados a partir de arrays
-     * Para incluir uma propriedade no elemento XML a partir de um array use: 
+     * Para incluir uma propriedade no elemento XML a partir de um array use:
      * [
      *      "elemento" => [
      *           "Attr_NomeDaPropriedade" => "valor",
@@ -64,7 +64,7 @@ class XmlParser
         foreach ($mixed as $index => $mixedElement) {
             if (is_array($mixedElement)) {
                 /**
-                 * Dado um array associativo com filhos de índice numérico retornamos 
+                 * Dado um array associativo com filhos de índice numérico retornamos
                  * vários elementos xml com o mesmo nome da chave pai. Isto é necessário
                  * porque não é possível ter várias chaves com o mesmo nome.
                  *  */

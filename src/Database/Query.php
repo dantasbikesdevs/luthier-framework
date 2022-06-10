@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Luthier\Database;
 
@@ -82,7 +82,7 @@ class Query
     if(is_object($fieldsAndValues)) {
       $fieldsAndValues = Reflection::getValuesObjectNoReadOnly($fieldsAndValues);
     }
-    
+
     /**
      * Transforma um array de valores como este: [1, "dev", 1.88]
      * Em um array de valores assim: ["|1|", "|dev|", "|1.88|"]
