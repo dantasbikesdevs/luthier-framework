@@ -2,14 +2,16 @@
 
 namespace Luthier\Http\Middlewares;
 
+use App\Models\Entity\UserEntity;
+use App\Repositories\UserRepository;
 use Closure;
 use Exception;
+use Luthier\Exceptions\AppException;
 use Luthier\Http\Middlewares\IMiddleware;
 use Throwable;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
 use Luthier\Security\Jwt as JwtService;
-use Luthier\Security\Auth as AuthService;
 
 class Auth implements IMiddleware
 {
@@ -24,12 +26,19 @@ class Auth implements IMiddleware
       $payload = JwtService::decode($jwt);
       $request->setPayload($payload);
 
-      $user = AuthService::authJWT($payload);
+      $user = self::authJWT($payload);
       $request->setUser($user);
     } catch (Throwable $error) {
       throw new Exception("Acesso não permitido.", 403);
     }
 
     return $next($request, $response);
+  }
+
+  public static function authJWT($payload) {
+    $user = (new UserRepository)->getUserJWT($payload);
+    if(!$user instanceof UserEntity) throw new AppException("Token inválido.", 404);
+
+    return $user;
   }
 }

@@ -32,7 +32,7 @@ class Can implements IMiddleware
     /** LÓGICA DE VERIFICAR REGRAS */
     $userRules = array_map(function ($role) {
       return $role['NAME'];
-    }, $user->getRules());
+    }, $user->getRoles());
 
     foreach ($rules as $role) {
       return in_array($role, $userRules);
