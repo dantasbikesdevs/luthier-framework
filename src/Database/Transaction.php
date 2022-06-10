@@ -2,6 +2,7 @@
 
 namespace Luthier\Database;
 
+use App\Database\ApplicationDatabase;
 use Closure;
 use PDO;
 
@@ -10,9 +11,9 @@ class Transaction
   protected bool $hasActiveTransaction = false;
   private PDO $connection;
 
-  public function __construct(PDO $connection)
+  public function __construct(PDO $connection = null)
   {
-    $this->connection = $connection;
+    $this->connection = $connection ?? ApplicationDatabase::getConnection();
   }
 
   /**

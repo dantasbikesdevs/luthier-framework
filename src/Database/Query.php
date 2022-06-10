@@ -19,7 +19,7 @@ class Query
 
   public function __construct(Database $database = null)
   {
-    $this->database = is_null($database) ? ApplicationDatabase::getInstance() : $database;
+    $this->database = $database ?? ApplicationDatabase::getInstance();
   }
 
   /* Obtém uma query string e seus valores*/
