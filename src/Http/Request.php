@@ -207,7 +207,7 @@ class Request
   }
 
   /**
-   * Função responsável por pegar as permissões do usuário
+   * Função responsável por pegar as permissões que o usuário deve possuir para acessar a rota
    */
   public function permissions()
   {
@@ -215,11 +215,19 @@ class Request
   }
 
   /**
-   * Função responsável por pegar os papéis do usuário
+   * Função responsável por pegar os papéis que o usuário deve possuir para acessar a rota
    */
   public function rules()
   {
     return $this->router->getParamsRoute('rules');
+  }
+
+  /**
+   * Função responsável por as telas que o usuário deve possuir para acessar a rota
+   */
+  public function screens()
+  {
+    return $this->router->getParamsRoute('screens');
   }
 
   /**
