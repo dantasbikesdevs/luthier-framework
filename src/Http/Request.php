@@ -184,7 +184,7 @@ class Request
   /**
    * Método responsável por setar o usuário autenticado da requisição
    */
-  public function setUser($user): void
+  public static function setUser($user): void
   {
     self::$user = $user;
   }
