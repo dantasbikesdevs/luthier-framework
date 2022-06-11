@@ -32,9 +32,11 @@ class Cookie
       "d" => $base + $number * 86400, // dias (n * 60 * 60 * 24)
       default => 0
     };
-    
-    $domain = getenv("DOMAIN");
-    $domain = is_bool($domain) ? "/" : $domain;
+
+    if(empty($domain)) {
+      $domain = getenv("DOMAIN");
+      $domain = is_bool($domain) ? "/" : $domain;
+    }
 
     /**
      * ["cookie" => "valor"]
