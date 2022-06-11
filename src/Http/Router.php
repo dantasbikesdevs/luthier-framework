@@ -195,6 +195,12 @@ class Router
       $params['permissions'] = array_merge($params['permissions'], $permissions);
     }
 
+    $screens = $this->screens();
+    if (count($screens)) {
+      $params['screens'] = $params['screens'] ?? [];
+      $params['screens'] = array_merge($params['screens'], $screens);
+    }
+
     $params['middlewares'] = isset($params['middlewares']) ? array_unique($params['middlewares']) : [];
 
     sort($params['middlewares']);
