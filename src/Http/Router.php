@@ -55,6 +55,11 @@ class Router
    */
   private array $rules = [];
 
+   /**
+   * Regras de acesso a telas
+   */
+  private array $screens = [];
+
   /**
    * Método responsável por iniciar a classe
    */
@@ -131,6 +136,16 @@ class Router
   }
 
   /**
+   * Regras de permissões da rota
+   */
+  public function screens()
+  {
+    $screens = $this->screens;
+    $this->screens = [];
+    return $screens;
+  }
+
+  /**
    * Adiciona verificação de permissão do usuário baseado em um conjunto de poderes (Ex: admin)
    */
   public function is(array $permissions): self
@@ -147,6 +162,16 @@ class Router
   {
     $this->middlewares(['auth', 'can']);
     $this->rules = $rules;
+    return $this;
+  }
+
+  /**
+   * Adiciona verificação de permissão do usuário para acessar uma tela (Ex: marketing)
+   */
+  public function see(array $screens): self
+  {
+    $this->middlewares(['auth', 'see']);
+    $this->screens = $screens;
     return $this;
   }
 
