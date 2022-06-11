@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Middlewares;
+namespace App\Http\Middlewares;
 
 use Closure;
 use Exception;
@@ -24,7 +24,7 @@ class JwtCookie implements IMiddleware
       $request->setPayload($payload);
 
       $user = Auth::authJWT($payload);
-      $request->setUser($user);
+      Request::setUser($user);
     } catch (Throwable $error) {
       throw new Exception("Acesso não permitido.", 403);
     }

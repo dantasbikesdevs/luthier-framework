@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Middlewares;
+namespace App\Http\Middlewares;
 
 use Closure;
 use Exception;
@@ -9,7 +9,6 @@ use Throwable;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
 use Luthier\Security\Jwt as JwtService;
-use Luthier\Security\Auth as AuthService;
 
 class AuthCookie implements IMiddleware
 {
@@ -24,7 +23,7 @@ class AuthCookie implements IMiddleware
       $request->setPayload($payload);
 
       $user = Auth::authJWT($payload);
-      $request->setUser($user);
+      Request::setUser($user);
     } catch (Throwable $error) {
       throw new Exception("Acesso não permitido.", 403);
     }
