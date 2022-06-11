@@ -35,9 +35,8 @@ class Transaction
    */
   public function rollback()
   {
-    $this->hasActiveTransaction = false;
-
     if ($this->hasActiveTransaction) {
+      $this->hasActiveTransaction = false;
       return $this->connection->rollBack();
     }
 
@@ -49,9 +48,8 @@ class Transaction
    */
   public function commit()
   {
-    $this->hasActiveTransaction = false;
-
     if ($this->hasActiveTransaction) {
+      $this->hasActiveTransaction = false;
       return $this->connection->commit();
     }
 
@@ -64,6 +62,7 @@ class Transaction
    */
   public function panicRollback(Closure $databaseAction)
   {
+    $this->begin();
     try {
       // Tenta executar uma ação no banco de dados
       $result = $databaseAction();
