@@ -56,7 +56,7 @@ Jwt::config($signature);
  * letra é transformada em minúscula.
  *
  */
-Middlewares::config("app/Middlewares");
+Middlewares::config("app/Http/Middlewares");
 
 # Middlewares padrões (executados em todas as rotas)
 Middlewares::setDefault([
