@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Luthier\Database;
 
@@ -79,7 +81,7 @@ class Query
   {
     $table = $tableName ?? $this->tableName;
 
-    if(is_object($fieldsAndValues)) {
+    if (is_object($fieldsAndValues)) {
       $fieldsAndValues = Reflection::getValuesObject($fieldsAndValues);
     }
 
@@ -112,7 +114,7 @@ class Query
   {
     $table = $tableName ?? $this->tableName;
 
-    if(is_object($fieldsAndValues)) {
+    if (is_object($fieldsAndValues)) {
       $fieldsAndValues = Reflection::getValuesObject($fieldsAndValues);
     }
 
@@ -308,7 +310,7 @@ class Query
   public function first()
   {
     $queryData = $this->getSql();
-    $this->queryStore = [];
+    $this->resetQuery();
     return $this->database->executeStatement($queryData["query"], $queryData["values"], false, $this->model);
   }
 
@@ -318,7 +320,7 @@ class Query
   public function all()
   {
     $queryData = $this->getSql();
-    $this->queryStore = [];
+    $this->resetQuery();
     return $this->database->executeStatement($queryData["query"], $queryData["values"], true, $this->model);
   }
 
@@ -328,7 +330,7 @@ class Query
   public function run()
   {
     $queryData = $this->getSql();
-    $this->queryStore = [];
+    $this->resetQuery();
     return $this->database->execute($queryData["query"], $queryData["values"]);
   }
 
@@ -418,5 +420,14 @@ class Query
   private function addToQueryStore(string $query)
   {
     $this->queryStore[] = $query;
+  }
+
+  /**
+   * Método responsável por resetar a queryStore toda vez que a mesma for executada.
+   */
+  private function resetQuery()
+  {
+    $this->queryStore = [];
+    $this->model = null;
   }
 }
