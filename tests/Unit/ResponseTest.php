@@ -21,6 +21,6 @@ test("deve enviar uma resposta corretamente", function () {
   $result = $response->send("Teste realizado com sucesso.");
 
   expect($result)
-    ->getContent()->toBe(["message" => "Teste realizado com sucesso."])
+    ->getContent()->toBe(["mensagem" => "Teste realizado com sucesso."])
     ->getCode()->toBe(200);
 });
