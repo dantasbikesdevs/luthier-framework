@@ -54,10 +54,13 @@ class Reflection
     $hiddenAttributes[] = "hiddenAttributes";
     $hiddenAttributes[] = "unusedInSQL";
 
+    $toLower = getenv("LOWER_CASE_RETURN") == "true" ? true : false;
+
     // Itera sobre todos os atributos do objeto e retorna um array com os valores
     foreach ($properties as $property) {
-      $key = trim($property->getName());
+      $key = $property->getName();
       if (in_array($key, $hiddenAttributes) || !$property->isInitialized($object)) continue;
+      $key = $toLower ? strtolower((string)$key) : $key;
       $objectValues[$key] = $property->getValue($object);
     }
 
