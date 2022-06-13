@@ -100,7 +100,7 @@ class Query
     $table = $tableName ?? $this->tableName;
 
     if (is_object($fieldsAndValues)) {
-      $fieldsAndValues = Reflection::getValuesObject($fieldsAndValues);
+      $fieldsAndValues = Reflection::getValuesObjectToSQL($fieldsAndValues);
     }
 
     /**
@@ -133,7 +133,7 @@ class Query
     $table = $tableName ?? $this->tableName;
 
     if (is_object($fieldsAndValues)) {
-      $fieldsAndValues = Reflection::getValuesObject($fieldsAndValues);
+      $fieldsAndValues = Reflection::getValuesObjectToSQL($fieldsAndValues);
     }
 
     /**

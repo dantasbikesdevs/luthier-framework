@@ -3,6 +3,7 @@
 namespace Luthier\Http;
 
 use Luthier\Exceptions\ResponseException;
+use Luthier\Reflection\Reflection as Reflection;
 use Luthier\Utils\Transform;
 use Luthier\Xml\XmlParser;
 
@@ -60,6 +61,9 @@ class Response
    */
   public function setContent(mixed $content): Response
   {
+    if(is_object($content)) {
+      $content = Reflection::getValuesObjectToReturnUser($content);
+    }
     $content = $this->sanitize($content);
     $this->content = $content;
     return $this;
