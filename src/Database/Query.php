@@ -328,8 +328,9 @@ class Query
   public function first()
   {
     $queryData = $this->getSql();
+    $model = $this->model;
     $this->resetQuery();
-    return $this->database->executeStatement($queryData["query"], $queryData["values"], false, $this->model);
+    return $this->database->executeStatement($queryData["query"], $queryData["values"], false, $model);
   }
 
   /**
@@ -338,8 +339,9 @@ class Query
   public function all()
   {
     $queryData = $this->getSql();
+    $model = $this->model;
     $this->resetQuery();
-    return $this->database->executeStatement($queryData["query"], $queryData["values"], true, $this->model);
+    return $this->database->executeStatement($queryData["query"], $queryData["values"], true, $model);
   }
 
   /**
@@ -364,7 +366,7 @@ class Query
     $this->addToQueryStore($query);
 
     $queryData = $this->getSql();
-    $this->queryStore = [];
+    $this->resetQuery();
     return $this->database->execute($queryData["query"], $queryData["values"])->fetchObject()->$implodedFields;
   }
 
