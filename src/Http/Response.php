@@ -61,9 +61,6 @@ class Response
    */
   public function setContent(mixed $content): Response
   {
-    if(is_object($content)) {
-      $content = Reflection::getValuesObjectToReturnUser($content);
-    }
     $content = $this->sanitize($content);
     $this->content = $content;
     return $this;
@@ -368,14 +365,10 @@ class Response
       $content = Transform::objectToArray($content);
     }
 
-    if (!is_array($content)) {
-      return $this->cleanValue($content);
-    }
-
     foreach ($content as $key => $value) {
       $cleanValue = $value;
-      if (is_array($cleanValue)) {
-        $this->sanitize($cleanValue);
+      if (is_array($cleanValue) || is_object($cleanValue)) {
+        $content[$key] = $this->sanitize($cleanValue);
       } else if (isset($cleanValue)){
         $cleanValue = $this->cleanValue($cleanValue);
         $content[$key] = $cleanValue;
