@@ -11,6 +11,11 @@ class Pagination
   private int $limit;
 
   /**
+   * Primeiro registro da página atual.
+   */
+  private int $first;
+
+  /**
    * Quantidade total de resultados do banco
    */
   private int $results;
@@ -46,6 +51,9 @@ class Pagination
 
     // VERIFICA SE A PÁGINA ATUAL NÃO EXCEDE O NÚMERO DE PÁGINAS
     $this->currentPage = $this->currentPage <= $this->pages ? $this->currentPage : $this->pages;
+
+    // CALCULA O PRIMEIRO REGISTRO DA PÁGINA
+    $this->first = ($this->limit * ($this->currentPage - 1));
   }
 
   /**
@@ -53,8 +61,7 @@ class Pagination
    */
   public function getLimit()
   {
-    $offset = ($this->limit * ($this->currentPage - 1));
-    return $offset . ',' . $this->limit;
+    return $this->limit;
   }
 
   /**
@@ -75,6 +82,14 @@ class Pagination
     }
 
     return $pages;
+  }
+
+  /**
+   * Método responsável por o retornar nímero do primeiro registro da página
+   */
+  public function getFirst()
+  {
+    return $this->first;
   }
 
   /**
