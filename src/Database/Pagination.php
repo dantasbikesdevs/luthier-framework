@@ -11,7 +11,7 @@ class Pagination
   private int $limit;
 
   /**
-   * Primeiro registro da página atual.
+   * Número do primeiro registro da página atual.
    */
   private int $first;
 
