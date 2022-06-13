@@ -362,7 +362,11 @@ class Response
   private function sanitize(mixed $content): mixed
   {
     if (is_object($content)) {
-      $content = Transform::objectToArray($content);
+      $content = Reflection::getValuesObjectToReturnUser($content);
+    }
+
+    if(!is_array($content)) {
+      return $this->cleanValue($content);
     }
 
     foreach ($content as $key => $value) {

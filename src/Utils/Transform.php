@@ -2,14 +2,16 @@
 
 namespace Luthier\Utils;
 
-use Luthier\Reflection\Reflection;
+use Exception;
 
 class Transform
 {
   public static function objectToArray(object $object): array
   {
-    $array = Reflection::getValuesObjectToReturnUser($object);
-
+    foreach ($object as $key => $value) {
+      $array[$key] = $value;
+    }
+    
     return $array;
   }
 }
