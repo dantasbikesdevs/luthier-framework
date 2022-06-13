@@ -91,7 +91,7 @@ class XmlParser
             } else {
                 if (strpos($index, $attr) !== false) {
                     $plural = $DOMDocument->createElement($index);
-                    $domElement->setAttribute(substr($index, strlen($attr)), $mixedElement);
+                    $domElement->setAttribute(substr($index, strlen($attr)), (string)$mixedElement);
                 } else {
                     if (is_int($index)) {
                         if ($index == 0) {
@@ -101,7 +101,7 @@ class XmlParser
                             $domElement->parentNode->appendChild($node);
                         }
                     } else {
-                        $plural = $DOMDocument->createElement($index, $mixedElement);
+                        $plural = $DOMDocument->createElement($index, (string)$mixedElement);
                         $domElement->appendChild($plural);
                     }
                 }
