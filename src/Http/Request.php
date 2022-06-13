@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Luthier\Http;
 
@@ -126,10 +128,14 @@ class Request
   /**
    * Método responsável por retornar os parâmetros da URL($_GET) da requisição
    */
-  public function getQueryParams(array $validParamNames): array
+  public function getQueryParams(array $validParamNames = null): array
   {
     $params = $this->queryParams;
     $validQueryParams = [];
+
+    if (is_null($validParamNames)) {
+      return $params;
+    }
 
     // Ex: ?nome=dev -> ["nome" => "dev"]
     foreach ($params as $name => $value) {
@@ -144,6 +150,20 @@ class Request
     }
 
     return $validQueryParams;
+  }
+
+  /**
+   * Método responsável por retornar um parâmetro da URL($_GET) da requisição
+   */
+  public function getQueryParam(string $validParamName): string | int | bool | null
+  {
+    $params = $this->queryParams;
+
+    if (isset($params[$validParamName])) {
+      return $params[$validParamName];
+    }
+
+    return null;
   }
 
   /**
@@ -290,7 +310,7 @@ class Request
       if (is_array($cleanValue)) {
         $this->sanitize($cleanValue);
       } else if (isset($cleanValue)) {
-        if(is_string($cleanValue)) {
+        if (is_string($cleanValue)) {
           $cleanValue = trim($cleanValue);
           $cleanValue = preg_replace($patterns, '', $cleanValue);
         }
