@@ -8,15 +8,33 @@ use App\Database\ApplicationDatabase;
 use Exception;
 use Luthier\Reflection\Reflection;
 use Luthier\Regex\Regex;
-use Luthier\Utils\Transform;
 use stdClass;
 
 class Query
 {
+  /**
+   * Tabela a ser consultada/executada.
+   */
   private ?string $tableName;
+
+  /**
+   * Classe modelo da tabela, caso exista.
+   */
   private mixed $model = null;
+
+  /**
+   * Instância de Database.
+   */
   private Database $database;
+
+  /**
+   * Flag que força operação sem o uso de WHERE (Tome bastante cuidado).
+   */
   private bool $forceOperation = false;
+
+  /**
+   * Atributo que armazena partes da query a ser executada.
+   */
   private array $queryStore;
 
   public function __construct(Database $database = null)
