@@ -22,8 +22,8 @@ class Reflection
 
     // Se o atributo hidden existir, retorna um array com o valor do atributo
     $unusedInSQL = empty($unused) ? [] : $unused[0]->getValue($object);
-    $hiddenAttributes[] = "hiddenAttributes";
-    $hiddenAttributes[] = "unusedInSQL";
+    $unusedInSQL[] = "hiddenAttributes";
+    $unusedInSQL[] = "unusedInSQL";
 
     // Itera sobre todos os atributos do objeto e retorna um array com os valores
     foreach ($properties as $property) {
