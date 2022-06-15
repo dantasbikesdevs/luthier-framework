@@ -77,6 +77,7 @@ class Reflection
 
     // Itera sobre todos os atributos do objeto e retorna um array com os valores
     foreach ($properties as $property) {
+      if (!$property->isInitialized($object)) continue;
       $key = trim($property->getName());
       $objectValues[$key] = $property->getValue($object);
     }
