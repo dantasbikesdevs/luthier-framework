@@ -104,7 +104,7 @@ class Database implements IDatabase
         case 23000:
           throw new DatabaseException('Dados já existentes!');
         default:
-          if (getenv("ENV") == "DEV") throw new DatabaseException('Erro ao tentar conexão com o banco de dados: ' . $e->getMessage());
+          if (getenv("ENV") == "DEV") throw new DatabaseException('Erro ao realizar operação com o banco de dados: ' . $e->getMessage());
           throw new DatabaseException('Erro ao realizar operação. Consulte a equipe responsável.');
       }
     }
