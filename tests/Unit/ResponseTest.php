@@ -24,3 +24,11 @@ test("deve enviar uma resposta corretamente", function () {
     ->getContent()->toBe(["mensagem" => "Teste realizado com sucesso."])
     ->getCode()->toBe(200);
 });
+
+test("deve tratar HTMLSPECIALCHARS e remover tags HTML", function () {
+  $response = new Response();
+  $response->send("<script>alert('Ola Mundo')</script>");
+
+  expect($response->getContent())
+    ->toBe("alert(&#039;Ola Mundo&#039;)");
+});
