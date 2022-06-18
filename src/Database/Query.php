@@ -160,7 +160,7 @@ class Query
   public function delete(?string $tableName = null)
   {
     $table = $tableName ?? $this->tableName;
-    $query = "DELETE FROM |$table|";
+    $query = "DELETE FROM $table";
 
     $this->addToQueryStore($query);
     return $this;
