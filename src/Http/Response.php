@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Luthier\Http;
 
@@ -209,7 +211,7 @@ class Response
     $content = $this->content;
 
     if (!is_array($content) && !is_object($content)) {
-      if ($code >=400) {
+      if ($code >= 400) {
         $content = ["erro" => $content];
       } else {
         $content = ["mensagem" => $content];
@@ -361,25 +363,28 @@ class Response
    */
   private function sanitize(mixed $content): mixed
   {
+    $toLower = getenv("LOWER_CASE_RETURN") == "true" ? true : false;
+
     if (is_object($content)) {
       $content = Reflection::getValuesObjectToReturnUser($content);
     }
 
-    if(!is_array($content)) {
+    if (!is_array($content)) {
       return $this->cleanValue($content);
     }
 
     foreach ($content as $key => $value) {
+      if ($toLower) $key = strtolower((string)$key);
       $cleanValue = $value;
       if (is_array($cleanValue) || is_object($cleanValue)) {
-        $content[$key] = $this->sanitize($cleanValue);
-      } else if (isset($cleanValue)){
+        $newContent[$key] = $this->sanitize($cleanValue);
+      } else if (isset($cleanValue)) {
         $cleanValue = $this->cleanValue($cleanValue);
-        $content[$key] = $cleanValue;
+        $newContent[$key] = $cleanValue;
       }
     }
 
-    return $content;
+    return $newContent;
   }
 
   /**
@@ -387,7 +392,7 @@ class Response
    */
   private function cleanValue(mixed $value): mixed
   {
-    if(!is_string($value)) {
+    if (!is_string($value)) {
       return $value;
     };
 
