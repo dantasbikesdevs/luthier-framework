@@ -300,11 +300,8 @@ class Request
    */
   private function sanitize(array $params): array
   {
-    $patterns[] = '/;/';
     $patterns[] = '/--/';
-    $patterns[] = '/"/';
-    $patterns[] = "/'/";
-
+  
     foreach ($params as $key => $value) {
       $cleanValue = $value;
       if (is_array($cleanValue)) {

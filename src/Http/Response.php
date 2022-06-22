@@ -396,8 +396,7 @@ class Response
       return $value;
     };
 
-    $cleanValue = strip_tags(trim($value));
-    $cleanValue = htmlspecialchars($cleanValue);
+    $cleanValue = htmlspecialchars(trim($value), ENT_NOQUOTES);
 
     return $cleanValue;
   }
