@@ -167,6 +167,27 @@ class Query
   }
 
   /**
+   * Adiciona uma condição "where" com os filtros recebidos por array.
+   * Os valores no objeto devem ser passados no formato "CAMPO" => "VALOR"
+   * Será retornado um registro caso corresponda a todos os filtros passados
+   * Para executar adicione o método run() no final.
+   */
+  public function filterWhere(array $filters)
+  {
+    $filterSQL = "";
+    foreach($filters as $key => $value) {
+      if(empty($value) && $value != 0) continue;
+      $filterSQL .= "$key = |$value| AND ";
+    }
+
+    $filterSQL = substr($filterSQL, 0, -5);
+    $query = "WHERE ($filterSQL)";
+
+    $this->addToQueryStore($query);
+    return $this;
+  }
+
+  /**
    * Adiciona uma condição "where". Recebe uma condição no formato "campo = |valor|" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
