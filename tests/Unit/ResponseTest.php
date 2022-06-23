@@ -30,5 +30,5 @@ test("deve tratar HTMLSPECIALCHARS e remover tags HTML", function () {
   $response->send("<script>alert('Ola Mundo')</script>");
 
   expect($response->getContent())
-    ->toBe("alert(&#039;Ola Mundo&#039;)");
+    ->toBe("&lt;script&gt;alert('Ola Mundo')&lt;/script&gt;");
 });
