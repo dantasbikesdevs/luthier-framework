@@ -174,6 +174,8 @@ class Query
    */
   public function filterWhere(array $filters)
   {
+    if(empty($filters)) return;
+    
     $filterSQL = "";
     foreach($filters as $key => $value) {
       if(empty($value) && $value != 0) continue;
