@@ -174,16 +174,18 @@ class Query
    */
   public function filterWhere(array $filters): self
   {
-    if(empty($filters)) return $this;
+    if (empty($filters)) return $this;
 
     $filterSQL = "";
-    foreach($filters as $key => $value) {
-      if(empty($value) && $value != 0) continue;
+    foreach ($filters as $key => $value) {
+      if (is_null($value)) continue;
       $filterSQL .= "$key = |$value| AND ";
     }
 
     $filterSQL = substr($filterSQL, 0, -5);
     $query = "WHERE ($filterSQL)";
+
+    if (empty($filterSQL)) return $this;
 
     $this->addToQueryStore($query);
     return $this;
@@ -195,7 +197,7 @@ class Query
    */
   public function where(string $condition): self
   {
-    if(empty($condition)) return $this;
+    if (empty($condition)) return $this;
 
     $query = "WHERE $condition ";
 
@@ -210,7 +212,7 @@ class Query
    */
   public function orWhere(string $condition): self
   {
-    if(empty($condition)) return $this;
+    if (empty($condition)) return $this;
 
     $query = "OR $condition";
 
@@ -224,7 +226,7 @@ class Query
    */
   public function andWhere(string $condition): self
   {
-    if(empty($condition)) return $this;
+    if (empty($condition)) return $this;
 
     $query = "AND $condition";
 
