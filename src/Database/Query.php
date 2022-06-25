@@ -54,7 +54,7 @@ class Query
    * Indica a tabela na qual as operações serão realizadas. Se omitido as operações serão executadas com a tabela
    * definida na criação do objeto Database. Adicione mais operações antes de executar a query com o método run().
    */
-  public function from(string $tableName)
+  public function from(string $tableName): self
   {
     $this->tableName = $tableName;
     $from = " FROM " . $tableName;
@@ -66,7 +66,7 @@ class Query
    * Inicia query de select. Recebe os campos desejados (por padrão seleciona todos) e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function select(mixed $fields = "*", ?int $first = null, ?int $skip = null)
+  public function select(mixed $fields = "*", ?int $first = null, ?int $skip = null): self
   {
     if (is_array($fields)) {
       $fields = implode(', ', $fields);
@@ -95,7 +95,7 @@ class Query
    * seus novos valores e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function insert(array | object $fieldsAndValues, ?string $tableName = null)
+  public function insert(array | object $fieldsAndValues, ?string $tableName = null): self
   {
     $table = $tableName ?? $this->tableName;
 
@@ -128,7 +128,7 @@ class Query
    * Para executar adicione o método run() no final. Essa query não será executada sem where a menos que seja
    * removidas as guardas com forceDangerousCommand.
    */
-  public function update(array | object $fieldsAndValues, ?string $tableName = null)
+  public function update(array | object $fieldsAndValues, ?string $tableName = null): self
   {
     $table = $tableName ?? $this->tableName;
 
@@ -157,7 +157,7 @@ class Query
    * Para executar adicione o método run() no final. Essa query não será executada sem where a menos que seja
    * removidas as guardas com forceDangerousCommand.
    */
-  public function delete(?string $tableName = null)
+  public function delete(?string $tableName = null): self
   {
     $table = $tableName ?? $this->tableName;
     $query = "DELETE FROM $table";
@@ -172,10 +172,10 @@ class Query
    * Será retornado um registro caso corresponda a todos os filtros passados
    * Para executar adicione o método run() no final.
    */
-  public function filterWhere(array $filters)
+  public function filterWhere(array $filters): self
   {
-    if(empty($filters)) return;
-    
+    if(empty($filters)) return $this;
+
     $filterSQL = "";
     foreach($filters as $key => $value) {
       if(empty($value) && $value != 0) continue;
@@ -193,8 +193,10 @@ class Query
    * Adiciona uma condição "where". Recebe uma condição no formato "campo = |valor|" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function where(string $condition)
+  public function where(string $condition): self
   {
+    if(empty($condition)) return $this;
+
     $query = "WHERE $condition ";
 
     $this->addToQueryStore($query);
@@ -206,8 +208,10 @@ class Query
    * Adiciona uma condição "or" ao "where". Recebe uma condição no formato "campo = |valor|" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function orWhere(string $condition)
+  public function orWhere(string $condition): self
   {
+    if(empty($condition)) return $this;
+
     $query = "OR $condition";
 
     $this->addToQueryStore($query);
@@ -218,8 +222,10 @@ class Query
    * Adiciona uma condição "and" ao "where". Recebe uma condição no formato "campo = |valor|" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function andWhere(string $condition)
+  public function andWhere(string $condition): self
   {
+    if(empty($condition)) return $this;
+
     $query = "AND $condition";
 
     $this->addToQueryStore($query);
@@ -230,7 +236,7 @@ class Query
    * Adiciona uma ordenação aos resultados da query. Recebe um campo pelo qual ordenar e uma direção.
    * Para executar adicione o método run() no final.
    */
-  public function orderBy(string $sort = "id", string $order = "asc")
+  public function orderBy(string $sort = "id", string $order = "asc"): self
   {
     $query = "ORDER BY |$sort| |$order|";
 
@@ -244,7 +250,7 @@ class Query
    *
    * Isso resulta em um query assim: "SELECT * FROM client JOIN receipt ON client.id = receipt.client_id"
    */
-  public function joinWith(string $table, string $on, string $type = "")
+  public function joinWith(string $table, string $on, string $type = ""): self
   {
     // Caso o usuário use esta notação para se relatar as tabelas principal e secundária
     $query = "$type JOIN $table ON $on";
@@ -260,7 +266,7 @@ class Query
    *
    * Isso resulta em um query assim: "SELECT * FROM client INNER JOIN receipt ON client.id = receipt.client_id"
    */
-  public function innerJoinWith(string $table, string $on)
+  public function innerJoinWith(string $table, string $on): self
   {
     $this->joinWith($table, $on, "INNER");
     return $this;
@@ -272,7 +278,7 @@ class Query
    *
    * Isso resulta em um query assim: "SELECT * FROM client left JOIN receipt ON client.id = receipt.client_id"
    */
-  public function leftJoinWith(string $table, string $on)
+  public function leftJoinWith(string $table, string $on): self
   {
     $this->joinWith($table, $on, "LEFT");
     return $this;
@@ -285,7 +291,7 @@ class Query
    *
    * Isso resulta em um query assim: "SELECT * FROM client INNER JOIN receipt ON client.id = receipt.client_id"
    */
-  public function rightJoinWith(string $table, string $on)
+  public function rightJoinWith(string $table, string $on): self
   {
     $this->joinWith($table, $on, "INNER");
     return $this;
@@ -297,7 +303,7 @@ class Query
    *
    * Isso resulta em um query assim: "SELECT * FROM client INNER JOIN receipt ON client.id = receipt.client_id"
    */
-  public function fullJoinWith(string $table, string $on)
+  public function fullJoinWith(string $table, string $on): self
   {
     $this->joinWith($table, $on, "INNER");
     return $this;
@@ -310,7 +316,7 @@ class Query
    * Cria uma query customizada. Recebe uma query com os valores não confiáveis entre pipes "|" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function customQuery(string $queryString)
+  public function customQuery(string $queryString): self
   {
     $this->addToQueryStore($queryString);
     return $this;
@@ -339,7 +345,7 @@ class Query
   /**
    * Marca se o resultado da consulta será baseado em um objeto de determinada classe ou não.
    */
-  public function asObject($model = stdClass::class)
+  public function asObject($model = stdClass::class): self
   {
     $this->model = $model;
     return $this;
