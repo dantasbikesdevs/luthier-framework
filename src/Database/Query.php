@@ -177,9 +177,9 @@ class Query
     if (empty($filters)) return $this;
 
     $filterSQL = "";
-    foreach ($filters as $key => $value) {
-      if (is_null($value)) continue;
-      $filterSQL .= "$key = |$value| AND ";
+    foreach ($filters as $filter) {
+      if (is_null($filter)) continue;
+      $filterSQL .= "$filter AND ";
     }
 
     $filterSQL = substr($filterSQL, 0, -5);
