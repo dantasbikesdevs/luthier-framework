@@ -177,9 +177,14 @@ class Query
     if (empty($filters)) return $this;
 
     $filterSQL = "";
-    foreach ($filters as $filter) {
+    foreach ($filters as $key => $filter) {
       if (is_null($filter)) continue;
-      $filterSQL .= "$filter AND ";
+
+      if (!is_numeric($key)) {
+        $filterSQL .= "$key = |$filter| AND";
+      } else {
+        $filterSQL .= "$filter AND ";
+      }
     }
 
     $filterSQL = substr($filterSQL, 0, -5);
