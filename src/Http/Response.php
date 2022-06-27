@@ -373,18 +373,19 @@ class Response
       return $this->cleanValue($content);
     }
 
+    $cleanContent = [];
     foreach ($content as $key => $value) {
       if ($toLower) $key = strtolower((string)$key);
       $cleanValue = $value;
       if (is_array($cleanValue) || is_object($cleanValue)) {
-        $newContent[$key] = $this->sanitize($cleanValue);
+        $cleanContent[$key] = $this->sanitize($cleanValue);
       } else if (isset($cleanValue)) {
         $cleanValue = $this->cleanValue($cleanValue);
-        $newContent[$key] = $cleanValue;
+        $cleanContent[$key] = $cleanValue;
       }
     }
 
-    return $newContent;
+    return $cleanContent;
   }
 
   /**
