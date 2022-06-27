@@ -176,24 +176,37 @@ class Query
   {
     if (empty($filters)) return $this;
 
+    $filterSQL = $this->transformFiltersInWheres($filters);
+    if (empty($filterSQL)) return $this;
+
+    $query = "WHERE ($filterSQL)";
+    $this->addToQueryStore($query);
+    return $this;
+  }
+
+  /**
+   * Transforma array de filtros em uma cláusula de WHERES.
+   * Exemplo: ["age" => 18, "position" => "dev", "power <> |1.88|"]
+   * Resultado: WHERE (age = |18| AND position = |"dev"| AND power <> |1.88|)
+   */
+  private function transformFiltersInWheres(array $filters): string
+  {
     $filterSQL = "";
     foreach ($filters as $key => $filter) {
       if (is_null($filter)) continue;
 
       if (!is_numeric($key)) {
-        $filterSQL .= "$key = |$filter| AND";
-      } else {
-        $filterSQL .= "$filter AND ";
+        $filterSQL .= "$key = |$filter| AND ";
+        continue;
       }
+
+      if (!$this->existValueInPipes($filter)) {
+        $filterSQL .= "$filter AND ";
+      };
     }
 
     $filterSQL = substr($filterSQL, 0, -5);
-    $query = "WHERE ($filterSQL)";
-
-    if (empty($filterSQL)) return $this;
-
-    $this->addToQueryStore($query);
-    return $this;
+    return $filterSQL;
   }
 
   /**
@@ -447,6 +460,20 @@ class Query
       "query" => $cleanQueryString,
       "values" => $params
     ];
+  }
+
+  /**
+   * Extrai valores que estiverem entre | e retorna se o resultado é vazio ou não.
+   */
+  private function existValueInPipes(string $value): bool
+  {
+    $patternVariable = '/\|(.*?)\|/';
+    if (preg_match_all($patternVariable, $value, $matches)) {
+      $params = $matches[1];
+      return empty($params[0]);
+    }
+
+    return true;
   }
 
   /**
