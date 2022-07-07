@@ -254,6 +254,15 @@ class Router
   }
 
   /**
+	 * Método responsável por definir uma rota no PATCH
+	 */
+	public function patch(string $route, $params = []): Router
+	{
+		$this->addRoute('PATCH', $route, $params);
+		return $this;
+	}
+
+  /**
    * Método responsável por definir uma rota no DELETE
    */
   public function delete(string $route, $params = []): Router
