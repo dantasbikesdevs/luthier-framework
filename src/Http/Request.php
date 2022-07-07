@@ -128,24 +128,17 @@ class Request
   /**
    * Método responsável por retornar os parâmetros da URL($_GET) da requisição
    */
-  public function getQueryParams(array $validParamNames = null): array
+  public function getQueryParams(): array
   {
     $params = $this->queryParams;
     $validQueryParams = [];
-
-    if (is_null($validParamNames)) {
-      return $params;
-    }
 
     // Ex: ?nome=dev -> ["nome" => "dev"]
     foreach ($params as $name => $value) {
       $name = strtolower($name);
 
-      // Checa se o parâmetro passado esta na lista dos parâmetros válidos
-      $isValid = in_array($name, $validParamNames);
-
-      if ($isValid && $value) {
-        $validQueryParams[] = ["field" => $name, "value" => $value];
+      if(!empty($value)) {
+        $validQueryParams[$name] = $value;
       }
     }
 
@@ -301,7 +294,7 @@ class Request
   private function sanitize(array $params): array
   {
     $patterns[] = '/--/';
-  
+
     foreach ($params as $key => $value) {
       $cleanValue = $value;
       if (is_array($cleanValue)) {
