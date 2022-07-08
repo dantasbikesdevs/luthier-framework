@@ -258,7 +258,7 @@ class Query
    */
   public function orderBy(string $sort = "id", string $order = "asc"): self
   {
-    $query = "ORDER BY |$sort| |$order|";
+    $query = "ORDER BY $sort $order";
 
     $this->addToQueryStore($query);
     return $this;
