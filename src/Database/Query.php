@@ -473,6 +473,8 @@ class Query
       return empty($params[0]);
     }
 
+    if(!empty($value)) return false;
+
     return true;
   }
 
