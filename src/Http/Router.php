@@ -348,19 +348,7 @@ class Router
       if ($response->getContent() instanceof Response) return $response->getContent();
       return $response;
     } catch (Exception $error) {
-      if(class_exists(ExceptionHandler::class)) {
-        return (new ExceptionHandler($error))->getResponse();
-      }
-
-      $httpCode = $error->getCode() == 0 ? 500 : $error->getCode();
-      $errorMessage = $this->getErrorMessage($error, $httpCode);
-
-      // Composição da resposta de erro
-      $response = new Response();
-      $response->setCode($httpCode);
-      $response->setContent($errorMessage);
-      $response->setContentType($this->contentType);
-      return $response;
+      throw $error;
     }
   }
 
