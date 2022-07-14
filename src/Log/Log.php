@@ -39,6 +39,11 @@ class Log extends Logger
   private ?UserEntity $user;
 
   /**
+   * UID do log gerado.
+   */
+  private string $uid;
+
+  /**
    * Método responsável por setar os canais definidos pelo usuário.
    */
   public static function config(LogManager $manager)
@@ -94,8 +99,11 @@ class Log extends Logger
       return $record;
     });
     $this->pushProcessor(new \Monolog\Processor\PsrLogMessageProcessor());
-    $this->pushProcessor(new \Monolog\Processor\UidProcessor());
     $this->pushProcessor(new \Monolog\Processor\IntrospectionProcessor());
+
+    $uidProcessor = new \Monolog\Processor\UidProcessor();
+    $this->uid = $uidProcessor->getUid();
+    $this->pushProcessor($uidProcessor);
   }
 
   /**
@@ -189,5 +197,13 @@ class Log extends Logger
   public function setTimeFormat(string $timeFormat): void
   {
     $this->timeFormat = $timeFormat;
+  }
+
+  /**
+   * Retorna o uuid gerado para o log.
+   */
+  public function getUid(): string
+  {
+    return $this->uid;
   }
 }
