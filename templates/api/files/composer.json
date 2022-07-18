@@ -19,7 +19,7 @@
     }
   ],
   "require": {
-    "firebase/php-jwt": "dev-main",
+    "firebase/php-jwt": "^6.3.0",
     "dantas/luthier": "dev-main",
     "monolog/monolog": "^3.0",
     "phpmailer/phpmailer": "^6.6"
