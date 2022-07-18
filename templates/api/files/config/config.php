@@ -4,12 +4,17 @@ setlocale(LC_TIME, 'pt_BR', 'pt_BR.utf-8', 'portuguese');
 date_default_timezone_set('America/Sao_Paulo');
 
 use App\Database\ApplicationDatabase;
+use App\Http\ExceptionHandler;
 use Luthier\Database\DatabaseManager;
 use Luthier\Environment\Environment;
 use Luthier\Security\Jwt;
 use Luthier\Http\Middlewares;
 use Luthier\Log\Log;
 use Luthier\Log\LogManager;
+
+set_exception_handler(function ($error) {
+  ExceptionHandler::init($error);
+});
 
 # Carrega as variáveis de ambiente presentes no arquivo .env na raiz
 $envPath = __DIR__ . "/../.env";
