@@ -9,8 +9,8 @@ use Luthier\Database\DatabaseManager;
 use Luthier\Environment\Environment;
 use Luthier\Security\Jwt;
 use Luthier\Http\Middlewares;
-use Luthier\Log\Log;
-use Luthier\Log\LogManager;
+use App\Log\Log;
+use App\Log\LogManager;
 
 set_exception_handler(function ($error) {
   ExceptionHandler::init($error);
