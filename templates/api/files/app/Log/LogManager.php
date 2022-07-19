@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Luthier\Log;
+namespace App\Log;
 
 class LogManager
 {
