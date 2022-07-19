@@ -48,7 +48,7 @@ class Request
   /**
    * Usuário autenticado da requisição
    */
-  private static $user;
+  private static object | array | null $user = null;
 
   /**
    * Cabeçalhos da requisição

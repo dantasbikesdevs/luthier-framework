@@ -11,3 +11,9 @@
 - Classe de Pagination portada do Host das Financeiras
 - Classe de ConfigDatabase portada do Host das Financeiras
 - Classe de Database portada do Host das Financeiras
+
+# V1.0.0
+
+- Template de API
+- Classe de Reflection para visualização de atributos privados
+- Carregamento automático de templates e middlewares
