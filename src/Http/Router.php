@@ -281,6 +281,15 @@ class Router
   }
 
   /**
+   * Método responsável por definir uma rota no DELETE
+   */
+  public function head(string $route, $params = []): Router
+  {
+    $this->addRoute('HEAD', $route, $params);
+    return $this;
+  }
+
+  /**
    * Método responsável por retornar a URI sem prefixo.
    */
   public function getUri()
