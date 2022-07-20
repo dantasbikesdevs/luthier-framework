@@ -497,6 +497,8 @@ class Router
           return $methods[$httpMethod];
         }
 
+        if ($httpMethod == 'OPTIONS') exit;
+
         // MÉTODO NÃO PERMITIDO PARA ESSA ROTA
         throw new Exception('Método não permitido', 405);
       }
