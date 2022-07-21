@@ -1,12 +1,12 @@
 {
   "name": "dantas/luthier",
   "description": "Framework PHP interno para construção de aplicações MVC",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "type": "library",
   "authors": [
     {
       "name": "equipe web",
-      "email": "examples@example.com"
+      "email": "programacao@dantaseletro.com.br"
     }
   ],
   "minimum-stability": "stable",
@@ -29,6 +29,6 @@
     }
   },
   "require": {
-    "firebase/php-jwt": "dev-main"
+    "firebase/php-jwt": "^6.3.0"
   }
 }
