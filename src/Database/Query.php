@@ -435,7 +435,7 @@ class Query
     /**
      * Regex que identifica valores dentro de "|".
      */
-    $patternVariable = '/\|(?=[A-Za-z0-9])(.*?)\|/';
+    $patternVariable = '/\|(?=[^x])(.*?)\|/';
 
     /**
      * Utiliza o regex anterior para separar os valores da query
