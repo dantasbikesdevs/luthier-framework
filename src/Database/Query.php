@@ -254,11 +254,14 @@ class Query
 
   /**
    * Adiciona uma ordenação aos resultados da query. Recebe um campo pelo qual ordenar e uma direção.
+   * Exemplo: "age DESC".
    * Para executar adicione o método run() no final.
    */
-  public function orderBy(string $sort = "id", string $order = "asc"): self
+  public function orderBy(string $order): self
   {
-    $query = "ORDER BY $sort $order";
+    if(empty($order)) return $this;
+
+    $query = "ORDER BY $order";
 
     $this->addToQueryStore($query);
     return $this;
