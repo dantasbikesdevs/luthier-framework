@@ -336,6 +336,19 @@ class Query
   // TODO: RightJoin
 
   /**
+   * Agrupa os resultados da query. Recebe uma string com as tabelas referentes ao agrupamento.
+   */
+  public function groupBy(string $groupBy): self
+  {
+    if(empty($groupBy)) return $this;
+
+    $query = "GROUP BY $groupBy";
+
+    $this->addToQueryStore($query);
+    return $this;
+  }
+
+  /**
    * Cria uma query customizada. Recebe uma query com os valores não confiáveis entre pipes "|" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
