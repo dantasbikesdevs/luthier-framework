@@ -49,9 +49,6 @@ class Pagination
     // CALCULA O TOTAL DE PÁGINAS
     $this->pages = $this->results > 0 ? (int)ceil($this->results / $this->limit) : 1;
 
-    // VERIFICA SE A PÁGINA ATUAL NÃO EXCEDE O NÚMERO DE PÁGINAS
-    $this->currentPage = $this->currentPage <= $this->pages ? $this->currentPage : $this->pages;
-
     // CALCULA O PRIMEIRO REGISTRO DA PÁGINA
     $this->first = ($this->limit * ($this->currentPage - 1));
   }
