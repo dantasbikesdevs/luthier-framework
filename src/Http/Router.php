@@ -504,6 +504,6 @@ class Router
       }
     }
     // URL INEXISTENTE
-    throw new Exception("Página não encontrada!", 404);
+    throw new Exception("URL inexistente!", 404);
   }
 }
