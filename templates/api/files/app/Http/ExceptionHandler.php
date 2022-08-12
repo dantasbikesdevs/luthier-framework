@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use App\Log\Log;
 use Luthier\Http\Response;
-use Luthier\Log\Log;
 use Throwable;
 
 class ExceptionHandler
@@ -32,8 +32,7 @@ class ExceptionHandler
     {
         self::$error = $error;
         self::$message = $error->getMessage();
-        self::$code = $error->getCode() == 0 ? 500 : $error->getCode();
-
+        self::$code = $error->getCode() < 200 || $error->getCode() >= 600 ? 500 : $error->getCode();
         self::setError();
         self::sendResponse();
     }
@@ -57,8 +56,13 @@ class ExceptionHandler
      */
     private static function setError(): void
     {
-        if (self::$code >= 500) {
-            self::error500();
+        try {
+            if (self::$code >= 500) {
+                self::error500();
+            }
+        } catch (Throwable $error) {
+            self::$error = $error;
+            self::$message = "Ocorreu um erro inesperado. Caso o erro persista, contate o suporte.";
         }
     }
 
@@ -67,12 +71,6 @@ class ExceptionHandler
      */
     private static function error500(): void
     {
-        $logger = new Log("main");
-        $logger->error("Erro ao processar requisição.", [
-            "exception" => self::$error
-        ]);
-
-        $uid = $logger->getUid();
-        self::$message = "Não foi possível processar a requisição. Caso o erro persista, contate o suporte. Código do erro: $uid";
+        self::$message = "Não foi possível processar a requisição. Caso o erro persista, contate o suporte.";
     }
 }

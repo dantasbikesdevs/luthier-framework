@@ -21,6 +21,10 @@ $envPath = __DIR__ . "/../.env";
 $envObject = new Environment($envPath);
 $envObject->load();
 
+set_exception_handler(function ($error) {
+  ExceptionHandler::init($error);
+});
+
 require_once __DIR__ . "/../database/config.php";
 require_once __DIR__ . "/logging.php";
 
@@ -37,10 +41,6 @@ header("Access-Control-Allow-Headers: *");
 define('LUTHIER_URL', getenv('URL'));
 define('PROJECT_ROOT', __DIR__ . "/../");
 define('JWT_COOKIE_NAME', getenv("JWT_COOKIE_NAME"));
-
-# Configura os canais de log
-$logManager = new LogManager($channels);
-Log::config($logManager);
 
 # Configura a conexão com o banco de dados
 $config = databaseConfig($env);
