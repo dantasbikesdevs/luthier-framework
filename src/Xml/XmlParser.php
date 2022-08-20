@@ -34,9 +34,8 @@ class XmlParser
 
         // Pega o XML e passa para array, aí pega o array e passa para json
         $xmlAsJson = json_encode((array)$xmlElement);
-        $xmlAsJsonLowercase = strtolower($xmlAsJson);
 
-        return $xmlAsJsonLowercase;
+        return $xmlAsJson;
     }
 
     /**
