@@ -109,7 +109,16 @@ class Query
      * E depois em uma string assim: "|1|, |dev|, |1.88|"
      */
     foreach ($fieldsAndValues as $key => $value) {
-      if (empty($value) && $value !== 0) continue;
+      if (is_bool($value)) {
+        if ($value) {
+          $queryFields[] = "$key = true";
+        } else {
+          $queryFields[] = "$key = false";
+        }
+        continue;
+      }
+
+      if (empty($value) && $value != 0) continue;
 
       $queryFields[] = $key;
       $mappedValues[] = "|$value|";
@@ -148,7 +157,16 @@ class Query
         continue;
       }
 
-      if (empty($value) && $value !== 0) continue;
+      if (is_bool($value)) {
+        if ($value) {
+          $queryFields[] = "$key = true";
+        } else {
+          $queryFields[] = "$key = false";
+        }
+        continue;
+      }
+
+      if (empty($value) && $value != 0) continue;
 
       $queryFields[] = "$key = |$value|";
     }
