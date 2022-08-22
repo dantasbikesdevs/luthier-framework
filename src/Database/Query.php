@@ -111,9 +111,11 @@ class Query
     foreach ($fieldsAndValues as $key => $value) {
       if (is_bool($value)) {
         if ($value) {
-          $queryFields[] = "$key = true";
+          $queryFields[] = $key;
+          $mappedValues[] = "true";
         } else {
-          $queryFields[] = "$key = false";
+          $queryFields[] = $key;
+          $mappedValues[] = "false";
         }
         continue;
       }
