@@ -109,6 +109,8 @@ class Query
      * E depois em uma string assim: "|1|, |dev|, |1.88|"
      */
     foreach ($fieldsAndValues as $key => $value) {
+      if (empty($value) && $value !== 0) continue;
+      
       $queryFields[] = $key;
       $mappedValues[] = "|$value|";
     }
@@ -141,6 +143,13 @@ class Query
      * Em um array de valores assim: ["age = |18|", "position = |dev|", "power = |1.88|"]
      */
     foreach ($fieldsAndValues as $key => $value) {
+      if (is_null($value)) {
+        $queryFields[] = "$key = NULL";
+        continue;
+      }
+
+      if (empty($value) && $value !== 0) continue;
+
       $queryFields[] = "$key = |$value|";
     }
     $implodedValues = implode(',', $queryFields);
