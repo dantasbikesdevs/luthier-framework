@@ -110,7 +110,7 @@ class Query
      */
     foreach ($fieldsAndValues as $key => $value) {
       if (empty($value) && $value !== 0) continue;
-      
+
       $queryFields[] = $key;
       $mappedValues[] = "|$value|";
     }
@@ -460,7 +460,7 @@ class Query
     /**
      * Regex que identifica valores dentro de "|".
      */
-    $patternVariable = '/\|(?=[\w!@""#$%¨&*()+\/\\_{};\-\'\'])(.*?)\|/s';
+    $patternVariable = '/\|(?=[\w!@""#$%¨&*()+\/\\_{};\-\'\'])(.*?)\|/su';
 
     /**
      * Utiliza o regex anterior para separar os valores da query
