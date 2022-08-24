@@ -17,3 +17,7 @@
 - Template de API
 - Classe de Reflection para visualização de atributos privados
 - Carregamento automático de templates e middlewares
+
+# V1.0.1
+
+- Classe para renderização de conteúdo HTML
