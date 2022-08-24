@@ -21,7 +21,7 @@ class XmlParser
     public static function toJson(string $xml): string
     {
         // Transforma as tags encodadas em seus símbolos outra vez
-        $decodedXml = trim(htmlspecialchars_decode($xml));
+        $decodedXml = trim(html_entity_decode($xml));
 
         if (empty($decodedXml)) return [];
 
