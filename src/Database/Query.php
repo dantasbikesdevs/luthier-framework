@@ -123,6 +123,11 @@ class Query
       if (empty($value) && $value != 0) continue;
 
       $queryFields[] = $key;
+
+      if (is_string($value)) {
+        $value = str_replace("|", "{{}}", $value);
+      }
+
       $mappedValues[] = "|$value|";
     }
     $implodedFields = implode(',', $queryFields);
@@ -169,6 +174,10 @@ class Query
       }
 
       if (empty($value) && $value != 0) continue;
+
+      if (is_string($value)) {
+        $value = str_replace("|", "{{}}", $value);
+      }
 
       $queryFields[] = "$key = |$value|";
     }
@@ -225,6 +234,9 @@ class Query
       if (is_null($filter)) continue;
 
       if (!is_numeric($key)) {
+        if (is_string($filter)) {
+          $filter = str_replace("|", "{{}}", $filter);
+        }
         $filterSQL .= "$key = |$filter| AND ";
         continue;
       }
@@ -480,7 +492,7 @@ class Query
     /**
      * Regex que identifica valores dentro de "|".
      */
-    $patternVariable = '/\|(?=[\w!@""#$%¨&*()+\/\\_{};\-\'\'])(.*?)\|/su';
+    $patternVariable = '/\|(?=[\w!@""#$%¨&*()+?`|=:.,<>\/\\_{};\-\'\'])(.*?)\|/su';
 
     /**
      * Utiliza o regex anterior para separar os valores da query
@@ -500,6 +512,12 @@ class Query
     } else {
       $cleanQueryString = $queryString;
     }
+
+    $params = array_map(function ($param) {
+      if (is_string($param)) return str_replace("{{}}", "|", $param);
+
+      return $param;
+    }, $params);
 
     return [
       "query" => $cleanQueryString,
