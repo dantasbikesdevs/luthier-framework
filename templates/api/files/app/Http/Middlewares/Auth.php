@@ -6,7 +6,7 @@ use App\Models\Entity\UserEntity;
 use App\Repositories\UserRepository;
 use Closure;
 use Exception;
-use Luthier\Exceptions\AppException;
+use Luthier\Exceptions\AuthException;
 use Luthier\Http\Middlewares\IMiddleware;
 use Throwable;
 use Luthier\Http\Request;
@@ -37,7 +37,7 @@ class Auth implements IMiddleware
 
   public static function authJWT($payload) {
     $user = (new UserRepository)->getUserJWT($payload);
-    if(!$user instanceof UserEntity) throw new AppException("Token inválido.", 404);
+    if(!$user instanceof UserEntity) throw new AuthException("Token inválido.", 404);
 
     return $user;
   }

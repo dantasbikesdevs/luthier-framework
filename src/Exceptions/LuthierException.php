@@ -4,7 +4,7 @@ namespace Luthier\Exceptions;
 
 use Exception;
 
-class AppException extends Exception
+class LuthierException extends Exception
 {
   public function __construct(string $message = "", int $code = 0)
   {

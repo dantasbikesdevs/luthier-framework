@@ -2,7 +2,7 @@
 
 namespace Luthier\Exceptions;
 
-class ResponseException extends LuthierException
+class AuthException extends LuthierException
 {
   public function __construct(string $message = "", int $code = 0)
   {

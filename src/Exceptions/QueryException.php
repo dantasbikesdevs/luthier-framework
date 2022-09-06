@@ -2,7 +2,7 @@
 
 namespace Luthier\Exceptions;
 
-class QueryException extends AppException
+class QueryException extends LuthierException
 {
   public function __construct(string $message = "", int $code = 0)
   {
