@@ -6,6 +6,7 @@ namespace Luthier\Database;
 
 use App\Database\ApplicationDatabase;
 use Exception;
+use Luthier\Exceptions\QueryException;
 use Luthier\Reflection\Reflection;
 use Luthier\Regex\Regex;
 use stdClass;
@@ -130,6 +131,11 @@ class Query
 
       $mappedValues[] = "|$value|";
     }
+
+    if (empty($queryFields)) {
+      throw new QueryException("Nenhum campo foi informado para atualização.");
+    }
+
     $implodedFields = implode(',', $queryFields);
     $implodedValues = implode(',', $mappedValues);
 
@@ -181,6 +187,11 @@ class Query
 
       $queryFields[] = "$key = |$value|";
     }
+
+    if (empty($queryFields)) {
+      throw new QueryException("Nenhum campo foi informado para atualização.");
+    }
+
     $implodedValues = implode(',', $queryFields);
 
     $query = "UPDATE $table SET $implodedValues";
