@@ -112,4 +112,15 @@ class Pagination
   {
     return $this->results;
   }
+
+  /**
+   * Método responsável por retornar se a página atual informada pelo usuário
+   * excedeu o total de páginas.
+   */
+  public function isExceededPages(): bool
+  {
+    if ($this->getCurrentPage() > $this->getTotalPages()) return true;
+
+    return false;
+  }
 }
