@@ -28,7 +28,7 @@ class View
   /**
    * Método responsável por trocar as chaves pelos seus respectivos valores.
    */
-  private static function html(string $htmlTemplate, array $vars = [])
+  public static function html(string $htmlTemplate, array $vars = [])
   {
     $keys   = self::getKeys($vars);
     $values = array_values($vars);
