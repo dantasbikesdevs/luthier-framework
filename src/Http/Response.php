@@ -212,9 +212,9 @@ class Response
 
     if (!is_array($content) && !is_object($content)) {
       if ($code >= 400) {
-        $content = ["erro" => $content];
+        $content = ["error" => $content];
       } else {
-        $content = ["mensagem" => $content];
+        $content = ["message" => $content];
       }
     }
 
