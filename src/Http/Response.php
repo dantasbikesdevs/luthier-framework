@@ -369,9 +369,7 @@ class Response
       $content = Reflection::getValuesObjectToReturnUser($content);
     }
 
-    if (!is_array($content)) {
-      return $this->cleanValue($content);
-    }
+    if (!is_array($content)) return $content;
 
     $cleanContent = [];
     foreach ($content as $key => $value) {
@@ -380,26 +378,11 @@ class Response
       if (is_array($cleanValue) || is_object($cleanValue)) {
         $cleanContent[$key] = $this->sanitize($cleanValue);
       } else if (isset($cleanValue)) {
-        $cleanValue = $this->cleanValue($cleanValue);
         $cleanContent[$key] = $cleanValue;
       }
     }
 
     return $cleanContent;
-  }
-
-  /**
-   * Método responsável por "limpar" a string recebida
-   */
-  private function cleanValue(mixed $value): mixed
-  {
-    if (!is_string($value)) {
-      return $value;
-    };
-
-    $cleanValue = htmlspecialchars(trim($value), ENT_NOQUOTES);
-
-    return $cleanValue;
   }
 
   /**
