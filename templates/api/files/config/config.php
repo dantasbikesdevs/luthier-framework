@@ -11,10 +11,6 @@ use Luthier\Environment\Environment;
 use Luthier\Security\Jwt;
 use Luthier\Http\Middlewares;
 
-set_exception_handler(function ($error) {
-  ExceptionHandler::init($error);
-});
-
 # Carrega as variáveis de ambiente presentes no arquivo .env na raiz
 $envPath = __DIR__ . "/../.env";
 $envObject = new Environment($envPath);
