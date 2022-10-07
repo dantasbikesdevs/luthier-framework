@@ -21,3 +21,15 @@
 # V1.0.1
 
 - Classe para renderização de conteúdo HTML
+- Novo método na classe Query (filterWhere) que recebe um array com filtros para a consulta
+
+# V1.0.2
+
+- Novo método na classe Paginação que retorno se a página atual informada pelo cliente excede o total de páginas.
+
+# V1.1.2
+- Correção do REGEX responsável por tratar e extrair os valores entre os pipes (|) nas queries SQL
+
+# V1.1.3
+- Alteração do manipulador de exceções do sistema
+- Retorno da query SQL responsável por causar exceção no PDO juntamente a mensagem de erro (Jamais permitir que ela seja exposta para o cliente).
