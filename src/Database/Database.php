@@ -103,7 +103,7 @@ class Database implements IDatabase
         case 23000:
           throw new DatabaseException('Dados já existentes!');
         default:
-          throw new DatabaseException('Erro ao realizar operação com o banco de dados: ' . $e->getMessage());
+          throw new DatabaseException('Erro ao realizar operação com o banco de dados: ' . $e->getMessage() . ' - query: ' . $query);
       }
     }
   }
@@ -123,7 +123,7 @@ class Database implements IDatabase
         case 23000:
           throw new DatabaseException('Dados já existentes!');
         default:
-          throw new DatabaseException('Erro em operação com o banco de dados: ' . $e->getMessage());
+          throw new DatabaseException('Erro em operação com o banco de dados: ' . $e->getMessage() . ' - query: ' . $query);
       }
     }
   }
