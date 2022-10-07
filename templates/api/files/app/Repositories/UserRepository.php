@@ -7,11 +7,8 @@ use App\Repositories\AbstractRepository;
 use App\Models\Entity\UserEntity;
 use Luthier\Database\Database;
 use Luthier\Database\Query;
-use Luthier\Database\Transaction;
 use App\Repositories\PermissionsRepository;
 use App\Repositories\RolesRepository;
-use Exception;
-use Luthier\Log\Log;
 
 class UserRepository extends AbstractRepository
 {
@@ -99,23 +96,16 @@ class UserRepository extends AbstractRepository
 
   public function update($user, int $id)
   {
-    try {
-      $checkEmail = $this->findOneByEmail($user->getEmail());
+    $checkEmail = $this->findOneByEmail($user->getEmail());
 
-      if($checkEmail && $checkEmail->getId() != $id) {
-        throw new \InvalidArgumentException("Este e-mail já está em uso. Tente outro.", 409);
-      }
-
-      return $this->queryBuilder->update($user, $this->tableName)
-        ->where("$this->primaryKey = |$id|")
-        ->run();
-    } catch(\Exception $error) {
-      $logger = new Log("main");
-      $logger->error("Erro ao atualizar usuário", [
-        "exception" => $error
-      ]);
-      throw new \Exception($error->getMessage(), $error->getCode());
+    if($checkEmail && $checkEmail->getId() != $id) {
+      throw new \InvalidArgumentException("Este e-mail já está em uso. Tente outro.", 409);
     }
+
+    return $this->queryBuilder->update($user, $this->tableName)
+      ->where("$this->primaryKey = |$id|")
+      ->run();
+
   }
 
   public function getUserJWT($payload) {
