@@ -4,13 +4,12 @@ setlocale(LC_TIME, 'pt_BR', 'pt_BR.utf-8', 'portuguese');
 date_default_timezone_set('America/Sao_Paulo');
 
 use App\Database\ApplicationDatabase;
+use App\Exceptions\Handler;
 use App\Http\ExceptionHandler;
 use Luthier\Database\DatabaseManager;
 use Luthier\Environment\Environment;
 use Luthier\Security\Jwt;
 use Luthier\Http\Middlewares;
-use App\Log\Log;
-use App\Log\LogManager;
 
 set_exception_handler(function ($error) {
   ExceptionHandler::init($error);
@@ -21,8 +20,9 @@ $envPath = __DIR__ . "/../.env";
 $envObject = new Environment($envPath);
 $envObject->load();
 
-set_exception_handler(function ($error) {
-  ExceptionHandler::init($error);
+set_exception_handler(function ($exception) {
+  $handler = new Handler($exception);
+  $handler->register();
 });
 
 require_once __DIR__ . "/../database/config.php";
