@@ -10,7 +10,6 @@ use Monolog\Formatter\HtmlFormatter;
 use Monolog\Formatter\LineFormatter;
 use PHPMailer\PHPMailer\PHPMailer;
 use \Psr\Log\InvalidArgumentException;
-use Luthier\Log\PHPMailerHandler;
 use Luthier\Utils\Validate;
 use Luthier\Http\Request;
 use App\Log\LogManager;
