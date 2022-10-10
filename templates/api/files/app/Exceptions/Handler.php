@@ -29,7 +29,7 @@ class Handler
     public function __construct(Throwable $error)
     {
         $this->error = $error;
-        $this->code = $error->getCode() < 200 ? 500 : $error->getCode();
+        $this->code = $error->getCode() < 100 ? 500 : $error->getCode();
         $this->message = $error->getMessage();
     }
 
