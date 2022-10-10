@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use App\Log\Log;
 use Exception;
 use Luthier\Http\Response;
+use Throwable;
 
 class Handler
 {
     /**
-     * Exceção lançanda pelo sistema.
+     * Erro lançado pelo sistema.
      */
-    private Exception $exception;
+    private Throwable $error;
 
     /**
      * Código de erro da exceção.
@@ -24,11 +26,11 @@ class Handler
      */
     private string $message;
 
-    public function __construct(Exception $exception)
+    public function __construct(Throwable $error)
     {
-        $this->exception = $exception;
-        $this->code = $exception->getCode() < 200 || $exception->getCode() >= 600 ? 600 : (int) $exception->getCode();
-        $this->message = $exception->getMessage();
+        $this->error = $error;
+        $this->code = $error->getCode() < 200 ? 500 : $error->getCode();
+        $this->message = $error->getMessage();
     }
 
     /**
@@ -36,8 +38,9 @@ class Handler
      */
     public function register(): void
     {
-        if ($this->exception->getCode() >= 600) {
-            $this->message = "Ocorreu um erro interno do servidor. Caso o problema persista, contate o suporte.";
+        if ($this->code == 500) {
+            $uuid = $this->generateLog();
+            $this->message = "Ocorreu um erro interno do servidor. Caso o problema persista, contate o suporte. ({$uuid})";
         }
 
         $this->sendResponse();
@@ -53,5 +56,22 @@ class Handler
         ], $this->code);
 
         $response->sendResponses();
+    }
+
+    /**
+     * Método responsável por gerar o log da exceção e retornar o seu identificar único (uuid).
+     */
+    private function generateLog(): string
+    {
+        try {
+            $logger = new Log("main");
+            $logger->error("Erro ao processar requisição.", [
+                "exception" => $this->error
+            ]);
+
+            return $logger->getUid();
+        } catch (Throwable $throwable) {
+            return "ERRLOG";
+        }
     }
 }
