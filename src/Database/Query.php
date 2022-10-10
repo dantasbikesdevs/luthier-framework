@@ -201,8 +201,7 @@ class Query
   }
 
   /**
-   * Inicia query de delete. Recebe um array associativo ligando os campos a serem atualizados com
-   * seus novos valores e retorna um objeto Query.
+   * Inicia query de delete. Recebe uma string com o nome da tabela de onde será deletado os registros.
    * Para executar adicione o método run() no final. Essa query não será executada sem where a menos que seja
    * removidas as guardas com forceDangerousCommand.
    */
@@ -217,7 +216,8 @@ class Query
 
   /**
    * Adiciona uma condição "where" com os filtros recebidos por array.
-   * Os valores no objeto devem ser passados no formato "CAMPO" => "VALOR"
+   * Os valores no objeto devem ser passados no formato "CAMPO" => "VALOR" ou
+   * "CAMPO OPERADOR |VALOR|".
    * Será retornado um registro caso corresponda a todos os filtros passados
    * Para executar adicione o método run() no final.
    */
