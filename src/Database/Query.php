@@ -106,8 +106,8 @@ class Query
 
     /**
      * Transforma um array de valores como este: [1, "dev", 1.88]
-     * Em um array de valores assim: ["|1|", "|dev|", "|1.88|"]
-     * E depois em uma string assim: "|1|, |dev|, |1.88|"
+     * Em um array de valores assim: ["[1]", "[dev]", "[1.88"]
+     * E depois em uma string assim: "[1], [dev], [1.88]"
      */
     foreach ($fieldsAndValues as $key => $value) {
       if (is_bool($value)) {
@@ -126,10 +126,11 @@ class Query
       $queryFields[] = $key;
 
       if (is_string($value)) {
-        $value = str_replace("|", "{{}}", $value);
+        $valueReplaced = str_replace("[", "{{", $value);
+        $value = str_replace("]", "}}", $valueReplaced);
       }
 
-      $mappedValues[] = "|$value|";
+      $mappedValues[] = "[$value]";
     }
 
     if (empty($queryFields)) {
@@ -162,7 +163,7 @@ class Query
 
     /**
      * Transforma um array de valores como este: ["age" => 18, "position" => "dev", "power" => 1.88]
-     * Em um array de valores assim: ["age = |18|", "position = |dev|", "power = |1.88|"]
+     * Em um array de valores assim: ["age = [18]", "position = [dev]", "power = [1.88]"]
      */
     foreach ($fieldsAndValues as $key => $value) {
       if (is_null($value)) {
@@ -182,10 +183,11 @@ class Query
       if (empty($value) && $value != 0) continue;
 
       if (is_string($value)) {
-        $value = str_replace("|", "{{}}", $value);
+        $valueReplaced = str_replace("[", "{{", $value);
+        $value = str_replace("]", "}}", $valueReplaced);
       }
 
-      $queryFields[] = "$key = |$value|";
+      $queryFields[] = "$key = [$value]";
     }
 
     if (empty($queryFields)) {
@@ -217,7 +219,7 @@ class Query
   /**
    * Adiciona uma condição "where" com os filtros recebidos por array.
    * Os valores no objeto devem ser passados no formato "CAMPO" => "VALOR" ou
-   * "CAMPO OPERADOR |VALOR|".
+   * "CAMPO OPERADOR [VALOR]".
    * Será retornado um registro caso corresponda a todos os filtros passados
    * Para executar adicione o método run() no final.
    */
@@ -235,8 +237,8 @@ class Query
 
   /**
    * Transforma array de filtros em uma cláusula de WHERES.
-   * Exemplo: ["age" => 18, "position" => "dev", "power <> |1.88|"]
-   * Resultado: WHERE (age = |18| AND position = |"dev"| AND power <> |1.88|)
+   * Exemplo: ["age" => 18, "position" => "dev", "power <> [1.88]"]
+   * Resultado: WHERE (age = [18] AND position = ["dev"] AND power <> [1.88])
    */
   private function transformFiltersInWheres(array $filters): string
   {
@@ -246,9 +248,11 @@ class Query
 
       if (!is_numeric($key)) {
         if (is_string($filter)) {
-          $filter = str_replace("|", "{{}}", $filter);
+          $filterReplaced = str_replace("[", "{{", $filter);
+          $filter = str_replace("]", "}}", $filterReplaced);
         }
-        $filterSQL .= "$key = |$filter| AND ";
+
+        $filterSQL .= "$key = [$filter] AND ";
         continue;
       }
 
@@ -262,7 +266,7 @@ class Query
   }
 
   /**
-   * Adiciona uma condição "where". Recebe uma condição no formato "campo = |valor|" e retorna um objeto Query.
+   * Adiciona uma condição "where". Recebe uma condição no formato "campo = [valor]" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
   public function where(string $condition): self
@@ -277,7 +281,7 @@ class Query
 
 
   /**
-   * Adiciona uma condição "or" ao "where". Recebe uma condição no formato "campo = |valor|" e retorna um objeto Query.
+   * Adiciona uma condição "or" ao "where". Recebe uma condição no formato "campo = [valor]" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
   public function orWhere(string $condition): self
@@ -291,7 +295,7 @@ class Query
   }
 
   /**
-   * Adiciona uma condição "and" ao "where". Recebe uma condição no formato "campo = |valor|" e retorna um objeto Query.
+   * Adiciona uma condição "and" ao "where". Recebe uma condição no formato "campo = [valor]" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
   public function andWhere(string $condition): self
@@ -401,7 +405,7 @@ class Query
   }
 
   /**
-   * Cria uma query customizada. Recebe uma query com os valores não confiáveis entre pipes "|" e retorna um objeto Query.
+   * Cria uma query customizada. Recebe uma query com os valores não confiáveis entre colchetes "[]" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
   public function customQuery(string $queryString): self
@@ -490,26 +494,24 @@ class Query
   // ! PRIVATE METHODS
 
   /**
-   * Transforma uma query string como esta: "select * from clients where id = |$id|" em "select * from clients where id = ?"
+   * Transforma uma query string como esta: "select * from clients where id = [$id]" em "select * from clients where id = ?"
    * e separa os valores em um array. Retorna um array com "query" correspondendo a query limpa e "values" correspondendo aos
    * parâmetros na ordem correta.
    */
   private function extractQueryData(string $queryString)
   {
-    $this->guards($queryString);
-
     $params = [];
 
     /**
-     * Regex que identifica valores dentro de "|".
+     * Regex que identifica valores dentro de "[]".
      */
-    $patternVariable = '/\|(?=[\w\s!@""#$%¨&*()`+=:.?,<>\/\\_{};\-\'\'])(.*?)\|/su';
+    $patternVariable = '/\[(?=[\w\s!@""#$%¨&*()`|+=:.?,<>\/\\_{};\-\'\'])(.*?)\]/su';
 
     /**
      * Utiliza o regex anterior para separar os valores da query
      *
      * Entrada:
-     * "select name, age from clients where id = |1| or user = '|lorem|'"
+     * "select name, age from clients where id = [1] or user = '[lorem]'"
      *
      * Saída:
      * [
@@ -525,7 +527,10 @@ class Query
     }
 
     $params = array_map(function ($param) {
-      if (is_string($param)) return str_replace("{{}}", "|", $param);
+      if (is_string($param)) {
+        $paramReplaced = str_replace("{{", "[", $param);
+        return str_replace("}}", "]", $paramReplaced);
+      }
 
       return $param;
     }, $params);
@@ -537,11 +542,11 @@ class Query
   }
 
   /**
-   * Extrai valores que estiverem entre | e retorna se o resultado é vazio ou não.
+   * Extrai valores que estiverem entre [] e retorna se o resultado é vazio ou não.
    */
   private function existValueInPipes(string $value): bool
   {
-    $patternVariable = '/\|(.*?)\|/';
+    $patternVariable = '/\[(.*?)\]/';
     if (preg_match_all($patternVariable, $value, $matches)) {
       $params = $matches[1];
       return empty($params[0]);
