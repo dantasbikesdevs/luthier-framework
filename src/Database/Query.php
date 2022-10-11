@@ -125,10 +125,7 @@ class Query
 
       $queryFields[] = $key;
 
-      if (is_string($value)) {
-        $valueReplaced = str_replace("[", "{{", $value);
-        $value = str_replace("]", "}}", $valueReplaced);
-      }
+      $value = $this->replaceBrackets($value);
 
       $mappedValues[] = "[$value]";
     }
@@ -182,10 +179,7 @@ class Query
 
       if (empty($value) && $value != 0) continue;
 
-      if (is_string($value)) {
-        $valueReplaced = str_replace("[", "{{", $value);
-        $value = str_replace("]", "}}", $valueReplaced);
-      }
+      $value = $this->replaceBrackets($value);
 
       $queryFields[] = "$key = [$value]";
     }
@@ -237,32 +231,56 @@ class Query
 
   /**
    * Transforma array de filtros em uma cláusula de WHERES.
-   * Exemplo: ["age" => 18, "position" => "dev", "power <> [1.88]"]
-   * Resultado: WHERE (age = [18] AND position = ["dev"] AND power <> [1.88])
+   * Exemplo: [["age", 18, ">"], ["position", "dev", "="]]
+   * Resultado: WHERE (age > [18] AND position = ["dev"])
    */
   private function transformFiltersInWheres(array $filters): string
   {
     $filterSQL = "";
-    foreach ($filters as $key => $filter) {
-      if (is_null($filter)) continue;
+    foreach ($filters as $filter) {
+      if (!is_array($filters) || count($filter) < 2)
+        throw new QueryException("Filtros foram passados incorretamente");
 
-      if (!is_numeric($key)) {
-        if (is_string($filter)) {
-          $filterReplaced = str_replace("[", "{{", $filter);
-          $filter = str_replace("]", "}}", $filterReplaced);
-        }
+      $key = $filter[0];
+      $value = $filter[1];
+      $operator = $filter[2] ?? "=";
 
-        $filterSQL .= "$key = [$filter] AND ";
+      $key      = $this->replaceBrackets($key);
+      $value    = $this->replaceBrackets($value);
+      $operator = $this->replaceBrackets($operator);
+
+      if (is_null($value)) {
+        $filterSQL .= "$key $operator NULL AND ";
         continue;
       }
 
-      if (!$this->existValueInPipes($filter)) {
-        $filterSQL .= "$filter AND ";
-      };
+      if (is_bool($value)) {
+        if ($value) {
+          $filterSQL .= "$key $operator true AND ";
+        } else {
+          $filterSQL .= "$key $operator false AND ";
+        }
+        continue;
+      }
+
+      if (empty($value) && $value != 0) continue;
+
+      $filterSQL .= "$key $operator [$value] AND ";
     }
 
-    $filterSQL = substr($filterSQL, 0, -5);
-    return $filterSQL;
+    return substr($filterSQL, 0, -5);
+  }
+
+  /**
+   * Método responsável por substituir colchetes existentes, caso o parâmetro passado
+   * seja uma string, por chaves duplas.
+   */
+  private function replaceBrackets(mixed $value): mixed
+  {
+    if (!is_string($value)) return $value;
+
+    $valueReplaced = str_replace("[", "{{", $value);
+    return str_replace("]", "}}", $valueReplaced);
   }
 
   /**
@@ -315,7 +333,7 @@ class Query
    */
   public function orderBy(string $order): self
   {
-    if(empty($order)) return $this;
+    if (empty($order)) return $this;
 
     $query = "ORDER BY $order";
 
@@ -396,7 +414,7 @@ class Query
    */
   public function groupBy(string $groupBy): self
   {
-    if(empty($groupBy)) return $this;
+    if (empty($groupBy)) return $this;
 
     $query = "GROUP BY $groupBy";
 
@@ -500,6 +518,10 @@ class Query
    */
   private function extractQueryData(string $queryString)
   {
+    echo '<pre>';
+    print_r($queryString);
+    echo '<br>';
+    echo '</pre>';
     $params = [];
 
     /**
@@ -552,7 +574,7 @@ class Query
       return empty($params[0]);
     }
 
-    if(!empty($value)) return false;
+    if (!empty($value)) return false;
 
     return true;
   }
