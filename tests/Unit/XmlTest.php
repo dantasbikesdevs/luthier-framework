@@ -23,11 +23,11 @@ test("passagem de xml para array associativo", function () {
     "filho" => [
       "@attributes" => ["id" => "12"],
       "neto" => [
-        ["idade" => 1, "nome" => "lorem"],
-        ["nome" => "ipsum"],
+        ["idade" => 1, "nome" => "Lorem"],
+        ["nome" => "Ipsum"],
       ],
     ],
-    "nome" => "dolor"
+    "nome" => "Dolor"
   ];
 
   $result = XmlParser::toArray($xml);
@@ -51,7 +51,7 @@ test("tranformação de xml em json", function () {
     <nome>Dolor</nome>
   </pai>';
 
-  $expectedJson = '{"filho":{"@attributes":{"id":"12"},"neto":[{"idade":"1","nome":"lorem"},{"nome":"ipsum"}]},"nome":"dolor"}';
+  $expectedJson = '{"filho":{"@attributes":{"id":"12"},"neto":[{"idade":"1","nome":"Lorem"},{"nome":"Ipsum"}]},"nome":"Dolor"}';
 
   $result = XmlParser::toJson($xml);
 
@@ -63,11 +63,11 @@ test("transformação de array em xml", function () {
     "filho" => [
       "Attr_id" => 12,
       "neto" => [
-        ["idade" => 1, "nome" => "lorem"],
-        ["nome" => "ipsum"],
+        ["idade" => 1, "nome" => "Lorem"],
+        ["nome" => "Ipsum"],
       ],
     ],
-    "nome" => "dolor"
+    "nome" => "Dolor"
   ];
 
   $expectedXml =
@@ -75,13 +75,13 @@ test("transformação de array em xml", function () {
 <filho id="12">
   <neto>
     <idade>1</idade>
-    <nome>lorem</nome>
+    <nome>Lorem</nome>
   </neto>
   <neto>
-    <nome>ipsum</nome>
+    <nome>Ipsum</nome>
   </neto>
 </filho>
-<nome>dolor</nome>
+<nome>Dolor</nome>
 ';
 
   $result = XmlParser::xmlEncode($array, "utf-8");

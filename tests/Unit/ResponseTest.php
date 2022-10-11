@@ -21,7 +21,7 @@ test("deve enviar uma resposta corretamente", function () {
   $result = $response->send("Teste realizado com sucesso.");
 
   expect($result)
-    ->getContent()->toBe(["mensagem" => "Teste realizado com sucesso."])
+    ->getContent()->toBe(["message" => "Teste realizado com sucesso."])
     ->getCode()->toBe(200);
 });
 
@@ -30,5 +30,5 @@ test("deve tratar HTMLSPECIALCHARS e remover tags HTML", function () {
   $response->send("<script>alert('Ola Mundo')</script>");
 
   expect($response->getContent())
-    ->toBe("&lt;script&gt;alert('Ola Mundo')&lt;/script&gt;");
+    ->toBe("<script>alert('Ola Mundo')</script>");
 });

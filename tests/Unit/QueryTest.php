@@ -14,8 +14,8 @@ test("deve retornar uma query para consulta no banco", function () {
   $query = $queryBuilder->select("*")
     ->from("USERS u")
     ->innerJoinWith("USERS_GROUPS ug", "u.ID = ug.USER_ID")
-    ->where("u.ID = |$id|")
-    ->orWhere("u.NAME = |$username|");
+    ->where("u.ID = [$id]")
+    ->orWhere("u.NAME = [$username]");
 
   $statement = $query->getSql();
 
@@ -33,9 +33,9 @@ test("deve retornar uma query SQL com os filtros passados", function () {
   $age = 19;
 
   $filters = [
-    "ID <> |$id|",
+    "ID <> [$id]",
     "NAME" => $name,
-    "AGE > |$age|"
+    "AGE > [$age]"
   ];
 
   $query = $queryBuilder->select("*")
