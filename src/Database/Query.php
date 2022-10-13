@@ -9,6 +9,7 @@ use Exception;
 use Luthier\Exceptions\QueryException;
 use Luthier\Reflection\Reflection;
 use Luthier\Regex\Regex;
+use PDOStatement;
 use stdClass;
 
 class Query
@@ -34,9 +35,14 @@ class Query
   private bool $forceOperation = false;
 
   /**
-   * Atributo que armazena partes da query a ser executada.
+   * Atributo que armazena a string da query a ser executada.
    */
   private array $queryStore;
+
+  /**
+   * Atributo que armazena os parâmetros a serem inseridos na query.
+   */
+  private array $queryParams = [];
 
   public function __construct(Database $database = null)
   {
@@ -96,7 +102,7 @@ class Query
    * seus novos valores e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
-  public function insert(array | object $fieldsAndValues, ?string $tableName = null): self
+  public function insert(array|object $fieldsAndValues, ?string $tableName = null): self
   {
     $table = $tableName ?? $this->tableName;
 
@@ -113,15 +119,21 @@ class Query
       if (is_bool($value)) {
         if ($value) {
           $queryFields[] = $key;
-          $mappedValues[] = "true";
+          $mappedValues[] = "[true]";
         } else {
           $queryFields[] = $key;
-          $mappedValues[] = "false";
+          $mappedValues[] = "[false]";
         }
         continue;
       }
 
       if (empty($value) && $value != 0) continue;
+
+      if ($value == 0) {
+        $queryFields[] = $key;
+        $mappedValues[] = "[0]";
+        continue;
+      }
 
       $queryFields[] = $key;
 
@@ -150,7 +162,7 @@ class Query
    * Para executar adicione o método run() no final. Essa query não será executada sem where a menos que seja
    * removidas as guardas com forceDangerousCommand.
    */
-  public function update(array | object $fieldsAndValues, ?string $tableName = null): self
+  public function update(array|object $fieldsAndValues, ?string $tableName = null): self
   {
     $table = $tableName ?? $this->tableName;
 
@@ -164,20 +176,25 @@ class Query
      */
     foreach ($fieldsAndValues as $key => $value) {
       if (is_null($value)) {
-        $queryFields[] = "$key = NULL";
+        $queryFields[] = "$key = [NULL]";
         continue;
       }
 
       if (is_bool($value)) {
         if ($value) {
-          $queryFields[] = "$key = true";
+          $queryFields[] = "$key = [true]";
         } else {
-          $queryFields[] = "$key = false";
+          $queryFields[] = "$key = [false]";
         }
         continue;
       }
 
       if (empty($value) && $value != 0) continue;
+
+      if ($value == 0) {
+        $queryFields[] = "$key = [0]";
+        continue;
+      }
 
       $value = $this->replaceBrackets($value);
 
@@ -211,6 +228,38 @@ class Query
   }
 
   /**
+   * Método responsável por setar um parâmetro a query.
+   * Ex.: $query->where("id = :id")->setParam("id", 1);
+   * Ex.2: $query->where("id = ?")->setParam(1, 2);
+   *
+   * Obs.: Ao utilizar este método, os possíveis paramêtros informados entre colchetes "[]" na queryString serão ignorados
+   * e não serão extraídos, causando uma exceção de SQL. Portanto, não utilize as duas formas juntas.
+   */
+  public function setParam(int|string $param, int|string|bool|float|null $value): self
+  {
+    if (empty($param)) return $this;
+
+    $this->queryParams[$param] = $value;
+    return $this;
+  }
+
+  /**
+   * Método responsável por setar um array com os parâmetros da query.
+   * Ex.:  $query->where("id = ? and gender = ?")->setParams([1, "M"]);
+   * Ex.2: $query->where("id = :id and gender = :gender")->setParams(["id" => 1, "gender" => "M"]);
+   *
+   * Obs.: Ao utilizar este método, os possíveis paramêtros informados entre colchetes "[]" na queryString serão ignorados
+   * e não serão extraídos, causando uma exceção de SQL. Portanto, não utilize as duas formas juntas.
+   */
+  public function setParams(array $params): self
+  {
+    if (empty($params)) return $this;
+
+    $this->queryParams = $params;
+    return $this;
+  }
+
+  /**
    * Adiciona uma condição "where" com os filtros recebidos por array.
    * Os valores no objeto devem ser passados no formato "CAMPO" => "VALOR" ou
    * "CAMPO OPERADOR [VALOR]".
@@ -221,7 +270,7 @@ class Query
   {
     if (empty($filters)) return $this;
 
-    $filterSQL = $this->transformFiltersInWheres($filters);
+    $filterSQL = $this->transformFiltersInWhere($filters);
     if (empty($filterSQL)) return $this;
 
     $query = "WHERE ($filterSQL)";
@@ -230,42 +279,27 @@ class Query
   }
 
   /**
-   * Transforma array de filtros em uma cláusula de WHERES.
+   * Transforma array de filtros em uma cláusula de WHERE.
    * Exemplo: [["age", 18, ">"], ["position", "dev", "="]]
-   * Resultado: WHERE (age > [18] AND position = ["dev"])
+   * Resultado: WHERE (age > ? AND position = ?)
    */
-  private function transformFiltersInWheres(array $filters): string
+  private function transformFiltersInWhere(array $filters): string
   {
     $filterSQL = "";
     foreach ($filters as $filter) {
-      if (!is_array($filters) || count($filter) < 2)
+      if (!is_array($filter) || count($filter) < 2)
         throw new QueryException("Filtros foram passados incorretamente");
+
+      if (empty($filter[1]) && $filter[1] != 0) continue;
 
       $key = $filter[0];
       $value = $filter[1];
       $operator = $filter[2] ?? "=";
 
-      $key      = $this->replaceBrackets($key);
-      $value    = $this->replaceBrackets($value);
-      $operator = $this->replaceBrackets($operator);
+      $filterSQL .= "{$key} {$operator} :{$key}";
 
-      if (is_null($value)) {
-        $filterSQL .= "$key $operator NULL AND ";
-        continue;
-      }
-
-      if (is_bool($value)) {
-        if ($value) {
-          $filterSQL .= "$key $operator true AND ";
-        } else {
-          $filterSQL .= "$key $operator false AND ";
-        }
-        continue;
-      }
-
-      if (empty($value) && $value != 0) continue;
-
-      $filterSQL .= "$key $operator [$value] AND ";
+      $this->andWhere($filterSQL);
+      $this->setParam($key, $value);
     }
 
     return substr($filterSQL, 0, -5);
@@ -291,12 +325,11 @@ class Query
   {
     if (empty($condition)) return $this;
 
-    $query = "WHERE $condition ";
+    $query = "WHERE $condition";
 
     $this->addToQueryStore($query);
     return $this;
   }
-
 
   /**
    * Adiciona uma condição "or" ao "where". Recebe uma condição no formato "campo = [valor]" e retorna um objeto Query.
@@ -381,7 +414,6 @@ class Query
     return $this;
   }
 
-
   /**
    * Une os resultados de duas tabelas em uma determinada condição. Para executar adicione o método run() no final.
    * Exemplo: (new Query("client"))->select()->innerJoinWith(table: "receipt", on: "mainTable.id = thatTable.client_id")->run();
@@ -433,23 +465,31 @@ class Query
   }
 
   /**
-   * Retorna a query SQL e os seus valores em ordem ["query" => "select ? from table", "values" => "*"]
+   * Retorna a query SQL e os seus valores em ordem ["query" => "select * from table", "values" => []]
    */
-  public function getSql()
+  public function getSql(): array
   {
-    $queryTemplate =  implode(" ", $this->queryStore);
+    $queryTemplate = implode(" ", $this->queryStore);
     $cleanQueryTemplate = preg_replace(Regex::$contiguousBlankSpaces, " ", $queryTemplate);
-    return $this->extractQueryData($cleanQueryTemplate);
+    $queryParams = $this->queryParams;
+
+    $this->resetQuery();
+
+    if (empty($queryParams)) return $this->extractQueryData($cleanQueryTemplate);
+
+    return [
+      "query"  => $cleanQueryTemplate,
+      "values" => $queryParams
+    ];
   }
 
   /**
    * Pula guarda de proteção contra operações arriscadas. Recebe uma justificativa que será armazenada no log, juntamente com a query executada.
    */
-  public function forceDangerousCommand(string $justification)
+  public function forceDangerousCommand(string $justification): self
   {
     $this->forceOperation = true;
-
-    // TODO: Adicionar ao log
+    return $this;
   }
 
   /**
@@ -464,7 +504,7 @@ class Query
   /**
    * Executa a query SQL retornando apenas o primeiro resultado.
    */
-  public function first()
+  public function first(): mixed
   {
     $queryData = $this->getSql();
     $model = $this->model;
@@ -475,18 +515,19 @@ class Query
   /**
    * Executa a query SQL retornando todos os resultados.
    */
-  public function all()
+  public function all(): mixed
   {
     $queryData = $this->getSql();
     $model = $this->model;
     $this->resetQuery();
+
     return $this->database->executeStatement($queryData["query"], $queryData["values"], true, $model);
   }
 
   /**
    * Executa a query SQL
    */
-  public function run()
+  public function run(): PDOStatement | bool
   {
     $queryData = $this->getSql();
     $this->resetQuery();
@@ -497,7 +538,7 @@ class Query
    * Adiciona uma ordenação aos resultados da query. Recebe um campo pelo qual ordenar e uma direção.
    * Para executar adicione o método run() no final.
    */
-  public function returning(array $fields = ["id"])
+  public function returning(array $fields = ["id"]): mixed
   {
     $implodedFields = implode(',', $fields);
     $query = "returning $implodedFields";
@@ -516,12 +557,8 @@ class Query
    * e separa os valores em um array. Retorna um array com "query" correspondendo a query limpa e "values" correspondendo aos
    * parâmetros na ordem correta.
    */
-  private function extractQueryData(string $queryString)
+  private function extractQueryData(string $queryString): array
   {
-    echo '<pre>';
-    print_r($queryString);
-    echo '<br>';
-    echo '</pre>';
     $params = [];
 
     /**
@@ -548,6 +585,7 @@ class Query
       $cleanQueryString = $queryString;
     }
 
+    // "Desconverte" os colchetes para sua forma original
     $params = array_map(function ($param) {
       if (is_string($param)) {
         $paramReplaced = str_replace("{{", "[", $param);
@@ -582,7 +620,7 @@ class Query
   /**
    * Evita que operações perigosas sejam executadas. Pode ser pulado com forceDangerousCommand("justificativa")
    */
-  private function guards(string $query)
+  private function guards(string $query): void
   {
     if ($this->forceOperation) return;
 
@@ -600,20 +638,23 @@ class Query
   }
 
   /**
-   * Adiciona uma query a lista de queries para serem executadas. Essa função altera diretamente uma propriedade
+   * Adiciona uma query a lista de queries para serem executadas. Esse método altera diretamente uma propriedade
    * deste objeto.
    */
-  private function addToQueryStore(string $query)
+  private function addToQueryStore(string $query): self
   {
     $this->queryStore[] = $query;
+
+    return $this;
   }
 
   /**
-   * Método responsável por resetar a queryStore toda vez que a mesma for executada.
+   * Método responsável por resetar os dados da query toda vez que a mesma for executada.
    */
-  private function resetQuery()
+  private function resetQuery(): void
   {
     $this->queryStore = [];
+    $this->queryParams = [];
     $this->model = null;
   }
 }
