@@ -15,14 +15,16 @@ test("deve retornar uma query para consulta no banco", function () {
   $query = $this->queryBuilder->select("*")
     ->from("USERS u")
     ->innerJoinWith("USERS_GROUPS ug", "u.ID = ug.USER_ID")
-    ->where("u.ID = [$id]")
-    ->orWhere("u.NAME = [$username]");
+    ->where("u.ID = :id")
+    ->orWhere("u.NAME = :username")
+    ->setParam(":id", $id)
+    ->setParam(":username", $username);
 
   $statement = $query->getSql();
 
   expect($statement["query"])
-    ->toBe("SELECT * FROM USERS u INNER JOIN USERS_GROUPS ug ON u.ID = ug.USER_ID WHERE u.ID = ? OR u.NAME = ?");
-})->skip();
+    ->toBe("SELECT * FROM USERS u INNER JOIN USERS_GROUPS ug ON u.ID = ug.USER_ID WHERE u.ID = :id OR u.NAME = :username");
+});
 
 test("deve retornar uma query SQL com os filtros passados", function () {
   $id = 1;
@@ -30,9 +32,9 @@ test("deve retornar uma query SQL com os filtros passados", function () {
   $age = 19;
 
   $filters = [
-    "ID <> [$id]",
+    ["ID <> :id", ["id" => $id]],
     "NAME" => $name,
-    "AGE > [$age]"
+    ["AGE > :age", [$age]],
   ];
 
   $query = $this->queryBuilder->select("*")
@@ -42,39 +44,122 @@ test("deve retornar uma query SQL com os filtros passados", function () {
   $statement = $query->getSql();
 
   expect($statement["query"])
-    ->toBe("SELECT * FROM USERS u WHERE (ID <> ? AND NAME = ? AND AGE > ?)");
+    ->toBe("SELECT * FROM USERS u WHERE (ID <> :id AND NAME = :NAME AND AGE > :age)");
 
   expect($statement["values"])
-    ->toBe(["1", "André Oliveira", "19"]);
-})->skip();
+    ->toBe(["id" => 1, "NAME" => "André Oliveira", 19]);
+});
 
-test("deve lidar corretamente com queries onde existam colchetes nos parametros", function () {
-  $id = 1;
-  $name = "André [Oliveira][[]]][";
-  $age = 20;
-  $gender = "M[";
+test("deve inserir em um campo o valor zero com sucesso", function () {
+  $query = $this->queryBuilder->insert([
+    "NAME" => "André",
+    "AGE" => 0
+  ], "USERS u")
+    ->getSql();
 
-  $filters = [
-    ["ID", $id, "<>"],
-    ["NAME", $name],
-    ["AGE", $age, "<"],
-    ["GENDER", $gender]
-  ];
+    expect($query["query"])
+      ->toBe("INSERT INTO USERS u (NAME,AGE) VALUES (:NAME,:AGE)");
 
+    expect($query["values"])
+      ->toBe(["NAME" => "André", "AGE" => 0]);
+});
+
+test("deve inserir um valor booleano com sucesso", function () {
+  $query = $this->queryBuilder->insert([
+    "NAME" => "André",
+    "ACTIVE" => true
+  ], "USERS u")
+    ->getSql();
+
+    expect($query["query"])
+      ->toBe("INSERT INTO USERS u (NAME,ACTIVE) VALUES (:NAME,:ACTIVE)");
+
+    expect($query["values"])
+      ->toBe(["NAME" => "André", "ACTIVE" => true]);
+});
+
+test("deve atualizar um campo com o valor zero (0) com sucesso", function () {
+  $query = $this->queryBuilder->update([
+    "NAME" => "André",
+    "AGE" => 0
+  ], "USERS u")
+    ->getSql();
+
+    expect($query["query"])
+      ->toBe("UPDATE USERS u SET NAME = :NAME,AGE = :AGE");
+
+    expect($query["values"])
+      ->toBe(["NAME" => "André", "AGE" => 0]);
+});
+
+test("deve atualizar um campo com o valor nulo com sucesso", function () {
+  $query = $this->queryBuilder->update([
+    "NAME" => "André",
+    "TELEFONESECUNDARIO" => null
+  ], "USERS u")
+    ->getSql();
+
+    expect($query["query"])
+      ->toBe("UPDATE USERS u SET NAME = :NAME,TELEFONESECUNDARIO = :TELEFONESECUNDARIO");
+
+    expect($query["values"])
+      ->toBe(["NAME" => "André", "TELEFONESECUNDARIO" => null]);
+});
+
+test("deve atualizar um campo com o valor booleano com sucesso", function () {
+  $query = $this->queryBuilder->update([
+    "NAME" => "André",
+    "ACTIVE" => false
+  ], "USERS u")
+    ->getSql();
+
+    expect($query["query"])
+      ->toBe("UPDATE USERS u SET NAME = :NAME,ACTIVE = :ACTIVE");
+
+    expect($query["values"])
+      ->toBe(["NAME" => "André", "ACTIVE" => false]);
+});
+
+test("deve filtrar um campo com o valor zero com sucesso", function () {
   $query = $this->queryBuilder->select("*")
     ->from("USERS u")
-    ->filterWhere($filters);
+    ->filterWhere([
+      "AGE" => 0
+    ])
+    ->getSql();
 
-  $statement = $query->getSql();
+    expect($query["query"])
+      ->toBe("SELECT * FROM USERS u WHERE (AGE = :AGE)");
 
-  echo '<pre>';
-  print_r($statement);
-  echo '<br>';
-  echo '</pre>';exit;
+    expect($query["values"])
+      ->toBe(["AGE" => 0]);
+});
 
-  expect($statement["query"])
-    ->toBe("SELECT * FROM USERS u WHERE (ID <> ? AND NAME = ? AND AGE < ? AND GENDER = ?)");
+test("deve adicionar um parâmetro a query corretamente com o setParam", function () {
+  $query = $this->queryBuilder->select("*")
+    ->from("USERS u")
+    ->where("u.ID = :id")
+    ->setParam("id", 1)
+    ->getSql();
 
-  expect($statement["values"])
-    ->toBe(["1", "André [Oliveira][[]]][", "20", "M["]);
+    expect($query["query"])
+      ->toBe("SELECT * FROM USERS u WHERE u.ID = :id");
+
+    expect($query["values"])
+      ->toBe(["id" => 1]);
+});
+
+test("deve adicionar parâmetros a query corretamente com o setParams", function () {
+  $query = $this->queryBuilder->select("*")
+    ->from("USERS u")
+    ->where("u.ID = :id")
+    ->orWhere("u.NAME = :name")
+    ->setParams(["id" => 1, "name" => "André"])
+    ->getSql();
+
+    expect($query["query"])
+      ->toBe("SELECT * FROM USERS u WHERE u.ID = :id OR u.NAME = :name");
+
+    expect($query["values"])
+      ->toBe(["id" => 1, "name" => "André"]);
 });
