@@ -104,6 +104,8 @@ class Query
    */
   public function insert(array|object $fieldsAndValues, ?string $tableName = null): self
   {
+    if (empty($fieldsAndValues)) throw new QueryException("Nenhum campo foi informado para inserção.");
+
     $table = $tableName ?? $this->tableName;
 
     if (is_object($fieldsAndValues)) {
@@ -111,39 +113,14 @@ class Query
     }
 
     /**
-     * Transforma um array de valores como este: [1, "dev", 1.88]
-     * Em um array de valores assim: ["[1]", "[dev]", "[1.88"]
-     * E depois em uma string assim: "[1], [dev], [1.88]"
+     * Transforma um array de valores como este: ["age" => 18, "position" => "dev", "power" => 1.88]
+     * Em um dois arrays de valores assim: ["age", "position", "power"] e [":age", ":position", ":power"]
      */
     foreach ($fieldsAndValues as $key => $value) {
-      if (is_bool($value)) {
-        if ($value) {
-          $queryFields[] = $key;
-          $mappedValues[] = "[true]";
-        } else {
-          $queryFields[] = $key;
-          $mappedValues[] = "[false]";
-        }
-        continue;
-      }
-
-      if (empty($value) && $value != 0) continue;
-
-      if ($value == 0) {
-        $queryFields[] = $key;
-        $mappedValues[] = "[0]";
-        continue;
-      }
-
       $queryFields[] = $key;
+      $mappedValues[] = ":{$key}";
 
-      $value = $this->replaceBrackets($value);
-
-      $mappedValues[] = "[$value]";
-    }
-
-    if (empty($queryFields)) {
-      throw new QueryException("Nenhum campo foi informado para atualização.");
+      $this->setParam($key, $value);
     }
 
     $implodedFields = implode(',', $queryFields);
@@ -164,6 +141,8 @@ class Query
    */
   public function update(array|object $fieldsAndValues, ?string $tableName = null): self
   {
+    if (empty($fieldsAndValues)) throw new QueryException("Nenhum campo foi informado para atualização.");
+
     $table = $tableName ?? $this->tableName;
 
     if (is_object($fieldsAndValues)) {
@@ -172,37 +151,12 @@ class Query
 
     /**
      * Transforma um array de valores como este: ["age" => 18, "position" => "dev", "power" => 1.88]
-     * Em um array de valores assim: ["age = [18]", "position = [dev]", "power = [1.88]"]
+     * Em um array de valores assim: ["age = :age", "position = :position", "power = :power"]
      */
     foreach ($fieldsAndValues as $key => $value) {
-      if (is_null($value)) {
-        $queryFields[] = "$key = [NULL]";
-        continue;
-      }
+      $queryFields[] = "{$key} = :{$key}";
 
-      if (is_bool($value)) {
-        if ($value) {
-          $queryFields[] = "$key = [true]";
-        } else {
-          $queryFields[] = "$key = [false]";
-        }
-        continue;
-      }
-
-      if (empty($value) && $value != 0) continue;
-
-      if ($value == 0) {
-        $queryFields[] = "$key = [0]";
-        continue;
-      }
-
-      $value = $this->replaceBrackets($value);
-
-      $queryFields[] = "$key = [$value]";
-    }
-
-    if (empty($queryFields)) {
-      throw new QueryException("Nenhum campo foi informado para atualização.");
+      $this->setParam($key, $value);
     }
 
     $implodedValues = implode(',', $queryFields);
@@ -228,43 +182,13 @@ class Query
   }
 
   /**
-   * Método responsável por setar um parâmetro a query.
-   * Ex.: $query->where("id = :id")->setParam("id", 1);
-   * Ex.2: $query->where("id = ?")->setParam(1, 2);
-   *
-   * Obs.: Ao utilizar este método, os possíveis paramêtros informados entre colchetes "[]" na queryString serão ignorados
-   * e não serão extraídos, causando uma exceção de SQL. Portanto, não utilize as duas formas juntas.
-   */
-  public function setParam(int|string $param, int|string|bool|float|null $value): self
-  {
-    if (empty($param)) return $this;
-
-    $this->queryParams[$param] = $value;
-    return $this;
-  }
-
-  /**
-   * Método responsável por setar um array com os parâmetros da query.
-   * Ex.:  $query->where("id = ? and gender = ?")->setParams([1, "M"]);
-   * Ex.2: $query->where("id = :id and gender = :gender")->setParams(["id" => 1, "gender" => "M"]);
-   *
-   * Obs.: Ao utilizar este método, os possíveis paramêtros informados entre colchetes "[]" na queryString serão ignorados
-   * e não serão extraídos, causando uma exceção de SQL. Portanto, não utilize as duas formas juntas.
-   */
-  public function setParams(array $params): self
-  {
-    if (empty($params)) return $this;
-
-    $this->queryParams = $params;
-    return $this;
-  }
-
-  /**
    * Adiciona uma condição "where" com os filtros recebidos por array.
-   * Os valores no objeto devem ser passados no formato "CAMPO" => "VALOR" ou
-   * "CAMPO OPERADOR [VALOR]".
+   * Os valores no objeto devem ser passados no formato ["ID = :id", ["id" => 1]], não inverta a ordem!
+   * Primeiro a string com a condição e depois o array com os parâmetros.
    * Será retornado um registro caso corresponda a todos os filtros passados
    * Para executar adicione o método run() no final.
+   *
+   * Obs.: Caso algum parâmetro de um filtro passado seja vazio ou nulo, esse filtro será ignorado.
    */
   public function filterWhere(array $filters): self
   {
@@ -280,41 +204,44 @@ class Query
 
   /**
    * Transforma array de filtros em uma cláusula de WHERE.
-   * Exemplo: [["age", 18, ">"], ["position", "dev", "="]]
-   * Resultado: WHERE (age > ? AND position = ?)
+   * Exemplo: [["id > ?", [1]], ["name = ?", ["John"]]]
+   * Resultado: WHERE (id > ? AND name = ?)
+   * Exemplo 2: ["ID" => 1, "NAME" => "John"]
+   * Resultado: WHERE (ID = ? AND NAME = ?)
    */
   private function transformFiltersInWhere(array $filters): string
   {
     $filterSQL = "";
-    foreach ($filters as $filter) {
-      if (!is_array($filter) || count($filter) < 2)
-        throw new QueryException("Filtros foram passados incorretamente");
+    foreach ($filters as $key => $filter) {
+      if (is_string($key)) {
+        if ((empty($filter) && $filter != 0) || is_null($filter)) continue;
 
-      if (empty($filter[1]) && $filter[1] != 0) continue;
+        $filterSQL .= "{$key} = :{$key} AND ";
+        $this->setParam($key, $filter); continue;
+      }
 
-      $key = $filter[0];
-      $value = $filter[1];
-      $operator = $filter[2] ?? "=";
+      if (is_string($filter)) {
+        $filterSQL .= "{$filter} AND "; continue;
+      }
 
-      $filterSQL .= "{$key} {$operator} :{$key}";
+      if (!is_array($filter)) throw new QueryException("O filtro deve ser uma string ou um array.");
 
-      $this->andWhere($filterSQL);
-      $this->setParam($key, $value);
+      $query = $filter[0] ?? "";
+      $queryParams = $filter[1] ?? [];
+
+      if (empty($query)) throw new QueryException("Filtro inválido. A query não pode ser vazia.");
+
+      $queryParamsFiltered = array_filter($queryParams, fn ($value) => (!empty($value) || $value == 0) && !is_null($value));
+
+      if (count($queryParamsFiltered) < count($queryParams)) {
+        unset($filters[$key]); continue;
+      }
+
+      $filterSQL .= "{$query} AND ";
+      $this->setParams($queryParams);
     }
 
     return substr($filterSQL, 0, -5);
-  }
-
-  /**
-   * Método responsável por substituir colchetes existentes, caso o parâmetro passado
-   * seja uma string, por chaves duplas.
-   */
-  private function replaceBrackets(mixed $value): mixed
-  {
-    if (!is_string($value)) return $value;
-
-    $valueReplaced = str_replace("[", "{{", $value);
-    return str_replace("]", "}}", $valueReplaced);
   }
 
   /**
@@ -356,6 +283,39 @@ class Query
     $query = "AND $condition";
 
     $this->addToQueryStore($query);
+    return $this;
+  }
+
+  /**
+   * Método responsável por setar um parâmetro a query.
+   * Ex.: $query->where("id = :id")->setParam("id", 1);
+   * Ex.2: $query->where("id = ?")->setParam(1, 2);
+   *
+   * Obs.: Caso o nome do valor do parâmetro seja vazio, o parâmetro será ignorado.
+   */
+  public function setParam(int|string $param, int|string|bool|float|null $value): self
+  {
+    if (empty($param) && $param != 0) return $this;
+
+    $this->queryParams[$param] = $value;
+    return $this;
+  }
+
+  /**
+   * Método responsável por setar um array com os parâmetros da query.
+   * Ex.:  $query->where("id = ? and gender = ?")->setParams([1, "M"]);
+   * Ex.2: $query->where("id = :id and gender = :gender")->setParams(["id" => 1, "gender" => "M"]);
+   *
+   * Obs.: Caso seja passado um array vazio, nada será alterado.
+   */
+  public function setParams(array $params): self
+  {
+    if (empty($params)) return $this;
+
+    foreach ($params as $key => $value) {
+      $this->setParam($key, $value);
+    }
+
     return $this;
   }
 
@@ -475,8 +435,6 @@ class Query
 
     $this->resetQuery();
 
-    if (empty($queryParams)) return $this->extractQueryData($cleanQueryTemplate);
-
     return [
       "query"  => $cleanQueryTemplate,
       "values" => $queryParams
@@ -527,7 +485,7 @@ class Query
   /**
    * Executa a query SQL
    */
-  public function run(): PDOStatement | bool
+  public function run(): PDOStatement|bool
   {
     $queryData = $this->getSql();
     $this->resetQuery();
@@ -551,71 +509,6 @@ class Query
   }
 
   // ! PRIVATE METHODS
-
-  /**
-   * Transforma uma query string como esta: "select * from clients where id = [$id]" em "select * from clients where id = ?"
-   * e separa os valores em um array. Retorna um array com "query" correspondendo a query limpa e "values" correspondendo aos
-   * parâmetros na ordem correta.
-   */
-  private function extractQueryData(string $queryString): array
-  {
-    $params = [];
-
-    /**
-     * Regex que identifica valores dentro de "[]".
-     */
-    $patternVariable = '/\[(?=[\w\s!@""#$%¨&*()`|+=:.?,<>\/\\_{};\-\'\'])(.*?)\]/su';
-
-    /**
-     * Utiliza o regex anterior para separar os valores da query
-     *
-     * Entrada:
-     * "select name, age from clients where id = [1] or user = '[lorem]'"
-     *
-     * Saída:
-     * [
-     *  "query" => "select name, age from clients where id = ? or user = '?'",
-     *  "values" => [1, "lorem"]
-     * ]
-     */
-    if (preg_match_all($patternVariable, $queryString, $matches)) {
-      $cleanQueryString = preg_replace($patternVariable, '?', $queryString);
-      $params = $matches[1];
-    } else {
-      $cleanQueryString = $queryString;
-    }
-
-    // "Desconverte" os colchetes para sua forma original
-    $params = array_map(function ($param) {
-      if (is_string($param)) {
-        $paramReplaced = str_replace("{{", "[", $param);
-        return str_replace("}}", "]", $paramReplaced);
-      }
-
-      return $param;
-    }, $params);
-
-    return [
-      "query" => $cleanQueryString,
-      "values" => $params
-    ];
-  }
-
-  /**
-   * Extrai valores que estiverem entre [] e retorna se o resultado é vazio ou não.
-   */
-  private function existValueInPipes(string $value): bool
-  {
-    $patternVariable = '/\[(.*?)\]/';
-    if (preg_match_all($patternVariable, $value, $matches)) {
-      $params = $matches[1];
-      return empty($params[0]);
-    }
-
-    if (!empty($value)) return false;
-
-    return true;
-  }
 
   /**
    * Evita que operações perigosas sejam executadas. Pode ser pulado com forceDangerousCommand("justificativa")
