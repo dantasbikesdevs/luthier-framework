@@ -137,7 +137,7 @@ class Request
     foreach ($params as $name => $value) {
       $name = strtolower($name);
 
-      if(!empty($value)) {
+      if(!empty($value) || $value == 0) {
         $validQueryParams[$name] = $value;
       }
     }
