@@ -33,3 +33,8 @@
 # V1.1.3
 - Alteração do manipulador de exceções do sistema
 - Retorno da query SQL responsável por causar exceção no PDO juntamente a mensagem de erro (Jamais permitir que ela seja exposta para o cliente).
+
+# V2.0.0
+- Alteração do queryBuilder. Foi removido o tratamento de parâmetros através dos pipes e/ou colchetes
+por não serem tão confiáveis. Agora é através de um array de parâmetro e eles podem ser setados pelos métodos setParam ou setParams.
+- Caso seja passado uma condição vazia como parâmetro nos métodos que setam condições a query (where, andWhere e orWhere), será lançado uma exceção do tipo QueryException.
