@@ -229,7 +229,7 @@ class Query
       $query = $filter[0] ?? "";
       $queryParams = $filter[1] ?? [];
 
-      if (empty($query)) throw new QueryException("Filtro inválido. A query não pode ser vazia.");
+      if (empty($query)) throw new QueryException("Filtro inválido. A query não pode estar vazia.");
 
       $queryParamsFiltered = array_filter($queryParams, fn ($value) => (!empty($value) || $value == 0) && !is_null($value));
 
@@ -250,7 +250,7 @@ class Query
    */
   public function where(string $condition): self
   {
-    if (empty($condition)) throw new QueryException("A condição não pode ser vazia.");
+    if (empty($condition)) throw new QueryException("A condição não pode estar vazia.");
 
     $query = "WHERE $condition";
 
@@ -264,7 +264,7 @@ class Query
    */
   public function orWhere(string $condition): self
   {
-    if (empty($condition)) throw new QueryException("A condição não pode ser vazia.");
+    if (empty($condition)) throw new QueryException("A condição não pode estar vazia.");
 
     $query = "OR $condition";
 
@@ -278,7 +278,7 @@ class Query
    */
   public function andWhere(string $condition): self
   {
-    if (empty($condition)) throw new QueryException("A condição não pode ser vazia.");
+    if (empty($condition)) throw new QueryException("A condição não pode estar vazia.");
 
     $query = "AND $condition";
 
