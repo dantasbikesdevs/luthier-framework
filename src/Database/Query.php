@@ -466,6 +466,9 @@ class Query
   {
     $queryData = $this->getSql();
     $model = $this->model;
+
+    $this->guards($queryData["query"]);
+
     $this->resetQuery();
     return $this->database->executeStatement($queryData["query"], $queryData["values"], false, $model);
   }
@@ -477,8 +480,10 @@ class Query
   {
     $queryData = $this->getSql();
     $model = $this->model;
-    $this->resetQuery();
 
+    $this->guards($queryData["query"]);
+
+    $this->resetQuery();
     return $this->database->executeStatement($queryData["query"], $queryData["values"], true, $model);
   }
 
@@ -488,6 +493,9 @@ class Query
   public function run(): PDOStatement|bool
   {
     $queryData = $this->getSql();
+
+    $this->guards($queryData["query"]);
+
     $this->resetQuery();
     return $this->database->execute($queryData["query"], $queryData["values"]);
   }
@@ -502,10 +510,7 @@ class Query
     $query = "returning $implodedFields";
 
     $this->addToQueryStore($query);
-
-    $queryData = $this->getSql();
-    $this->resetQuery();
-    return $this->database->execute($queryData["query"], $queryData["values"])->fetchObject()->$implodedFields;
+    return $this->run()->fetchObject()->$implodedFields;
   }
 
   // ! PRIVATE METHODS
@@ -517,7 +522,7 @@ class Query
   {
     if ($this->forceOperation) return;
 
-    $query = strtolower($query);
+    $query = mb_strtolower($query);
     $dangerous = ["update", "delete"];
 
     foreach ($dangerous as $command) {
@@ -525,7 +530,7 @@ class Query
       $doesNotContainWhere = !str_contains($query, "where");
 
       if ($containsDangerousCommand && $doesNotContainWhere) {
-        throw new Exception("Erro ao tentar executar operação perigosa. '$query' sem where especificado.", 500);
+        throw new QueryException("Erro ao tentar executar operação perigosa. '$query' sem where especificado.");
       }
     }
   }
