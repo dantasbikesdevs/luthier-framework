@@ -250,7 +250,7 @@ class Query
    */
   public function where(string $condition): self
   {
-    if (empty($condition)) return $this;
+    if (empty($condition)) throw new QueryException("A condição não pode ser vazia.");
 
     $query = "WHERE $condition";
 
@@ -264,7 +264,7 @@ class Query
    */
   public function orWhere(string $condition): self
   {
-    if (empty($condition)) return $this;
+    if (empty($condition)) throw new QueryException("A condição não pode ser vazia.");
 
     $query = "OR $condition";
 
@@ -278,7 +278,7 @@ class Query
    */
   public function andWhere(string $condition): self
   {
-    if (empty($condition)) return $this;
+    if (empty($condition)) throw new QueryException("A condição não pode ser vazia.");
 
     $query = "AND $condition";
 
