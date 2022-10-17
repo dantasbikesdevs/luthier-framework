@@ -182,69 +182,6 @@ class Query
   }
 
   /**
-   * Adiciona uma condição "where" com os filtros recebidos por array.
-   * Os valores no objeto devem ser passados no formato ["ID = :id", ["id" => 1]], não inverta a ordem!
-   * Primeiro a string com a condição e depois o array com os parâmetros.
-   * Será retornado um registro caso corresponda a todos os filtros passados
-   * Para executar adicione o método run() no final.
-   *
-   * Obs.: Caso algum parâmetro de um filtro passado seja vazio ou nulo, esse filtro será ignorado.
-   */
-  public function filterWhere(array $filters): self
-  {
-    if (empty($filters)) return $this;
-
-    $filterSQL = $this->transformFiltersInWhere($filters);
-    if (empty($filterSQL)) return $this;
-
-    $query = "WHERE ($filterSQL)";
-    $this->addToQueryStore($query);
-    return $this;
-  }
-
-  /**
-   * Transforma array de filtros em uma cláusula de WHERE.
-   * Exemplo: [["id > ?", [1]], ["name = ?", ["John"]]]
-   * Resultado: WHERE (id > ? AND name = ?)
-   * Exemplo 2: ["ID" => 1, "NAME" => "John"]
-   * Resultado: WHERE (ID = ? AND NAME = ?)
-   */
-  private function transformFiltersInWhere(array $filters): string
-  {
-    $filterSQL = "";
-    foreach ($filters as $key => $filter) {
-      if (is_string($key)) {
-        if ((empty($filter) && $filter != 0) || is_null($filter)) continue;
-
-        $filterSQL .= "{$key} = :{$key} AND ";
-        $this->setParam($key, $filter); continue;
-      }
-
-      if (is_string($filter)) {
-        $filterSQL .= "{$filter} AND "; continue;
-      }
-
-      if (!is_array($filter)) throw new QueryException("O filtro deve ser uma string ou um array.");
-
-      $query = $filter[0] ?? "";
-      $queryParams = $filter[1] ?? [];
-
-      if (empty($query)) throw new QueryException("Filtro inválido. A query não pode estar vazia.");
-
-      $queryParamsFiltered = array_filter($queryParams, fn ($value) => (!empty($value) || $value == 0) && !is_null($value));
-
-      if (count($queryParamsFiltered) < count($queryParams)) {
-        unset($filters[$key]); continue;
-      }
-
-      $filterSQL .= "{$query} AND ";
-      $this->setParams($queryParams);
-    }
-
-    return substr($filterSQL, 0, -5);
-  }
-
-  /**
    * Adiciona uma condição "where". Recebe uma condição no formato "campo = [valor]" e retorna um objeto Query.
    * Para executar adicione o método run() no final.
    */
@@ -284,6 +221,104 @@ class Query
 
     $this->addToQueryStore($query);
     return $this;
+  }
+
+  /**
+   * Adiciona uma condição "where" com os filtros recebidos por array.
+   *
+   * Formas possíveis de passar os filtros:
+   *
+   * Exemplo 1: ["ID" => 1, "NAME" => "John"]
+   * Resultado: WHERE (ID = ? AND NAME = ?)
+   *
+   * Exemplo 2: ["DATA_ENTREGA IS NOT NULL"]
+   * Resultado: WHERE (DATA_ENTREGA IS NOT NULL)
+   *
+   * Exemplo 3: [["id > ?", [1]], ["name = ?", ["John"]]]
+   * Resultado: WHERE (id > ? AND name = ?)
+   *
+   * Será retornado um registro caso corresponda a todos os filtros passados
+   * Para executar adicione o método run() no final.
+   *
+   * Obs.: Caso algum parâmetro de um filtro passado seja vazio ou nulo, esse filtro será ignorado.
+   * Recomendamos a não passar valores dinâmicos diretamente na string devido o risco de SQL injection.
+   */
+  public function filterWhere(array $filters): self
+  {
+    if (empty($filters)) return $this;
+
+    $filterSQL = $this->transformFiltersInWhere($filters);
+    if (empty($filterSQL)) return $this;
+
+    $query = "WHERE ($filterSQL)";
+    $this->addToQueryStore($query);
+    return $this;
+  }
+
+  /**
+   * Transforma array de filtros em uma cláusula de WHERE.
+   */
+  private function transformFiltersInWhere(array $filters): string
+  {
+    $filterSQL = "";
+    foreach ($filters as $key => $filter) {
+      if (is_string($key)) {
+        $this->firstWayToAddFilters($key, $filter, $filterSQL); continue;
+      }
+
+      if (is_string($filter)) {
+        $filterSQL .= "{$filter} AND "; continue;
+      }
+
+      if (is_array($filter[1])) {
+        $this->thirdWayToAddFilters($key, $filter, $filters, $filterSQL); continue;
+      }
+    }
+
+    return substr($filterSQL, 0, -5);
+  }
+
+  /**
+   * Método responsável por transformar a primeira forma possível de filtro em uma cláusula de WHERE.
+   *
+   * Exemplo:
+   * Entrada no método filterWhere: ["ID" => 1];
+   * Saída: WHERE (ID = :ID)
+   */
+  private function firstWayToAddFilters(int|string $key, int|string|bool|float|null $value, string &$filterSQL): void
+  {
+    if ((empty($value) && $value != 0) || is_null($value)) return;
+
+    $filterSQL .= "{$key} = :{$key} AND ";
+    $this->setParam($key, $value);
+  }
+
+  /**
+   * Método responsável por transformar a terceira forma possível de filtro em uma cláusula de WHERE
+   *
+   * Exemplo:
+   * Entrada no método filterWhere: ["ID = :id", ["id" => 1]]; Saída: WHERE (ID = :id)
+   */
+  private function thirdWayToAddFilters(
+    int|string $key,
+    array $filter,
+    array &$filters,
+    string &$filterSQL
+  ): void
+  {
+    $query = $filter[0] ?? "";
+    $queryParams = $filter[1] ?? [];
+
+    if (empty($query)) throw new QueryException("Filtro inválido. A query não pode estar vazia.");
+
+    $queryParamsFiltered = array_filter($queryParams, fn ($value) => (!empty($value) || $value == 0) && !is_null($value));
+
+    if (count($queryParamsFiltered) < count($queryParams)) {
+      unset($filters[$key]); return;
+    }
+
+    $filterSQL .= "{$query} AND ";
+    $this->setParams($queryParams);
   }
 
   /**
