@@ -38,3 +38,4 @@
 - Alteração do queryBuilder. Foi removido o tratamento de parâmetros através dos pipes e/ou colchetes
 por não serem tão confiáveis. Agora é através de um array de parâmetro e eles podem ser setados pelos métodos setParam ou setParams.
 - Caso seja passado uma condição vazia como parâmetro nos métodos que setam condições a query (where, andWhere e orWhere), será lançado uma exceção do tipo QueryException.
+- Nova atributo para indicar se a resposta deve ser convertida para entidades HTML.
