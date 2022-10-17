@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Luthier\Http;
 
-use Luthier\Exceptions\ResponseException;
 use Luthier\Reflection\Reflection as Reflection;
-use Luthier\Utils\Transform;
 use Luthier\Xml\XmlParser;
 
 class Response
@@ -36,6 +34,12 @@ class Response
    * Charset da resposta
    */
   private string $charset = "utf-8";
+
+  /**
+   * Define se o conteúdo da resposta deve ser convertido para entidades HTML.
+   * Por segurança, o valor padrão é TRUE.
+   */
+  private bool $encodeHtmlSpecialChars = true;
 
   /**
    *  Construtor define os valores
@@ -144,6 +148,15 @@ class Response
   public function getCharset(): string
   {
     return $this->charset;
+  }
+
+  /**
+   * Desativa a conversão de caracteres especiais HTML da resposta
+   */
+  public function disableEncodeHtmlSpecialChars(): self
+  {
+    $this->encodeHtmlSpecialChars = false;
+    return $this;
   }
 
   /**
@@ -359,7 +372,7 @@ class Response
 
   // ! MÉTODOS INTERNOS
   /**
-   * Método responsável por sanitizar a resposta para o cliente
+   * Método responsável por formatar a saída para o cliente
    */
   private function sanitize(mixed $content): mixed
   {
@@ -369,20 +382,35 @@ class Response
       $content = Reflection::getValuesObjectToReturnUser($content);
     }
 
-    if (!is_array($content)) return $content;
+    if (!is_array($content)) return $this->encodeHtmlEntities($content);
 
     $cleanContent = [];
     foreach ($content as $key => $value) {
-      if ($toLower) $key = strtolower((string)$key);
-      $cleanValue = $value;
-      if (is_array($cleanValue) || is_object($cleanValue)) {
-        $cleanContent[$key] = $this->sanitize($cleanValue);
-      } else if (isset($cleanValue)) {
-        $cleanContent[$key] = $cleanValue;
+      if ($toLower) {
+        $key = strtolower((string)$key);
+      }
+
+      if (is_array($value) || is_object($value)) {
+        $cleanContent[$key] = $this->sanitize($value);
+      } else {
+        $cleanContent[$key] = $this->encodeHtmlEntities($value);
       }
     }
 
     return $cleanContent;
+  }
+
+  /**
+   * Método responsável por converter caracteres especiais em entidades HTML,
+   * caso o parâmetro passado seja uma string.
+   */
+  private function encodeHtmlEntities(mixed $value): mixed
+  {
+    if (!$this->encodeHtmlSpecialChars) return $value;
+
+    if (!is_string($value)) return $value;
+
+    return htmlspecialchars($value);
   }
 
   /**
