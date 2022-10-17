@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Luthier\Http;
 
 use Luthier\Reflection\Reflection as Reflection;
+use Luthier\Resource\Contracts\Model;
 use Luthier\Xml\XmlParser;
 
 class Response
@@ -378,7 +379,7 @@ class Response
   {
     $toLower = getenv("LOWER_CASE_RETURN") == "true" ? true : false;
 
-    if (is_object($content)) {
+    if (is_object($content) && $content instanceof Model) {
       $content = Reflection::getValuesObjectToReturnUser($content);
     }
 
