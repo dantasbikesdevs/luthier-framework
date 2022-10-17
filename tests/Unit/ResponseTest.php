@@ -25,10 +25,19 @@ test("deve enviar uma resposta corretamente", function () {
     ->getCode()->toBe(200);
 });
 
-test("deve tratar HTMLSPECIALCHARS e remover tags HTML", function () {
+test("deve pular tratamento de HTMLSPECIALCHARS", function () {
   $response = new Response();
+  $response->disableEncodeHtmlSpecialChars();
   $response->send("<script>alert('Ola Mundo')</script>");
 
   expect($response->getContent())
     ->toBe("<script>alert('Ola Mundo')</script>");
+});
+
+test("deve tratar HTMLSPECIALCHARS", function () {
+  $response = new Response();
+  $response->send("<script>alert('Ola Mundo')</script>");
+
+  expect($response->getContent())
+    ->toBe("&lt;script&gt;alert(&#039;Ola Mundo&#039;)&lt;/script&gt;");
 });
