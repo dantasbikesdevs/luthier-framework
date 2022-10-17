@@ -9,32 +9,14 @@ use Luthier\Database\Query;
 class PermissionsRepository extends AbstractRepository
 {
   /**
-   * Nome da tabela do repositório.
+   * Nome da tabela de relação do repositório.
    */
-  protected string $tableName;
-
-  /**
-   * Chave primária da tabela do repositório.
-   */
-  protected string $primaryKey;
-
-  /**
-   * Váriavel responsável por guardar a classe do model atual.
-   */
-  protected $model;
-
-  /**
-   * Váriavel responsável por guardar queryBuilder.
-   */
-  private Query $queryBuilder;
+  protected string $tableRelation;
 
   public function __construct()
   {
-    $this->tableName     = "PERMISSIONS";
     $this->tableRelation = "USER_PERMISSIONS";
-    $this->primaryKey    = "ID";
-    $this->model         = null;
-    $this->queryBuilder  = new Query();
+    parent::__construct("PERMISSIONS", "ID");
   }
 
   /**
@@ -55,15 +37,9 @@ class PermissionsRepository extends AbstractRepository
     $this->queryBuilder
       ->delete()
       ->from($this->tableRelation)
-      ->where("ID_USER = |$id|")
+      ->where("ID_USER = :id")
+      ->setParam("id", $id)
       ->run();
-  }
-
-  public function findOne($id){
-    return $this->queryBuilder->select()
-      ->from($this->tableName)
-      ->where("ID = |$id|")
-      ->first();
   }
 
   public function findByUser(UserEntity $user){
@@ -71,7 +47,8 @@ class PermissionsRepository extends AbstractRepository
     return $this->queryBuilder->select("p.*")
       ->from("$this->tableName p")
       ->innerJoinWith("$this->tableRelation up", "up.ID_PERMISSION = p.ID")
-      ->where("up.ID_USER = |$id|")
+      ->where("up.ID_USER = :id")
+      ->setParam("id", $id)
       ->all();
   }
 
@@ -83,8 +60,10 @@ class PermissionsRepository extends AbstractRepository
       SELECT p.ID FROM PERMISSIONS p
       JOIN USER_PERMISSIONS up ON up.ID_PERMISSION = p.ID
       JOIN USUARIOS_HOST uh ON uh.COD =  up.ID_USER
-      WHERE uh.COD = |$id|
+      WHERE uh.COD = :id
       );"
-    );
+    )
+    ->setParam("id", $id)
+    ->all();
   }
 }

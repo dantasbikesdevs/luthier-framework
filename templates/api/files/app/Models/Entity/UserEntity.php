@@ -2,7 +2,9 @@
 
 namespace App\Models\Entity;
 
-class UserEntity extends Entity
+use Luthier\Resource\Contracts\Model;
+
+class UserEntity extends Entity implements Model
 {
   public readonly ?int $ID;
   public string $NAME;
@@ -11,6 +13,9 @@ class UserEntity extends Entity
   public int $AGE;
   protected array $PERMISSIONS;
   protected array $ROLES;
+
+  private array $hiddenAttributes = ["PASSWORD"];
+  private array $unusedInSQL = ["ID", "PERMISSIONS", "ROLES"];
 
   public function __construct($values = null)
   {

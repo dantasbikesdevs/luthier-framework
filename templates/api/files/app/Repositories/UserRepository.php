@@ -2,81 +2,31 @@
 
 namespace App\Repositories;
 
-use App\Database\ApplicationDatabase;
 use App\Repositories\AbstractRepository;
 use App\Models\Entity\UserEntity;
-use Luthier\Database\Database;
-use Luthier\Database\Query;
 use App\Repositories\PermissionsRepository;
 use App\Repositories\RolesRepository;
 
 class UserRepository extends AbstractRepository
 {
-  /**
-   * Nome da tabela do repositório.
-   */
-  protected string $tableName;
-
-  /**
-   * Chave primária da tabela do repositório.
-   */
-  protected string $primaryKey;
-
-  /**
-   * Váriavel responsável por guardar a classe do model atual.
-   */
-  protected $model;
-
-  /**
-   * Váriavel responsável por guardar queryBuilder.
-   */
-  private Query $queryBuilder;
-
-  /**
-   * Váriavel responsável por guardar a instância do banco de dados.
-   */
-  private Database $database;
-
   public function __construct()
   {
-    $this->tableName    = "USERS";
-    $this->primaryKey   = "ID";
-    $this->model        = UserEntity::class;
-    $this->database     = ApplicationDatabase::getInstance();
-    $this->queryBuilder = new Query();
-  }
-
-  public function findOne(int $id)
-  {
-    $user = $this->queryBuilder->select()
-      ->from($this->tableName)
-      ->where("$this->primaryKey = |$id|")
-      ->asObject($this->model)
-      ->first();
-
-    return $user;
-  }
-
-  public function findAll()
-  {
-    return $this->queryBuilder->select()
-      ->from($this->tableName)
-      ->asObject($this->model)
-      ->all();
+    parent::__construct("USERS", "ID", UserEntity::class);
   }
 
   /**
    * Procura por um usuário pelo seu e-mail e retorna um array com o id do usuário, um objeto (UserEntity) e um a senha pós hash
    */
-  public function findOneByEmail(string $email): UserEntity | array
+  public function findOneByEmail(string $email): ?UserEntity
   {
     $user = $this->queryBuilder->select()
       ->from($this->tableName)
-      ->where("EMAIL = |$email|")
+      ->where("EMAIL = :email")
+      ->setParam("email", $email)
       ->asObject($this->model)
       ->first();
 
-    if (!$user) return [];
+    if (!$user) return null;
 
     return $user;
   }
@@ -103,7 +53,8 @@ class UserRepository extends AbstractRepository
     }
 
     return $this->queryBuilder->update($user, $this->tableName)
-      ->where("$this->primaryKey = |$id|")
+      ->where("$this->primaryKey = :id")
+      ->setParam("id", $id)
       ->run();
 
   }

@@ -4,31 +4,18 @@ namespace App\Repositories;
 
 use App\Repositories\AbstractRepository;
 use App\Models\Entity\UserEntity;
-use Luthier\Database\Query;
 
 class RolesRepository extends AbstractRepository
 {
   /**
-   * Nome da tabela do repositório.
+   * Nome da tabela de relação do repositório.
    */
-  protected string $tableName;
-
-  /**
-   * Chave primária da tabela do repositório.
-   */
-  protected string $primaryKey;
-
-  /**
-   * Váriavel responsável por guardar queryBuilder.
-   */
-  private Query $queryBuilder;
+  protected string $tableRelation;
 
   public function __construct()
   {
-    $this->tableName     = "ROLES";
     $this->tableRelation = "USER_ROLES";
-    $this->primaryKey    = "ID";
-    $this->queryBuilder  = new Query();
+    parent::__construct("ROLES", "ID");
   }
 
   public function createRelation(UserEntity $user, $roleId){
@@ -43,15 +30,9 @@ class RolesRepository extends AbstractRepository
     $this->queryBuilder
       ->delete()
       ->from($this->tableRelation)
-      ->where("ID_USER = |$id|")
+      ->where("ID_USER = :id")
+      ->setParam("id", $id)
       ->run();
-  }
-
-  public function findOne($id){
-    return $this->queryBuilder->select()
-      ->from($this->tableName)
-      ->where("ID = |$id|")
-      ->first();
   }
 
   public function findByUser(UserEntity $user){
@@ -60,7 +41,8 @@ class RolesRepository extends AbstractRepository
     return $this->queryBuilder->select("r.*")
       ->from("$this->tableName r")
       ->innerJoinWith("$this->tableRelation ur", "ur.ID_ROLE = r.ID")
-      ->where("ur.ID_USER = |$id|")
+      ->where("ur.ID_USER = :id")
+      ->setParam("id", $id)
       ->all();
   }
 
@@ -72,8 +54,10 @@ class RolesRepository extends AbstractRepository
       SELECT r.ID FROM ROLES r
       JOIN USER_ROLES    ur ON ur.ID_ROLE = r.ID
       JOIN USUARIOS_HOST uh ON uh.COD     = ur.ID_USER
-      WHERE uh.COD = '${id}'
+      WHERE uh.COD = :id
       );"
-    );
+    )
+    ->setParam("id", $id)
+    ->all();
   }
 }

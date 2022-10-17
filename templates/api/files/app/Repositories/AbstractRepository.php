@@ -7,7 +7,6 @@ use Luthier\Database\Query;
 
 abstract class AbstractRepository implements IRepository
 {
-
   /**
    * Nome da tabela do repositório.
    */
@@ -26,18 +25,31 @@ abstract class AbstractRepository implements IRepository
   /**
    * Váriavel responsável por guardar queryBuilder.
    */
-  private Query $queryBuilder;
+  protected Query $queryBuilder;
+
+  public function __construct(
+    string $tableName,
+    string $primaryKey,
+    $model = null,
+    ?Query $query = null,
+  ) {
+    $this->tableName    = $tableName;
+    $this->primaryKey   = $primaryKey;
+    $this->model        = $model;
+    $this->queryBuilder = $query ?? new Query();
+  }
 
   public function findOne(int $id)
   {
     return $this->queryBuilder->select()
       ->from($this->tableName)
-      ->where("$this->primaryKey = |$id|")
+      ->where("$this->primaryKey = :id")
+      ->setParam("id", $id)
       ->asObject($this->model)
       ->first();
   }
 
-  public function findAll()
+  public function findAll(): array
   {
     return $this->queryBuilder->select()
       ->from($this->tableName)
@@ -55,14 +67,16 @@ abstract class AbstractRepository implements IRepository
   public function update($model, int $id)
   {
     return $this->queryBuilder->update($model, $this->tableName)
-      ->where("$this->primaryKey = |$id|")
+      ->where("$this->primaryKey = :id")
+      ->setParam("id", $id)
       ->run();
   }
 
   public function destroy(int $id)
   {
     return $this->queryBuilder->delete($this->tableName)
-      ->where("$this->primaryKey = |$id|")
+      ->where("$this->primaryKey = :id")
+      ->setParam("id", $id)
       ->run();
   }
 }
