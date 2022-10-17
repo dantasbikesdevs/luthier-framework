@@ -289,22 +289,18 @@ class Request
   }
 
   /**
-   * Método responsável por limpar os dados do post, evitando injection e XSS
+   * Método responsável por sanitizar os dados da requisição
    */
   private function sanitize(array $params): array
   {
-    $patterns[] = '/--/';
-
     foreach ($params as $key => $value) {
-      $cleanValue = $value;
-      if (is_array($cleanValue)) {
-        $this->sanitize($cleanValue);
-      } else if (isset($cleanValue)) {
-        if (is_string($cleanValue)) {
-          $cleanValue = trim($cleanValue);
-          $cleanValue = preg_replace($patterns, '', $cleanValue);
+      if (is_array($value)) {
+        $this->sanitize($value);
+      } else {
+        if (is_string($value)) {
+          $value = trim($value);
         }
-        $params[$key] = $cleanValue;
+        $params[$key] = $value;
       }
     }
 
