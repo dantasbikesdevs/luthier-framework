@@ -7,6 +7,7 @@ namespace Luthier\Http;
 use Luthier\Reflection\Reflection as Reflection;
 use Luthier\Resource\Contracts\Model;
 use Luthier\Xml\XmlParser;
+use phpDocumentor\Reflection\Element;
 
 class Response
 {
@@ -59,7 +60,8 @@ class Response
   {
     $this->setCode($code);
     $this->setContent($content);
-    return $this->httpResponse();
+
+    return $this;
   }
 
   /**
@@ -224,21 +226,6 @@ class Response
     $type = 'text/html';
     $this->contentType = $type;
     return $this;
-  }
-
-  /**
-   * Método responsável por enviar uma resposta ou erro
-   */
-  private function httpResponse(): Response
-  {
-    $code = $this->httpCode;
-    $content = $this->content;
-
-    $response = new Response();
-    $response->setCode($code);
-    $response->setContent($content);
-    $response->setContentType($this->contentType);
-    return $response;
   }
 
   // * Códigos de resposta HTTP. Última coisa a ser colocada na resposta.
