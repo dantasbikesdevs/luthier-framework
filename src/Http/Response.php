@@ -224,14 +224,6 @@ class Response
     $code = $this->httpCode;
     $content = $this->content;
 
-    if (!is_array($content) && !is_object($content)) {
-      if ($code >= 400) {
-        $content = ["error" => $content];
-      } else {
-        $content = ["message" => $content];
-      }
-    }
-
     $response = new Response();
     $response->setCode($code);
     $response->setContent($content);
