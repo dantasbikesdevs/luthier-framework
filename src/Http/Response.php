@@ -7,7 +7,6 @@ namespace Luthier\Http;
 use Luthier\Reflection\Reflection as Reflection;
 use Luthier\Resource\Contracts\Model;
 use Luthier\Xml\XmlParser;
-use phpDocumentor\Reflection\Element;
 
 class Response
 {
