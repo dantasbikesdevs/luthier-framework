@@ -217,6 +217,16 @@ class Response
   }
 
   /**
+   * Método responsável por configurar requisição para HTML
+   */
+  public function asHtml(): self
+  {
+    $type = 'text/html';
+    $this->contentType = $type;
+    return $this;
+  }
+
+  /**
    * Método responsável por enviar uma resposta ou erro
    */
   private function httpResponse(): Response
