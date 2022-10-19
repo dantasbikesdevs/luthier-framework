@@ -38,9 +38,11 @@ class Response
 
   /**
    * Define se o conteúdo da resposta deve ser convertido para entidades HTML.
-   * Por segurança, o valor padrão é TRUE.
+   * Por segurança, o valor padrão é um array vazio e todos os atributos acabam
+   * sendo convertidos. Caso queira ignorar algum, passe-o no seguinte formato:
+   * ["nome_atributo1", "nome_atributo2", ...]
    */
-  private bool $encodeHtmlSpecialChars = true;
+  private array|bool $ignoreAttributesHtmlSpecialChars = false;
 
   /**
    *  Construtor define os valores
@@ -155,9 +157,14 @@ class Response
   /**
    * Desativa a conversão de caracteres especiais HTML da resposta
    */
-  public function disableEncodeHtmlSpecialChars(): self
+  public function ignoreAttributesEncodeHtmlSpecialChars(array $attributes = []): self
   {
-    $this->encodeHtmlSpecialChars = false;
+    if (empty($attributes)) {
+      $this->ignoreAttributesHtmlSpecialChars = true;
+    } else {
+      $this->ignoreAttributesHtmlSpecialChars = $attributes;
+    }
+
     return $this;
   }
 
@@ -382,7 +389,7 @@ class Response
       if (is_array($value) || is_object($value)) {
         $cleanContent[$key] = $this->sanitize($value);
       } else {
-        $cleanContent[$key] = $this->encodeHtmlEntities($value);
+        $cleanContent[$key] = $this->encodeHtmlEntities($value, $key);
       }
     }
 
@@ -393,13 +400,15 @@ class Response
    * Método responsável por converter caracteres especiais em entidades HTML,
    * caso o parâmetro passado seja uma string.
    */
-  private function encodeHtmlEntities(mixed $value): mixed
+  private function encodeHtmlEntities(mixed $value, int|string|null $key = null): mixed
   {
-    if (!$this->encodeHtmlSpecialChars) return $value;
+    if ($this->contentType === "text/html" && $this->ignoreAttributesHtmlSpecialChars === false) return $value;
 
-    if (!is_string($value)) return $value;
+    if (is_bool($this->ignoreAttributesHtmlSpecialChars) && $this->ignoreAttributesHtmlSpecialChars) return $value;
 
-    return htmlspecialchars($value);
+    if (is_array($this->ignoreAttributesHtmlSpecialChars) && in_array($key, $this->ignoreAttributesHtmlSpecialChars)) return $value;
+
+    return is_string($value) ? htmlspecialchars($value) : $value;
   }
 
   /**
