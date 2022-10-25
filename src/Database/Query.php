@@ -118,9 +118,12 @@ class Query
      */
     foreach ($fieldsAndValues as $key => $value) {
       $queryFields[] = $key;
-      $mappedValues[] = ":{$key}";
 
-      $this->setParam($key, $value);
+      $cleanKey = $this->cleanParameterKey($key);
+
+      $mappedValues[] = ":{$cleanKey}";
+
+      $this->setParam($cleanKey, $value);
     }
 
     $implodedFields = implode(',', $queryFields);
@@ -154,9 +157,11 @@ class Query
      * Em um array de valores assim: ["age = :age", "position = :position", "power = :power"]
      */
     foreach ($fieldsAndValues as $key => $value) {
-      $queryFields[] = "{$key} = :{$key}";
+      $cleanKey = $this->cleanParameterKey($key);
 
-      $this->setParam($key, $value);
+      $queryFields[] = "{$key} = :{$cleanKey}";
+
+      $this->setParam($cleanKey, $value);
     }
 
     $implodedValues = implode(',', $queryFields);
@@ -288,6 +293,13 @@ class Query
   private function firstWayToAddFilters(int|string $key, int|string|bool|float|null $value, string &$filterSQL): void
   {
     if ((empty($value) && $value != 0) || is_null($value)) return;
+
+    if (is_string($key)) {
+      $cleanKey = $this->cleanParameterKey($key);
+      $filterSQL .= "{$key} = :{$cleanKey} AND ";
+      $this->setParam($cleanKey, $value);
+      return;
+    }
 
     $filterSQL .= "{$key} = :{$key} AND ";
     $this->setParam($key, $value);
@@ -549,6 +561,15 @@ class Query
   }
 
   // ! PRIVATE METHODS
+
+  /**
+   * Método responsável por remover caracteres especiais para as chaves de parâmetro
+   * para que seja possível setar o parâmetro corretamente.
+   */
+  private function cleanParameterKey(string $value): string
+  {
+    return preg_replace("/[^a-zA-Z0-9_]/", "", $value);
+  }
 
   /**
    * Evita que operações perigosas sejam executadas. Pode ser pulado com forceDangerousCommand("justificativa")
