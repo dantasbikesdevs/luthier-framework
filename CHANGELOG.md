@@ -40,3 +40,8 @@ por não serem tão confiáveis. Agora é através de um array de parâmetro e e
 - Caso seja passado uma condição vazia como parâmetro nos métodos que setam condições a query (where, andWhere e orWhere), será lançado uma exceção do tipo QueryException.
 - Nova atributo para indicar se a resposta deve ser convertida para entidades HTML.
 - Nova interface para modelos que devem ser tratados pelos métodos de Reflection ao serem retornados para o usuário.
+
+# V2.0.1
+- Corrige problema ao inserir/atualizar campos que possuem caracteres especiais no nome da coluna.
+- Corrige problema ao realizar filtros com alias de tabela e/ou com caracteres especiais no
+nome da coluna.
