@@ -45,3 +45,6 @@ por não serem tão confiáveis. Agora é através de um array de parâmetro e e
 - Corrige problema ao inserir/atualizar campos que possuem caracteres especiais no nome da coluna.
 - Corrige problema ao realizar filtros com alias de tabela e/ou com caracteres especiais no
 nome da coluna.
+
+# V2.1.0
+- Método para geração de UUID v4.
