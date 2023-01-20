@@ -3,102 +3,104 @@
 namespace Luthier\Http\Middlewares;
 
 use Exception;
-use Luthier\Http\Middlewares\IMiddleware;
 use Luthier\Http\Response;
 use Luthier\Http\Request;
+use Luthier\Http\Router\Contracts\Route as RouteInterface;
 
 class Queue
 {
-  /**
-   * Mapeamento de middlewares
-   */
-  private static array $map = [];
-
-  /**
-   * Mapeamento de middlewares padrões em todas rotas
-   */
-  private static array $default = [];
-
-  /**
-   * Fila de middleware a serem executados
-   */
-  private array $middlewares = [];
-
-  /**
-   * Função de execução do controller
-   * @var callable
-   */
-  private $controller;
-
-  /**
-   * Argumentos da função do controller
-   */
-  private array $controllerArgs = [];
-
-  /**
-   * Método para construção do middleware
-   */
-  public function __construct(array $middlewares, callable $controller, array $controllerArgs)
-  {
-    $this->middlewares = array_merge(self::$default, $middlewares);
-    $this->controller = $controller;
-    $this->controllerArgs = $controllerArgs;
-  }
-
-  /**
-   * Método responsável por setar o mapa de middlewares
-   */
-  public static function setMap(array $map)
-  {
-    self::$map = $map;
-  }
-
-  /**
-   * Método responsável por setar o mapa de middlewares
-   */
-  public static function setDefault(array $default)
-  {
-    self::$default = $default;
-  }
-
-  /**
-   * Método responsável por executar os middlewares e controllers
-   */
-  public function next(Request $request, Response $response): Response
-  {
-    // Se não tivermos middlewares na fila então podemos pular tudo e executar o controller
-    if (empty($this->middlewares)) return call_user_func_array($this->controller, $this->controllerArgs);
-
-    // Pega o primeiro elemento da lista e o remove ao mesmo tempo (array_shift tem efeitos colaterais por usar a lista como referência)
-    $middleware = array_shift($this->middlewares);
-
-    // Se o middleware passado não estiver presente na lista de middlewares criada com a função setMap nós retornamos um erro
-    if (!isset(self::$map[$middleware])) {
-      return $response->internalServerError('Problemas ao processar um middleware');
-    }
-
-    // A fila recebe a atual instância deste objeto (reutilizando as propriedades)
-    $queue = $this;
+    /**
+     * Middlewares da aplicação.
+     * @var array<string, string>
+     */
+    private static array $middlewares = [];
 
     /**
-     * A função next usa o contexto do atual objeto de fila e chama o método queue até o momento em que algo interrompe o processo.
-     * - Consumir todos os elementos da lista de middlewares interrompe o processo
-     * - Não encontrar um middleware interrompe o processo
-     * - Não encontrar a função handle em um middleware interrompe o processo
+     * Middlewares que executarão em todas as rotas.
+     * @var array<string, string>
      */
-    $next  = function ($request, $response) use ($queue) {
-      return $queue->next($request, $response);
-    };
+    private static array $middlewaresDefaults = [];
 
-    // Cria um objeto com a classe que corresponde ao middleware cadastrado no $map
-    $actualMiddleware = new self::$map[$middleware];
+    /**
+     * Rota atual.
+     */
+    private RouteInterface $router;
 
-    // Executa o middleware apenas de ele implementar IMiddleware
-    if ($actualMiddleware instanceof IMiddleware) {
-      return $actualMiddleware->handle($request, $response, $next);
+    /**
+     * @var callable
+     */
+    private $controller;
+
+    public function __construct(RouteInterface $router, callable $controller)
+    {
+        $this->router = $router;
+        $this->controller = $controller;
     }
 
-    // Executado apenas quando o middleware não implementa a interface desejada
-    throw new Exception("Todos os middlewares devem implementar IMiddleware. Erro acontecendo ao interpretar middleware $middleware", 500);
-  }
+    /**
+     * Método responsável por cadastrar os middlewares da aplicação.
+     */
+    public static function map(array $middlewares): void
+    {
+        foreach ($middlewares as $name => $middleware) {
+            self::$middlewares[$name] = $middleware;
+        }
+    }
+
+    /**
+     * Método responsável por adicionar os middlewares padrões.
+     */
+    public static function addDefaults(array $middlewares): void
+    {
+        foreach ($middlewares as $key => $middleware) {
+            self::$middlewaresDefaults[$key] = $middleware;
+        }
+    }
+
+    /**
+     * Método responsável por retornar todos os middlewares da fila.
+     */
+    public function middlewares(): array
+    {
+        $routerMiddlewares = $this->router->getMiddlewares();
+
+        return array_merge(self::$middlewaresDefaults, $routerMiddlewares);
+    }
+
+    /**
+     * Método responsável por executar os middlewares.
+     */
+    public function execute(Request $request): mixed
+    {
+        $middlewares = $this->middlewares();
+
+        return $this->next($request, $middlewares);
+    }
+
+    /**
+     * Método responsável por executar o middleware.
+     */
+    private function next(Request $request, array &$middlewares): mixed
+    {
+        if (empty($middlewares)) return call_user_func($this->controller);
+
+        $middleware = array_shift($middlewares);
+
+        if (!isset(self::$middlewares[$middleware])) {
+            throw new Exception("Middleware {$middleware} não encontrado.");
+        }
+
+        $queue = $this;
+        $next = function (Request $request) use ($queue, $middlewares) {
+            return $queue->next($request, $middlewares);
+        };
+
+        $currentMiddleware = new self::$middlewares[$middleware];
+
+        if (!$currentMiddleware instanceof IMiddleware) {
+            throw new Exception("Middleware não implementa a interface Middleware.");
+        }
+
+        return $currentMiddleware->handle($request, new Response(), $next);
+    }
 }

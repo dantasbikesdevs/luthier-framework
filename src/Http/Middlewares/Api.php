@@ -9,7 +9,7 @@ use Luthier\Http\Response;
 
 class Api implements IMiddleware
 {
-  public function handle(Request $request, Response $response, Closure $next): Response
+  public function handle(Request $request, Response $response, Closure $next): mixed
   {
     $response->asJson();
     return $next($request, $response);

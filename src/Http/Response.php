@@ -126,6 +126,7 @@ class Response
     foreach ($headers as $key => $value) {
       $this->headers[$key] = $value;
     }
+
     return $this;
   }
 
@@ -421,6 +422,7 @@ class Response
 
     $contentType = $this->getHeader("Content-Type");
     if (!$contentType) $this->setHeaders(['Content-Type' => $this->getContentType()]);
+
 
     // Cria cada headers
     foreach ($this->headers as $key => $value) {
