@@ -6,6 +6,7 @@ namespace Luthier\Http\Router;
 
 use Closure;
 use Luthier\Exceptions\RouterException;
+use Luthier\Http\Request;
 use Luthier\Http\Router\Contracts\Route as RouteInterface;
 use Luthier\Http\Router\Contracts\Controller as ControllerInterface;
 
@@ -47,9 +48,12 @@ class Route implements RouteInterface
      */
     private array $variables;
 
+    private static Request $request;
+
     public function __construct(
         string $method,
-        string $uri
+        string $uri,
+        Request $request
     )
     {
         $this->httpMethod = $method;
@@ -58,6 +62,7 @@ class Route implements RouteInterface
         $this->middlewares = [];
         $this->variables = [];
         $this->setUri($uri);
+        self:: $request = $request;
     }
 
     /**
@@ -173,6 +178,30 @@ class Route implements RouteInterface
     public function getMiddlewares(): array
     {
         return $this->middlewares;
+    }
+
+    /**
+     * Método responsável por retornar as variáveis da rota.
+     */
+    public function getVariables(): array
+    {
+        $values = $this->getValueOfVariables();
+
+        return array_merge([
+            "request" => self:: $request
+        ], array_combine($this->variables, $values));
+    }
+
+    /**
+     * Método responsável por retornar os valores das variáveis da rota.
+     */
+    private function getValueOfVariables(): array
+    {
+        preg_match($this->getUri(), self:: $request->getUri(), $variables);
+
+        unset($variables[0]);
+
+        return $variables;
     }
 
     /**

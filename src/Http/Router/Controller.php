@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Luthier\Http\Router;
 
 use InvalidArgumentException;
 use Luthier\Http\Router\Contracts\Route as RouteInterface;
 use Luthier\Http\Router\Contracts\Controller as ControllerInterface;
+use ReflectionClass;
+use ReflectionMethod;
 
 class Controller implements ControllerInterface
 {
@@ -38,7 +38,50 @@ class Controller implements ControllerInterface
 
     public function getClosure()
     {
-        // TODO: Implement getClosure() method.
+        $method = $this->methodName;
+
+        $reflection = new ReflectionClass($this->className);
+
+        $arguments = $this->getArguments();
+
+        return fn () => $reflection
+            ->newInstance()
+            ->$method(...$arguments);
+    }
+
+    /**
+     * Método responsável por retornar os parâmetros do método do controlador.
+     */
+    public function getParameters(): array
+    {
+        $reflection = new ReflectionMethod($this->className, $this->methodName);
+
+        $parameters = $reflection->getParameters();
+
+        return array_map(function ($parameter) {
+            return $parameter->getName();
+        }, $parameters);
+    }
+
+    /**
+     * Método responsável por retornar os argumentos do método com os seus valores.
+     */
+    public function getArguments(): array
+    {
+        $parameters = $this->getParameters();
+
+        $variables = $this->route->getVariables();
+
+        $arguments = [];
+        foreach ($parameters as $parameter) {
+            $lowerCaseName = strtolower($parameter);
+
+            if (!isset($variables[$lowerCaseName])) continue;
+
+            $arguments[$parameter] = $variables[$lowerCaseName];
+        }
+
+        return $arguments;
     }
 
     /**

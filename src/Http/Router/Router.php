@@ -85,7 +85,7 @@ class Router implements RouterInterface
      */
     public static function prefix(string $prefix): RouteInterface
     {
-        $route = new Route("", "");
+        $route = new Route("", "", self::$request);
 
         $route->prefix(self::$prefix . $prefix);
 
@@ -102,7 +102,7 @@ class Router implements RouterInterface
         array|callable|null $action = null
     ): RouteInterface
     {
-        $route = new Route($method, $uri);
+        $route = new Route($method, $uri, self::$request);
         $route->prefix(self::$prefix);
 
         if (is_array($action)) {
