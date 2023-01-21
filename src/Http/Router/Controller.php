@@ -2,13 +2,15 @@
 
 namespace Luthier\Http\Router;
 
+use Closure;
 use InvalidArgumentException;
-use Luthier\Http\Router\Contracts\Route as RouteInterface;
+use Luthier\Http\Router\Abstracts\Action;
 use Luthier\Http\Router\Contracts\Controller as ControllerInterface;
+use Reflection;
 use ReflectionClass;
 use ReflectionMethod;
 
-class Controller implements ControllerInterface
+class Controller extends Action implements ControllerInterface
 {
     /**
      * Classe do controlador.
@@ -20,68 +22,13 @@ class Controller implements ControllerInterface
      */
     private string $methodName;
 
-    /**
-     * Rota que utiliza este controlador.
-     */
-    private RouteInterface $route;
-
     public function __construct(
         string $className,
-        string $methodName,
-        Route $route
+        string $methodName
     )
     {
         $this->setClassName($className);
         $this->setMethodName($methodName);
-        $this->route = $route;
-    }
-
-    public function getClosure()
-    {
-        $method = $this->methodName;
-
-        $reflection = new ReflectionClass($this->className);
-
-        $arguments = $this->getArguments();
-
-        return fn () => $reflection
-            ->newInstance()
-            ->$method(...$arguments);
-    }
-
-    /**
-     * Método responsável por retornar os parâmetros do método do controlador.
-     */
-    public function getParameters(): array
-    {
-        $reflection = new ReflectionMethod($this->className, $this->methodName);
-
-        $parameters = $reflection->getParameters();
-
-        return array_map(function ($parameter) {
-            return $parameter->getName();
-        }, $parameters);
-    }
-
-    /**
-     * Método responsável por retornar os argumentos do método com os seus valores.
-     */
-    public function getArguments(): array
-    {
-        $parameters = $this->getParameters();
-
-        $variables = $this->route->getVariables();
-
-        $arguments = [];
-        foreach ($parameters as $parameter) {
-            $lowerCaseName = strtolower($parameter);
-
-            if (!isset($variables[$lowerCaseName])) continue;
-
-            $arguments[$parameter] = $variables[$lowerCaseName];
-        }
-
-        return $arguments;
     }
 
     /**
@@ -110,5 +57,26 @@ class Controller implements ControllerInterface
         }
 
         $this->methodName = $methodName;
+    }
+
+    /**
+     * Método responsável por retornar a closure do controlador da rota
+     * para que seja seja executada com os seus devidos parâmetros.
+     */
+    public function getClosure(array $variables): Closure
+    {
+        $reflection = new ReflectionClass($this->className);
+
+        $reflectionMethod = new ReflectionMethod($this->className, $this->methodName);
+
+        $method = $this->methodName;
+
+        $parameters = $this->getParameters($reflectionMethod);
+
+        $arguments = $this->getArguments($parameters, $variables);
+
+        return fn() => $reflection
+            ->newInstance()
+            ->$method(...$arguments);
     }
 }

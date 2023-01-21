@@ -1,12 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Luthier\Http\Router;
 
 use Closure;
 use Luthier\Exceptions\RouterException;
 use Luthier\Http\Request;
+use Luthier\Http\Response;
 use Luthier\Http\Router\Contracts\Route as RouteInterface;
 use Luthier\Http\Router\Contracts\Controller as ControllerInterface;
 
@@ -41,13 +40,16 @@ class Route implements RouteInterface
      * Ação da rota, caso não seja passado o
      * controlador.
      */
-    private ?Closure $action;
+    private Callback $closure;
 
     /**
      * Variáveis da rota.
      */
     private array $variables;
 
+    /**
+     * Requisição atual.
+     */
     private static Request $request;
 
     public function __construct(
@@ -121,11 +123,7 @@ class Route implements RouteInterface
      */
     public function controller(string $className, $methodName): static
     {
-        $this->controller = new Controller(
-            $className,
-            $methodName,
-            $this
-        );
+        $this->controller = new Controller($className, $methodName);
 
         return $this;
     }
@@ -134,13 +132,17 @@ class Route implements RouteInterface
      * Método responsável por setar a ação da rota.
      * Utilizado para rotas que não possuem um controlador.
      */
-    public function action(callable $action): static
+    public function closure(callable $closure): static
     {
-        $this->action = $action;
+        $this->closure = new Callback($closure);
 
         return $this;
     }
 
+    /**
+     * Método responsável por setar a URI da rota já
+     * com o pattern para verificação de rotas posteriormente.
+     */
     private function setUri(string $uri): void
     {
         $patternUri = $this->patternUri($uri);
@@ -181,6 +183,25 @@ class Route implements RouteInterface
     }
 
     /**
+     * Método responsável por retornar a closure da rota,
+     * seja do controlador ou da função passada.
+     */
+    public function getAction(): ?Closure
+    {
+        if (! isset($this->controller) && ! isset($this->closure)) {
+            throw new RouterException(
+                "Nenhuma ação foi definida para esta rota."
+            );
+        }
+
+        $arguments = $this->getVariables();
+
+        return isset($this->controller) ?
+            $this->controller->getClosure($arguments)
+            : $this->closure->getClosure($arguments);
+    }
+
+    /**
      * Método responsável por retornar as variáveis da rota.
      */
     public function getVariables(): array
@@ -188,7 +209,8 @@ class Route implements RouteInterface
         $values = $this->getValueOfVariables();
 
         return array_merge([
-            "request" => self:: $request
+            "request"  => self:: $request,
+            "response" => new Response(),
         ], array_combine($this->variables, $values));
     }
 
@@ -197,28 +219,11 @@ class Route implements RouteInterface
      */
     private function getValueOfVariables(): array
     {
-        preg_match($this->getUri(), self:: $request->getUri(), $variables);
+        preg_match($this->getUri(), self::$request->getUri(), $variables);
 
         unset($variables[0]);
 
         return $variables;
-    }
-
-    /**
-     * Método responsável por retornar a closure da rota,
-     * seja do controlador ou da função passada.
-     */
-    public function getAction(): ?Closure
-    {
-        if (! isset($this->controller) && ! isset($this->action)) {
-            throw new RouterException(
-                "Nenhuma ação foi definida para esta rota."
-            );
-        }
-
-        return isset($this->controller) ?
-            $this->controller->getClosure()
-            : $this->action;
     }
 
     /**

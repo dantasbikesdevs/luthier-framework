@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Luthier\Http\Router\Contracts;
 
-use Luthier\Http\Response;
-
 interface Router
 {
     /**

@@ -28,10 +28,10 @@ interface Route
     public function controller(string $className, string $methodName): static;
 
     /**
-     * Método responsável por setar a ação da rota.
+     * Método responsável por setar a closure da rota.
      * Utilizado para rotas que não possuem um controlador.
      */
-    public function action(callable $action): static;
+    public function closure(callable $closure): static;
 
     /**
      * Método responsável por adicionar os middlewares da rota.

@@ -38,45 +38,45 @@ class Router implements RouterInterface
      * Método responsável por registrar uma nova rota GET
      * e retornar o seu registro para demais manipulações.
      */
-    public static function get(string $uri, array|callable|null $action = null): RouteInterface
+    public static function get(string $uri, array|callable|null $closure = null): RouteInterface
     {
-        return self::addRoute("GET", $uri, $action);
+        return self::addRoute("GET", $uri, $closure);
     }
 
     /**
      * Método responsável por registrar uma nova rota POST
      * e retornar o seu registro para demais manipulações.
      */
-    public static function post(string $uri, array|callable|null $action = null): RouteInterface
+    public static function post(string $uri, array|callable|null $closure = null): RouteInterface
     {
-        return self::addRoute("POST", $uri, $action);
+        return self::addRoute("POST", $uri, $closure);
     }
 
     /**
      * Método responsável por registrar uma nova rota PUT
      * e retornar o seu registro para demais manipulações.
      */
-    public static function put(string $uri, array|callable|null $action = null): RouteInterface
+    public static function put(string $uri, array|callable|null $closure = null): RouteInterface
     {
-        return self::addRoute("PUT", $uri, $action);
+        return self::addRoute("PUT", $uri, $closure);
     }
 
     /**
      * Método responsável por registrar uma nova rota PATCH
      * e retornar o seu registro para demais manipulações.
      */
-    public static function patch(string $uri, array|callable|null $action = null): RouteInterface
+    public static function patch(string $uri, array|callable|null $closure = null): RouteInterface
     {
-        return self::addRoute("PATCH", $uri, $action);
+        return self::addRoute("PATCH", $uri, $closure);
     }
 
     /**
      * Método responsável por registrar uma nova rota DELETE
      * e retornar o seu registro para demais manipulações.
      */
-    public static function delete(string $uri, array|callable|null $action = null): RouteInterface
+    public static function delete(string $uri, array|callable|null $closure = null): RouteInterface
     {
-        return self::addRoute("DELETE", $uri, $action);
+        return self::addRoute("DELETE", $uri, $closure);
     }
 
     /**
@@ -99,18 +99,18 @@ class Router implements RouterInterface
     private static function addRoute(
         string $method,
         string $uri,
-        array|callable|null $action = null
+        array|callable|null $closure = null
     ): RouteInterface
     {
         $route = new Route($method, $uri, self::$request);
         $route->prefix(self::$prefix);
 
-        if (is_array($action)) {
-            $route->controller($action[0] ?? "", $action[1] ?? "");
+        if (is_array($closure)) {
+            $route->controller($closure[0] ?? "", $closure[1] ?? "");
         }
 
-        if ($action instanceof Closure) {
-            $route->action($action);
+        if ($closure instanceof Closure) {
+            $route->closure($closure);
         }
 
         self::$routes->add($route);
