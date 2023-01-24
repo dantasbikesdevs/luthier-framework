@@ -122,8 +122,6 @@ abstract class Route implements RouteInterface
 
     /**
      * Método responsável por setar as permissões da rota.
-     *
-     * @param array<int, string> $permissions
      */
     public function is(array $permissions): static
     {
@@ -137,8 +135,6 @@ abstract class Route implements RouteInterface
 
     /**
      * Método responsável por setar as regras da rota.
-     *
-     * @param array<int, string> $rules
      */
     public function can(array $rules): static
     {
@@ -152,8 +148,6 @@ abstract class Route implements RouteInterface
 
     /**
      * Método responsável por setar as telas da rota.
-     *
-     * @param array<int, string> $screens
      */
     public function see(array $screens): static
     {
