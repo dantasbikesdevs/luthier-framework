@@ -36,6 +36,10 @@ class Group extends AbstractRoute implements GroupInterface
             $route->is($this->permissions);
             $route->can($this->rules);
             $route->see($this->screens);
+
+            if (! empty($this->controller->getClassName())) {
+                $route->controller($this->controller->getClassName());
+            }
         }
     }
 

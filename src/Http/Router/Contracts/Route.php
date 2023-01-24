@@ -42,7 +42,13 @@ interface Route
     /**
      * Método responsável por setar o controlador da rota.
      */
-    public function controller(string $className, string $methodName): static;
+    public function controller(string $className, string $methodName = ""): static;
+
+    /**
+     * Método responsável por setar o método do controlador
+     * da rota.
+     */
+    public function method(string $methodName): static;
 
     /**
      * Método responsável por setar a closure da rota.

@@ -78,6 +78,7 @@ abstract class Route implements RouteInterface
     {
         $this->httpMethod = $method;
         $this->setUri($uri);
+        $this->controller = new Controller();
         self:: $request = $request;
     }
 
@@ -167,9 +168,24 @@ abstract class Route implements RouteInterface
     /**
      * Método responsável por setar o controlador da rota.
      */
-    public function controller(string $className, $methodName): static
+    public function controller(string $className, string $methodName = ""): static
     {
-        $this->controller = new Controller($className, $methodName);
+        $this->controller->setClassName($className);
+
+        if (empty($methodName)) return $this;
+
+        $this->controller->setMethodName($methodName);
+
+        return $this;
+    }
+
+    /**
+     * Método responsável por setar o método do controlador
+     * da rota.
+     */
+    public function method(string $methodName): static
+    {
+        $this->controller->setMethodName($methodName);
 
         return $this;
     }
@@ -260,7 +276,7 @@ abstract class Route implements RouteInterface
      */
     public function getAction(): ?Closure
     {
-        if (!isset($this->controller) && !isset($this->closure)) {
+        if (! isset($this->controller) && ! isset($this->closure)) {
             throw new RouterException(
                 "Nenhuma ação foi definida para esta rota."
             );
@@ -268,9 +284,9 @@ abstract class Route implements RouteInterface
 
         $arguments = $this->getVariables();
 
-        return isset($this->controller) ?
-            $this->controller->getClosure($arguments)
-            : $this->closure->getClosure($arguments);
+        return isset($this->closure) ?
+            $this->closure->getClosure($arguments)
+            : $this->controller->getClosure($arguments);
     }
 
     /**

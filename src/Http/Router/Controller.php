@@ -23,8 +23,8 @@ class Controller extends Action implements ControllerInterface
     private string $methodName;
 
     public function __construct(
-        string $className,
-        string $methodName
+        string $className = "",
+        string $methodName = ""
     )
     {
         $this->setClassName($className);
@@ -32,31 +32,38 @@ class Controller extends Action implements ControllerInterface
     }
 
     /**
-     * Método responsável por setar o nome da classe do controlador,
-     * verificando antes se a classe existe.
+     * Método responsável por setar o nome da classe do controlador.
      */
-    private function setClassName(string $className): void
+    public function setClassName(string $className): void
     {
-        if (! class_exists($className, true)) {
-            throw new InvalidArgumentException("Classe {$className} não existe.");
-        }
-
         $this->className = $className;
     }
 
     /**
      * Método responsável por setar o nome do método da classe do
-     * controlador, vericando antes se o método existe na classe.
+     * controlador.
      */
-    private function setMethodName(string $methodName): void
+    public function setMethodName(string $methodName): void
     {
-        if (! method_exists($this->className, $methodName)) {
-            throw new InvalidArgumentException(
-                "Método {$methodName} não existe na classe {$this->className}.
-            ");
-        }
-
         $this->methodName = $methodName;
+    }
+
+    /**
+     * Método responsável por retornar o nome da classe do
+     * controlador.
+     */
+    public function getClassName(): string
+    {
+        return $this->className;
+    }
+
+    /**
+     * Método responsável por retornar o nome do método da classe
+     * do controlador.
+     */
+    public function getMethodName(): string
+    {
+        return $this->methodName;
     }
 
     /**
@@ -65,6 +72,12 @@ class Controller extends Action implements ControllerInterface
      */
     public function getClosure(array $variables): Closure
     {
+        if (empty($this->className) || empty($this->methodName)) {
+            throw new InvalidArgumentException(
+                "A classe ou método do controlador não foram informados."
+            );
+        }
+
         $reflection = new ReflectionClass($this->className);
 
         $reflectionMethod = new ReflectionMethod($this->className, $this->methodName);
