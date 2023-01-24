@@ -177,6 +177,8 @@ class Response
     // Envia os cabeçalhos setados anteriormente
     $this->sendHeaders();
 
+    if (is_null($this->content)) return;
+
     // Entrega o conteúdo
     echo match ($this->contentType) {
       'application/json' => json_encode($this->content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
