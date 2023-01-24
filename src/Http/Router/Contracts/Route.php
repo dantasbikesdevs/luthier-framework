@@ -41,6 +41,27 @@ interface Route
     public function middlewares(array $middlewares): static;
 
     /**
+     * Método responsável por setar as permissões da rota.
+     *
+     * @param array<int, string> $permissions
+     */
+    public function is(array $permissions): static;
+
+    /**
+     * Método responsável por setar as permissões da rota.
+     *
+     * @param array<int, string> $rules
+     */
+    public function can(array $rules);
+
+    /**
+     * Método responsável por setar as permissões da rota.
+     *
+     * @param array<int, string> $screens
+     */
+    public function see(array $screens);
+
+    /**
      * Método responsável por retornar o prefixo da rota.
      */
     public function getPrefix(): string;
@@ -59,4 +80,19 @@ interface Route
      * Método responsável por retornar os middlewares da rota.
      */
     public function getMiddlewares(): array;
+
+    /**
+     * Método responsável por retornar as permissões da rota.
+     */
+    public function getPermissions(): array;
+
+    /**
+     * Método responsável por retornar as regras da rota.
+     */
+    public function getRules(): array;
+
+    /**
+     * Método responsável por retornar as telas da rota.
+     */
+    public function getScreens(): array;
 }

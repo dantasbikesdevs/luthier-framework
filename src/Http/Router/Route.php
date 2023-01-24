@@ -19,17 +19,17 @@ class Route implements RouteInterface
     /**
      * Prefixo da rota.
      */
-    private string $prefix;
+    private string $prefix = "";
 
     /**
      * URI da rota.
      */
-    private string $uri;
+    private string $uri = "";
 
     /**
      * Middlewares da rota.
      */
-    private array $middlewares;
+    private array $middlewares = [];
 
     /**
      * Controlador da rota.
@@ -45,7 +45,22 @@ class Route implements RouteInterface
     /**
      * Variáveis da rota.
      */
-    private array $variables;
+    private array $variables = [];
+
+    /**
+     * Permissões de acesso a rota.
+     */
+    private array $permissions = [];
+
+    /**
+     * Regras de acesso a rota.
+     */
+    private array $rules = [];
+
+    /**
+     * Telas de acesso a rota.
+     */
+    private array $screens = [];
 
     /**
      * Requisição atual.
@@ -59,10 +74,6 @@ class Route implements RouteInterface
     )
     {
         $this->httpMethod = $method;
-        $this->prefix = "";
-        $this->uri = "";
-        $this->middlewares = [];
-        $this->variables = [];
         $this->setUri($uri);
         self:: $request = $request;
     }
@@ -116,6 +127,45 @@ class Route implements RouteInterface
     private function addMiddleware(string $middleware): void
     {
         $this->middlewares[] = $middleware;
+    }
+
+    /**
+     * Método responsável por setar as permissões da rota.
+     *
+     * @param array<int, string> $permissions
+     */
+    public function is(array $permissions): static
+    {
+        $this->permissions = $permissions;
+        $this->middlewares(["auth", "is"]);
+
+        return $this;
+    }
+
+    /**
+     * Método responsável por setar as regras da rota.
+     *
+     * @param array<int, string> $rules
+     */
+    public function can(array $rules): static
+    {
+        $this->rules = $rules;
+        $this->middlewares(["auth", "can"]);
+
+        return $this;
+    }
+
+    /**
+     * Método responsável por setar as telas da rota.
+     *
+     * @param array<int, string> $screens
+     */
+    public function see(array $screens): static
+    {
+        $this->screens = $screens;
+        $this->middlewares(["auth", "screen"]);
+
+        return $this;
     }
 
     /**
@@ -179,7 +229,31 @@ class Route implements RouteInterface
      */
     public function getMiddlewares(): array
     {
-        return $this->middlewares;
+        return array_unique($this->middlewares);
+    }
+
+    /**
+     * Método responsável por retornar as permissões da rota.
+     */
+    public function getPermissions(): array
+    {
+        return $this->permissions;
+    }
+
+    /**
+     * Método responsável por retornar as regras da rota.
+     */
+    public function getRules(): array
+    {
+        return $this->rules;
+    }
+
+    /**
+     * Método responsável por retornar as telas da rota.
+     */
+    public function getScreens(): array
+    {
+        return $this->screens;
     }
 
     /**

@@ -45,6 +45,11 @@ interface Router
     public static function prefix(string $prefix): RouteInterface;
 
     /**
+     * Método responsável por retornar a rota atual.
+     */
+    public static function getRoute(): RouteInterface;
+
+    /**
      * Método responsável por executar o roteador, executando
      * assim a rota atual.
      */

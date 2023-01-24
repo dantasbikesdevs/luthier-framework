@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Luthier\Http;
 
-use Luthier\Http\Router\Router;
+use Luthier\Http\Router\Contracts\Router as RouterInterface;
 
 class Request
 {
@@ -58,7 +58,7 @@ class Request
     /**
      * Router da página
      */
-    private Router $router;
+    private RouterInterface $router;
 
     /**
      * Construtor da classe
@@ -80,7 +80,7 @@ class Request
     /**
      * Método responsável por retornar o router
      */
-    public function getRouter(): Router
+    public function getRouter(): RouterInterface
     {
         return $this->router;
     }
@@ -228,7 +228,7 @@ class Request
      */
     public function permissions()
     {
-        return $this->router->getParamsRoute('permissions') ?? [];
+        return $this->router->getRoute()->getPermissions();
     }
 
     /**
@@ -236,7 +236,7 @@ class Request
      */
     public function rules()
     {
-        return $this->router->getParamsRoute('rules');
+        return $this->router->getRoute()->getRules();
     }
 
     /**
@@ -244,7 +244,7 @@ class Request
      */
     public function screens()
     {
-        return $this->router->getParamsRoute('screens');
+        return $this->router->getRoute()->getScreens();
     }
 
     /**

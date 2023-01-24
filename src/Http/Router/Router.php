@@ -120,19 +120,49 @@ class Router implements RouterInterface
     }
 
     /**
-     * Método responsável por executar o roteador, executando
-     * assim a rota atual.
+     * Método responsável por retornar as rotas que "batem"
+     * com a URI da requisição.
      */
-    public static function run(): Response
+    private static function getRoutesByUri(): RouteCollectionInterface
     {
         $uri = self::$request->getUri();
-        $httpMethod = self::$request->getHttpMethod();
 
         $routes = self::$routes->getByUri($uri);
 
         if ($routes->isEmpty()) {
             throw new RouterException("Rota não encontrada", 404);
         }
+
+        return $routes;
+    }
+
+    /**
+     * Método responsável por retornar a rota atual.
+     */
+    public static function getRoute(): RouteInterface
+    {
+        $routes = self::getRoutesByUri();
+
+        $httpMethod = self::$request->getHttpMethod();
+
+        $route = $routes->getByHttpMethod($httpMethod)->first();
+
+        if (!$route) {
+            throw new RouterException("Método não permitido", 405);
+        }
+
+        return $route;
+    }
+
+    /**
+     * Método responsável por executar o roteador, executando
+     * assim a rota atual.
+     */
+    public static function run(): Response
+    {
+        $routes = self::getRoutesByUri();
+
+        $httpMethod = self::$request->getHttpMethod();
 
         if ($httpMethod === Request::METHOD_OPTIONS) {
             return self::options($routes);
