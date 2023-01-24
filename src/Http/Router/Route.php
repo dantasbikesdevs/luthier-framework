@@ -6,8 +6,8 @@ use Closure;
 use Luthier\Exceptions\RouterException;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
+use Luthier\Http\Router\Abstracts\Action;
 use Luthier\Http\Router\Contracts\Route as RouteInterface;
-use Luthier\Http\Router\Contracts\Controller as ControllerInterface;
 
 class Route implements RouteInterface
 {
@@ -34,13 +34,13 @@ class Route implements RouteInterface
     /**
      * Controlador da rota.
      */
-    private ControllerInterface $controller;
+    private Action $controller;
 
     /**
      * Ação da rota, caso não seja passado o
      * controlador.
      */
-    private Callback $closure;
+    private Action $closure;
 
     /**
      * Variáveis da rota.
