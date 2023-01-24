@@ -7,6 +7,7 @@ use Luthier\Exceptions\RouterException;
 use Luthier\Http\Middlewares\Queue;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
+use Luthier\Http\Router\Contracts\RouteCollection as RouteCollectionInterface;
 use Luthier\Http\Router\Contracts\Route as RouteInterface;
 use Luthier\Http\Router\Contracts\Router as RouterInterface;
 
@@ -20,7 +21,7 @@ class Router implements RouterInterface
     /**
      * Coleção de rotas do sistema.
      */
-    private static RouteCollection $routes;
+    private static RouteCollectionInterface $routes;
 
     /**
      * Requisição atual.
@@ -174,7 +175,7 @@ class Router implements RouterInterface
      * Método responsável por retornar uma resposta quando o
      * método for OPTIONS.
      */
-    private static function options(RouteCollection $routes): Response
+    private static function options(RouteCollectionInterface $routes): Response
     {
         $methods = $routes->getHttpMethods();
 

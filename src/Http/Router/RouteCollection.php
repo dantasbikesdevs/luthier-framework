@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Luthier\Http\Router;
 
 use Luthier\Http\Router\Contracts\Route as RouteInterface;
+use Luthier\Http\Router\Contracts\RouteCollection as RouteCollectionInterface;
 
-class RouteCollection
+class RouteCollection implements RouteCollectionInterface
 {
     /**
      * Array com todas as rotas.
@@ -24,7 +25,7 @@ class RouteCollection
      * Método responsável por dicionar uma nova rota
      * a coleção de rotas.
      */
-    public function add(RouteInterface $route): self
+    public function add(RouteInterface $route): static
     {
         $this->routes[] = $route;
 
@@ -55,7 +56,7 @@ class RouteCollection
      * Método responsável por retornar as rotas da coleção
      * que "baterem" com o pattern da URI requisitada.
      */
-    public function getByUri(string $uri = ""): RouteCollection
+    public function getByUri(string $uri = ""): static
     {
         $routes = array_values(array_filter($this->routes, function ($route) use ($uri) {
             return preg_match($route->getUri(), $uri);
@@ -68,7 +69,7 @@ class RouteCollection
      * Método responsável por retornar as rotas da coleção
      * que possuirem o método HTTP requisitado.
      */
-    public function getByHttpMethod(string $httpMethod): RouteCollection
+    public function getByHttpMethod(string $httpMethod): static
     {
         $routes = array_values(array_filter($this->routes, function ($route) use ($httpMethod) {
             return $route->getHttpMethod() === $httpMethod;
