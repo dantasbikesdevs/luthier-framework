@@ -17,7 +17,7 @@ abstract class Action
      * Deve retornar um array no seguinte modelo:
      * [ [ 'name' => 'id', 'type' => 'int' ] ]
      */
-    public function getParameters(ReflectionMethod|ReflectionFunction $reflection): array
+    protected function getParameters(ReflectionMethod|ReflectionFunction $reflection): array
     {
         $parameters = $reflection->getParameters();
 
