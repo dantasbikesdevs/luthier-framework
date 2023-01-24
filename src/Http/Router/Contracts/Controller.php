@@ -12,5 +12,5 @@ interface Controller
      * Método responsável por retornar a closure do controlador da rota
      * para que seja seja executada com os seus devidos parâmetros.
      */
-    public function getClosure(array $parameters): Closure;
+    public function getClosure(array $variables): Closure;
 }
