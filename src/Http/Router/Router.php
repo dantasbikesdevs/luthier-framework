@@ -7,6 +7,7 @@ use Luthier\Exceptions\RouterException;
 use Luthier\Http\Middlewares\Queue;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
+use Luthier\Http\Router\Contracts\Group as GroupInterface;
 use Luthier\Http\Router\Contracts\RouteCollection as RouteCollectionInterface;
 use Luthier\Http\Router\Contracts\Route as RouteInterface;
 use Luthier\Http\Router\Contracts\Router as RouterInterface;
@@ -81,16 +82,13 @@ class Router implements RouterInterface
     }
 
     /**
-     * Método responsável por registrar uma rota com prefixo e
-     * retornar o seu registro para demais manipulações.
+     * Método responsável por registrar um prefixo para um
+     * grupo de rotas e retornar o seu registro para demais
+     * manipulações.
      */
-    public static function prefix(string $prefix): RouteInterface
+    public static function prefix(string $prefix): GroupInterface
     {
-        $route = new Route("", "", self::$request);
-
-        $route->prefix(self::$prefix . $prefix);
-
-        return $route;
+        return new Group($prefix, self::$request);
     }
 
     /**
