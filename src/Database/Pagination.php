@@ -119,8 +119,6 @@ class Pagination
    */
   public function isExceededPages(): bool
   {
-    if ($this->getCurrentPage() > $this->getTotalPages()) return true;
-
-    return false;
+    return $this->getCurrentPage() > $this->getTotalPages();
   }
 }
