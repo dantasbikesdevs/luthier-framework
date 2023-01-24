@@ -373,9 +373,9 @@ class Response
    */
   private function sanitize(mixed $content): mixed
   {
-    $toLower = getenv("LOWER_CASE_RETURN") == "true" ? true : false;
+    $toLower = getenv("LOWER_CASE_RETURN") == "true";
 
-    if (is_object($content) && $content instanceof Model) {
+    if ($content instanceof Model) {
       $content = Reflection::getValuesObjectToReturnUser($content);
     }
 
