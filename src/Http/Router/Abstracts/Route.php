@@ -86,7 +86,7 @@ abstract class Route implements RouteInterface
      */
     public function prefix(string $prefix): static
     {
-        $this->prefix = $prefix;
+        $this->prefix = str_starts_with($prefix, "/") ? $prefix : "/{$prefix}";
 
         $patternPrefix = $this->patternUri($prefix);
 
@@ -191,6 +191,8 @@ abstract class Route implements RouteInterface
      */
     protected function setUri(string $uri): void
     {
+        $uri = str_starts_with($uri, "/") ? $uri : "/{$uri}";
+
         $patternUri = $this->patternUri($uri);
 
         $this->uri = $patternUri . '\/$/ism';
