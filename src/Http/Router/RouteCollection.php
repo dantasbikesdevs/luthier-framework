@@ -62,7 +62,14 @@ class RouteCollection implements RouteCollectionInterface
             return preg_match($route->getUri(), $uri);
         }));
 
-        return new static($routes);
+        $staticRoutes = array_values(array_filter($routes, function ($route) {
+            return ! $route->isDynamic();
+        }));
+
+        return new static(! empty($staticRoutes)
+            ? array_merge($staticRoutes, $routes)
+            : $routes
+        );
     }
 
     /**

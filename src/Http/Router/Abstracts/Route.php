@@ -15,6 +15,11 @@ use Luthier\Http\Router\Controller;
 abstract class Route implements RouteInterface
 {
     /**
+     * Pattern para extrair as variáveis da rota.
+     */
+    public const patternVariable = '/{(.*?)}/';
+
+    /**
      * Método HTTP da rota.
      */
     protected string $httpMethod;
@@ -66,6 +71,11 @@ abstract class Route implements RouteInterface
     protected array $screens = [];
 
     /**
+     * Indica se a rota é dinâmica.
+     */
+    protected bool $isDynamic = false;
+
+    /**
      * Requisição atual.
      */
     protected static Request $request;
@@ -89,9 +99,9 @@ abstract class Route implements RouteInterface
     {
         $this->prefix = str_starts_with($prefix, "/") ? $prefix : "/{$prefix}";
 
-        $patternPrefix = $this->patternUri($prefix);
+        $extractPrefix = $this->extractVariables($prefix);
 
-        $this->uri = $patternPrefix . $this->uri;
+        $this->uri = $extractPrefix . $this->uri;
 
         return $this;
     }
@@ -203,9 +213,7 @@ abstract class Route implements RouteInterface
     {
         $uri = str_starts_with($uri, "/") ? $uri : "/{$uri}";
 
-        $patternUri = $this->patternUri($uri);
-
-        $this->uri = $patternUri . '\/$/ism';
+        $this->uri = $this->extractVariables($uri);
     }
 
     /**
@@ -229,7 +237,7 @@ abstract class Route implements RouteInterface
      */
     public function getUri(): string
     {
-        return "/^" . $this->uri;
+        return $this->patternUri($this->uri);
     }
 
     /**
@@ -262,6 +270,15 @@ abstract class Route implements RouteInterface
     public function getScreens(): array
     {
         return array_unique($this->screens);
+    }
+
+    /**
+     * Método responsável por indicar se a rota é
+     * dinâmica ou não.
+     */
+    public function isDynamic(): bool
+    {
+        return $this->isDynamic;
     }
 
     /**
@@ -314,20 +331,42 @@ abstract class Route implements RouteInterface
      */
     protected function patternUri(string $uri): string
     {
-        if (empty($uri)) return "";
+        $uri = rtrim($uri, "/");
 
-        $uri = preg_replace("/\/\/+/", "/", $uri);
+        return '/^' . str_replace('/', '\/', $uri) . '\/$/ism';
+    }
 
-        // Padrão de validação das variáveis da rota
-        // Exemplo: /users/{id}/posts/{post_id}
-        $patternVariable = '/{(.*?)}/';
-        if (preg_match_all($patternVariable, $uri, $matches)) {
-            $uri = preg_replace($patternVariable, '([\w!@""#$%¨&*ç()`+=:.?,<>_{};\-\'\']*?)', $uri);
-            $this->variables = array_map("mb_strtolower", $matches[1]);
+    /**
+     * Método responsável por extrair as variáveis da rota, alterar a posição
+     * pelo regex e setar o nome das variáveis no atributo.
+     */
+    protected function extractVariables(string $uri): string
+    {
+        $uri = $this->replaceRepeteadSlash($uri);
+
+        if (preg_match_all(self::patternVariable, $uri, $matches)) {
+            $uri = preg_replace(self::patternVariable, '(.*?)', $uri);
+            $this->variables = array_merge($this->variables, $this->mapToLowerCase($matches[1]));
+            $this->isDynamic = true;
         }
 
-        $uri = rtrim($uri, '/');
+        return $uri;
+    }
 
-        return str_replace('/', '\/', $uri);
+    /**
+     * Método responsável por substituir barras repetidas por uma única.
+     */
+    protected function replaceRepeteadSlash(string $uri): string
+    {
+        return preg_replace("/\/\/+/", "/", $uri);
+    }
+
+    /**
+     * Método responsável por mapear os valores de um array para
+     * minúsculo.
+     */
+    protected function mapToLowerCase(array $array): array
+    {
+        return array_map("mb_strtolower", $array);
     }
 }
