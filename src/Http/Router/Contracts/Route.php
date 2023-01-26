@@ -15,22 +15,16 @@ interface Route
 
     /**
      * Método responsável por setar as permissões da rota.
-     *
-     * @param array<int, string> $permissions
      */
     public function is(array $permissions): static;
 
     /**
      * Método responsável por setar as permissões da rota.
-     *
-     * @param array<int, string> $rules
      */
     public function can(array $rules);
 
     /**
      * Método responsável por setar as permissões da rota.
-     *
-     * @param array<int, string> $screens
      */
     public function see(array $screens);
 
