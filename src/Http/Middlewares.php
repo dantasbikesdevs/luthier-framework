@@ -55,7 +55,7 @@ class Middlewares
      */
     private static function mapMiddlewaresApplication(): void
     {
-        $path = realpath(dirname(__DIR__, 2)) . "/" . self::$path;
+        $path = realpath(dirname(__DIR__, 5)) . "/" . self::$path;
 
         $dir = dir($path);
 
