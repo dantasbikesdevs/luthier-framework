@@ -47,7 +47,7 @@ interface Router
     /**
      * Método responsável por retornar a rota atual.
      */
-    public static function getRoute(): RouteInterface;
+    public static function getCurrentRoute(): RouteInterface;
 
     /**
      * Método responsável por executar o roteador, executando

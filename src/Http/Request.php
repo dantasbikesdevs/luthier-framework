@@ -228,7 +228,7 @@ class Request
      */
     public function permissions()
     {
-        return $this->router->getRoute()->getPermissions();
+        return $this->router->getCurrentRoute()->getPermissions();
     }
 
     /**
@@ -236,7 +236,7 @@ class Request
      */
     public function rules()
     {
-        return $this->router->getRoute()->getRules();
+        return $this->router->getCurrentRoute()->getRules();
     }
 
     /**
@@ -244,7 +244,7 @@ class Request
      */
     public function screens()
     {
-        return $this->router->getRoute()->getScreens();
+        return $this->router->getCurrentRoute()->getScreens();
     }
 
     /**
