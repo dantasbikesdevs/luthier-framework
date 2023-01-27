@@ -62,14 +62,36 @@ class RouteCollection implements RouteCollectionInterface
             return preg_match($route->getUri(), $uri);
         }));
 
-        $staticRoutes = array_values(array_filter($routes, function ($route) {
-            return ! $route->isDynamic();
-        }));
+        $staticRoutes = $this->getAllStatic($routes);
+
+        $dynamicRoutes = $this->getAllDynamic($routes);
 
         return new static(! empty($staticRoutes)
-            ? array_merge($staticRoutes, $routes)
-            : $routes
+            ? array_merge($staticRoutes, $dynamicRoutes)
+            : $dynamicRoutes
         );
+    }
+
+    /**
+     * Método responsável por retornar as rotas dinâmicas do array
+     * recebido.
+     */
+    private function getAllDynamic(array $routes): array
+    {
+        return array_values(array_filter($routes, function ($route) {
+            return $route->isDynamic();
+        }));
+    }
+
+    /**
+     * Método responsável por retornar as rotas estáticas do array
+     * recebido.
+     */
+    private function getAllStatic(array $routes): array
+    {
+        return array_values(array_filter($routes, function ($route) {
+            return ! $route->isDynamic();
+        }));
     }
 
     /**
