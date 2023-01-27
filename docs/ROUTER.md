@@ -140,3 +140,67 @@ Router::prefix("/users")
 Por padrão, além das variáveis da URL, caso existam, são passadas via parâmetro uma instância de `Luthier\Http\Request` e uma instância de `Luthier\Http\Response`.
 Para "capturá-las", você deve definir os parâmetros na função/método do controlador com `$request` e `$response` sem ou com a mesma
 tipagem das classes para que não ocorra erro.
+
+### Middlewares
+
+Middlewares são ações que são executadas antes da execução da rota. Estas funções podem ser utilizadas para
+validações, autenticação, etc.
+
+Para definir o(s) middleware(s) de uma rota, você precisa utilizar o método `middlewares()` e passar um array
+com o nome dos mesmos.
+
+Exemplo:
+
+```php
+<?php
+
+Router::get("/rota", function () {
+    return "Olá mundo!";
+})->middlewares(["auth"]);
+```
+
+Lembre-se que o middleware deve estar registrado para que seja executado.
+
+### Permissões
+
+Para definir permissões para a rota, você pode utilizar os métodos `is()`, `can()` e `see()`.
+
+- **Is**: método utilizado para setar as permissões com relação ao cargo do usuário.
+O mesmo recebe um array de cargos.
+
+Exemplo:
+
+```php
+<?php
+
+Router::get("/rota", function () {
+    return "Olá mundo!";
+})->is(["admin"]);
+```
+
+- **Can**: método utilizado para setar as permissões com relação ao que o usuário pode fazer.
+
+Exemplo:
+
+```php
+<?php
+
+Router::get("/rota", function () {
+    return "Olá mundo!";
+})->can(["read_route"]);
+```
+
+- **See**: método utilizado para setar as permissões com relação a telas que o usuário pode ver.
+
+Exemplo:
+
+```php
+<?php
+
+Router::get("/rota", function () {
+    return "Olá mundo!";
+})->see(["marketing"]);
+```
+
+Por padrão, ao utilizar os métodos de permissão, é setado o middleware `auth` para autenticação
+e o respectivo middleware para autorização.
