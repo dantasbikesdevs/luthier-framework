@@ -33,9 +33,9 @@ class Group extends AbstractRoute implements GroupInterface
         foreach ($routes as $route) {
             $route->prefix($this->prefix);
             $route->middlewares($this->middlewares);
-            $route->is($this->permissions);
-            $route->can($this->rules);
-            $route->see($this->screens);
+            $route->is(array_merge($this->permissions, $route->getPermissions()));
+            $route->can(array_merge($this->rules, $route->getRules()));
+            $route->see(array_merge($this->screens, $route->getScreens()));
 
             if (! empty($this->controller->getClassName())) {
                 $route->controller($this->controller->getClassName());
