@@ -32,7 +32,7 @@ interface RouteCollection
      * Método responsável por retornar as rotas da coleção
      * que "baterem" com o pattern da URI requisitada.
      */
-    public function getByUri(string $uri): static;
+    public function getAllByUri(string $uri): static;
 
     /**
      * Método responsável por retornar as rotas da coleção

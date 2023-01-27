@@ -129,7 +129,7 @@ class Router implements RouterInterface
     {
         $uri = self::$request->getUri();
 
-        $routes = self::$routes->getByUri($uri);
+        $routes = self::$routes->getAllByUri($uri);
 
         if ($routes->isEmpty()) {
             throw new RouterException("Rota não encontrada", 404);

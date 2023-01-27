@@ -56,7 +56,7 @@ class RouteCollection implements RouteCollectionInterface
      * Método responsável por retornar as rotas da coleção
      * que "baterem" com o pattern da URI requisitada.
      */
-    public function getByUri(string $uri = ""): static
+    public function getAllByUri(string $uri = ""): static
     {
         $routes = array_values(array_filter($this->routes, function ($route) use ($uri) {
             return preg_match($route->getUri(), $uri);
