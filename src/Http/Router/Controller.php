@@ -80,7 +80,7 @@ class Controller extends Action implements ControllerInterface
 
         $reflection = new ReflectionClass($this->className);
 
-        $reflectionMethod = new ReflectionMethod($this->className, $this->methodName);
+        $reflectionMethod = $reflection->getMethod($this->methodName);
 
         $method = $this->methodName;
 
