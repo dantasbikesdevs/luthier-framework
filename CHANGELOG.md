@@ -48,3 +48,7 @@ nome da coluna.
 
 # V2.1.0
 - Método para geração de UUID v4.
+
+# V3.0.0
+- Refatorado todo o módulo de rotas. Nesta refatoração é corrigida problemas de
+conflitos de rotas estáticas e dinâmicas, além de não executar todas as rotas desnecessariamente.
