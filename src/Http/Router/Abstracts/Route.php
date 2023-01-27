@@ -253,7 +253,7 @@ abstract class Route implements RouteInterface
      */
     public function getPermissions(): array
     {
-        return array_unique($this->permissions);
+        return $this->permissions;
     }
 
     /**
@@ -261,7 +261,7 @@ abstract class Route implements RouteInterface
      */
     public function getRules(): array
     {
-        return array_unique($this->rules);
+        return $this->rules;
     }
 
     /**
@@ -269,7 +269,7 @@ abstract class Route implements RouteInterface
      */
     public function getScreens(): array
     {
-        return array_unique($this->screens);
+        return $this->screens;
     }
 
     /**
