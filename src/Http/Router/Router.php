@@ -25,6 +25,11 @@ class Router implements RouterInterface
     private static RouteCollectionInterface $routes;
 
     /**
+     * Rota atual.
+     */
+    private static RouteInterface $currentRoute;
+
+    /**
      * Requisição atual.
      */
     private static Request $request;
@@ -143,17 +148,7 @@ class Router implements RouterInterface
      */
     public static function getCurrentRoute(): RouteInterface
     {
-        $routes = self::getRoutesByUri();
-
-        $httpMethod = self::$request->getHttpMethod();
-
-        $route = $routes->getByHttpMethod($httpMethod)->first();
-
-        if (!$route) {
-            throw new RouterException("Método não permitido", 405);
-        }
-
-        return $route;
+        return self::$currentRoute;
     }
 
     /**
@@ -175,6 +170,8 @@ class Router implements RouterInterface
         if (!$route) {
             throw new RouterException("Método não permitido", 405);
         }
+
+        self::$currentRoute = $route;
 
         $result = self::execute($route);
 
