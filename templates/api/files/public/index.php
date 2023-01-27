@@ -3,12 +3,11 @@
 require_once __DIR__ . "/../vendor/autoload.php";
 require_once __DIR__ . "/../config/config.php";
 
-use Luthier\Http\Response;
-use \Luthier\Http\Router;
-use \Luthier\Utils\Path;
+use Luthier\Http\Router\Router;
+use Luthier\Utils\Path;
 
 # Inicia o router (roteador)
-$router = new Router(LUTHIER_URL);
+$router = new Router();
 
 $routes = Path::getMultipleFiles(PROJECT_ROOT . "/routes/v1");
 

@@ -1,40 +1,25 @@
 <?php
 
-use \Luthier\Http\Response;
-use \Luthier\Http\Request;
-use \Luthier\Http\Router;
-use \App\Controller\UserController;
+use App\Controller\UserController;
+use Luthier\Http\Router\Router;
 
-$userController = new UserController();
+Router::prefix("/users")
+  ->controller(UserController::class)
+  ->group([
+    Router::post("/login", "signIn"),
 
-/**
- * Router existe aqui porque críamos este objeto em /public/index.php
- */
-$router->group("/users", function (Router &$router) use ($userController) {
-    $router->post("/login", [
-        fn (Request $request, Response $response) => $userController->signIn($request, $response)
-    ]);
+    Router::post("/register", "signUp"),
 
-    $router->post("/register", [
-        fn (Request $request, Response $response) => $userController->signUp($request, $response)
-    ]);
+    Router::get("/logout", "signOut")
+  ]);
 
-    $router->get("/logout", [
-        fn (Request $request, Response $response) => $userController->signOut($request, $response)
-    ]);
-});
+Router::prefix("/users")
+  ->is(["admin"])
+  ->controller(UserController::class)
+  ->group([
+    Router::put("/{id}", "update"),
 
-// Grupo
-$router->is(["admin"])->group("/users", function (Router &$router) use ($userController) {
-    $router->put("/{id}", [
-        fn (Request $request, Response $response, $id) => $userController->update($request, $response, $id)
-    ]);
+    Router::get("/", "findAll"),
 
-    $router->get("/", [
-        fn (Request $request, Response $response) => $userController->findAll($request, $response)
-    ]);
-
-    $router->get("/{id}", [
-        fn (Request $request, Response $response, int $id) => $userController->findOne($request, $response, $id)
-    ]);
-});
+    Router::get("/{id}", "findOne")
+  ]);
