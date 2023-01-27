@@ -209,7 +209,7 @@ class Router implements RouterInterface
      */
     private static function options(RouteCollectionInterface $routes): Response
     {
-        $methods = array_unique($routes->getHttpMethods());
+        $methods = $routes->getHttpMethods();
 
         return new Response(null, 200, [
             "Access-Control-Allow-Methods" => implode(",", array_values($methods)),

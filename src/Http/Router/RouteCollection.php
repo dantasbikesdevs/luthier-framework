@@ -82,7 +82,7 @@ class RouteCollection implements RouteCollectionInterface
             return $route->getHttpMethod() === $httpMethod;
         }));
 
-        return new static($routes);
+        return new static(array_unique($routes));
     }
 
     /**
