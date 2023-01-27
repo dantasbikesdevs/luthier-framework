@@ -189,7 +189,7 @@ class Router implements RouterInterface
         $closure = $router->getAction();
 
         $middlewareQueue = new Queue($router, $closure);
-        
+
         return $middlewareQueue->execute(self::$request);
     }
 
@@ -209,7 +209,7 @@ class Router implements RouterInterface
      */
     private static function options(RouteCollectionInterface $routes): Response
     {
-        $methods = $routes->getHttpMethods();
+        $methods = array_unique($routes->getHttpMethods());
 
         return new Response(null, 200, [
             "Access-Control-Allow-Methods" => implode(",", array_values($methods)),
