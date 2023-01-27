@@ -47,9 +47,9 @@ class RouteCollection implements RouteCollectionInterface
      */
     public function getHttpMethods(): array
     {
-        return array_map(function (RouteInterface $route) {
+        return array_unique(array_map(function (RouteInterface $route) {
             return $route->getHttpMethod();
-        }, $this->routes);
+        }, $this->routes));
     }
 
     /**
@@ -82,7 +82,7 @@ class RouteCollection implements RouteCollectionInterface
             return $route->getHttpMethod() === $httpMethod;
         }));
 
-        return new static(array_unique($routes));
+        return new static($routes);
     }
 
     /**
