@@ -345,7 +345,7 @@ abstract class Route implements RouteInterface
         $uri = $this->replaceRepeteadSlash($uri);
 
         if (preg_match_all(self::patternVariable, $uri, $matches)) {
-            $uri = preg_replace(self::patternVariable, '([\w!@""#$%¨&*ç()`+=:.?,<>_{};\-\'\'\\]*?)', $uri);
+            $uri = preg_replace(self::patternVariable, '([\w!@""#$%¨&*ç()`+=:.?,<>_{};\-\'\'\\]]*?)', $uri);
             $this->variables = array_merge($this->variables, $this->mapToLowerCase($matches[1]));
             $this->isDynamic = true;
         }
