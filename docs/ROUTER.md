@@ -202,5 +202,15 @@ Router::get("/rota", function () {
 })->see(["marketing"]);
 ```
 
-Por padrão, ao utilizar os métodos de permissão, é setado o middleware `auth` para autenticação
-e o respectivo middleware para autorização.
+**Obs.:** Lembre-se de setar o middleware de autenticação que irá setar o usuário na requisição, pois os métodos
+de autorização o utilização para realizar as validações.
+
+Exemplo:
+
+```php
+<?php
+
+Router::get("/rota", function () {
+    return "Olá mundo!";
+})->middlewares(["auth"])->see(["marketing"]);
+```
