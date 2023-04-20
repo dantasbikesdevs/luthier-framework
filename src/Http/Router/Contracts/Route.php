@@ -21,12 +21,12 @@ interface Route
     /**
      * Método responsável por setar as permissões da rota.
      */
-    public function can(array $rules);
+    public function can(array $rules): static;
 
     /**
      * Método responsável por setar as permissões da rota.
      */
-    public function see(array $screens);
+    public function see(array $screens): static;
 
     /**
      * Método responsável por setar o prefixo da rota.
