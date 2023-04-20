@@ -55,3 +55,14 @@ nome da coluna.
 - Refatorado todo o módulo de rotas. Nesta refatoração é corrigida problemas de
 conflitos de rotas estáticas e dinâmicas, executação desnecessaria todas as rotas
 e novas features.
+
+### V3.0.1
+- Refatoração dos métodos de autorização de rotas. Agora não é mais setado automaticamente o
+middleware `auth`, o que deixava o sistema de autorização totalmente acoplado a este middleware.
+Dessa forma, agora é necessário definir o middleware de autenticação manualmente com o método `middlewares()`
+nas rotas que necessitam de autorização.
+- Criação de uma classe de coleção para os middlewares das rotas.
+- Ordem de execução dos middlewares alterada. Agora os middlewares globais (do grupo de rotas) são inseridos no
+início da fila de execução, sendo assim também para os middlewares de rotas separadas. A ordem é definida pela
+ordem de declaração no array de middlewares. Exemplo: ["auth", "cors"]. Primeiro é executado o middleware `auth` e depois o `cors`.
+Já os middlewares de autorização são inseridos no final da fila de execução.
