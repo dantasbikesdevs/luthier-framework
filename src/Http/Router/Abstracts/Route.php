@@ -8,6 +8,7 @@ use Closure;
 use Luthier\Exceptions\RouterException;
 use Luthier\Http\Request;
 use Luthier\Http\Response;
+use Luthier\Http\Router\Collections\MiddlewareCollection;
 use Luthier\Http\Router\Contracts\Route as RouteInterface;
 use Luthier\Http\Router\Callback;
 use Luthier\Http\Router\Controller;
@@ -37,7 +38,7 @@ abstract class Route implements RouteInterface
     /**
      * Middlewares da rota.
      */
-    protected array $middlewares = [];
+    protected MiddlewareCollection $middlewares;
 
     /**
      * Controlador da rota.
@@ -87,8 +88,9 @@ abstract class Route implements RouteInterface
     )
     {
         $this->httpMethod = $method;
-        $this->setUri($uri);
         $this->controller = new Controller();
+        $this->middlewares = new MiddlewareCollection();
+        $this->setUri($uri);
         self:: $request = $request;
     }
 
@@ -107,7 +109,8 @@ abstract class Route implements RouteInterface
     }
 
     /**
-     * Método responsável por adicionar os middlewares da rota.
+     * Método responsável por adicionar, no início da lista,
+     * os middlewares da rota.
      *
      * @param array<int, string> $middlewares
      */
@@ -115,19 +118,33 @@ abstract class Route implements RouteInterface
     {
         if (empty($middlewares)) return $this;
 
+        $middlewares = array_reverse($middlewares);
+
         foreach ($middlewares as $middleware) {
-            $this->addMiddleware($middleware);
+            $this->middlewares->unshift($middleware);
         }
 
         return $this;
     }
 
     /**
-     * Método responsável por adicionar um middleware a rota.
+     * Método responsável por adicionar, no final da lista,
+     * middlewares da rota.
+     */
+    protected function addMiddlewares(array $middlewares): void
+    {
+        foreach ($middlewares as $middleware) {
+            $this->middlewares->push($middleware);
+        }
+    }
+
+    /**
+     * Método responsável por adicionar, no final da lista,
+     * um middleware da rota.
      */
     protected function addMiddleware(string $middleware): void
     {
-        $this->middlewares[] = $middleware;
+        $this->middlewares->push($middleware);
     }
 
     /**
@@ -138,7 +155,7 @@ abstract class Route implements RouteInterface
         if (empty($permissions)) return $this;
 
         $this->permissions = $permissions;
-        $this->middlewares(["auth", "is"]);
+        $this->addMiddleware("is");
 
         return $this;
     }
@@ -151,7 +168,7 @@ abstract class Route implements RouteInterface
         if (empty($rules)) return $this;
 
         $this->rules = $rules;
-        $this->middlewares(["auth", "can"]);
+        $this->addMiddleware("can");
 
         return $this;
     }
@@ -164,7 +181,7 @@ abstract class Route implements RouteInterface
         if (empty($screens)) return $this;
 
         $this->screens = $screens;
-        $this->middlewares(["auth", "screen"]);
+        $this->addMiddleware("screen");
 
         return $this;
     }
@@ -245,7 +262,7 @@ abstract class Route implements RouteInterface
      */
     public function getMiddlewares(): array
     {
-        return array_unique($this->middlewares);
+        return array_unique($this->middlewares->all());
     }
 
     /**

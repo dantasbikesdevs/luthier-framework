@@ -32,7 +32,7 @@ class Group extends AbstractRoute implements GroupInterface
     {
         foreach ($routes as $route) {
             $route->prefix($this->prefix);
-            $route->middlewares($this->middlewares);
+            $route->middlewares($this->middlewares->all());
             $route->is(array_merge($this->permissions, $route->getPermissions()));
             $route->can(array_merge($this->rules, $route->getRules()));
             $route->see(array_merge($this->screens, $route->getScreens()));
