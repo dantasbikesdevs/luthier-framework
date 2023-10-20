@@ -66,3 +66,10 @@ nas rotas que necessitam de autorização.
 início da fila de execução, sendo assim também para os middlewares de rotas separadas. A ordem é definida pela
 ordem de declaração no array de middlewares. Exemplo: ["auth", "cors"]. Primeiro é executado o middleware `auth` e depois o `cors`.
 Já os middlewares de autorização são inseridos no final da fila de execução.
+
+### V3.1.0
+
+- Adiciona suporte a múltiplos parâmetros iguais na query string.
+Exemplo: `?categoria=1&categoria=2&categoria=3&name=foo`
+
+Retorno: `["categoria" => [1, 2, 3], "name" => "foo"]`

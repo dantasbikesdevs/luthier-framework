@@ -276,9 +276,32 @@ class Request
     /**
      * Método responsável por definir os parâmetros ($_GET) da URL
      */
-    private function setQueryParams()
+    private function setQueryParams(): void
     {
-        $queryParams = $_GET ?? [];
+        if (empty($_SERVER["QUERY_STRING"])) {
+            $this->queryParams = [];
+            return;
+        }
+
+        $queryParamsEncoded = explode("&", $_SERVER["QUERY_STRING"]);
+
+        $queryParamsDecoded = array_map("urldecode", $queryParamsEncoded);
+
+        $queryParams = [];
+        foreach ($queryParamsDecoded as $queryParam) {
+            [$name, $value] = explode("=", $queryParam);
+
+            if (isset($queryParams[$name])) {
+                if (is_array($queryParams[$name])) {
+                    $queryParams[$name][] = $value;
+                } else {
+                    $queryParams[$name] = [$queryParams[$name], $value];
+                }
+            } else {
+                $queryParams[$name] = $value;
+            }
+        }
+
         $this->queryParams = $this->sanitize($queryParams);
     }
 
