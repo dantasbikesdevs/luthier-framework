@@ -74,6 +74,9 @@ class Database implements IDatabase
    */
   private static function connectionAsString($host, $path, $driver = "firebird")
   {
+    if($driver === "sqlite"){
+        return "$driver:{$path}";
+    }
     return "$driver:dbname=${host}:${path};charset=utf8;dialect=3;";
   }
 
