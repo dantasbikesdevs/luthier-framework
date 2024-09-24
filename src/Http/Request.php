@@ -270,7 +270,46 @@ class Request
         $json = file_get_contents('php://input');
         $jsonVars = json_decode($json, true) ?? [];
         $postVars = array_merge($jsonVars, $postVars);
-        $this->postVars = $this->sanitize($postVars);
+
+        $files = $this->normalizeFiles($_FILES);
+
+        $sanitizedPostvars = $this->sanitize($postVars);
+
+        $this->postVars = $this->mergeArrays($sanitizedPostvars, $files);
+    }
+
+    /**
+    * Normaliza a estrutura de $_FILES para suportar múltiplos uploads e arquivos aninhados
+    */
+    private function normalizeFiles(array $filesArray): array
+    {
+        $normalizedFiles = [];
+
+        foreach ($filesArray as $fileType => $properties) {
+            foreach ($properties as $propertyKey => $propertyValues) {
+                foreach ($propertyValues as $index => $valueProperties) {
+                    foreach ($valueProperties as $primaryKey => $value) {
+                        $normalizedFiles[$fileType][$index][$primaryKey][$propertyKey] = $value;
+                    }
+                }
+            }
+        }
+
+        return $normalizedFiles;
+    }
+
+    private function mergeArrays(array $array1, array $array2): array
+    {
+        foreach ($array2 as $key => $value) {
+            if (is_array($value) && isset($array1[$key]) && is_array($array1[$key])) {
+                $array1[$key] = $this->mergeArrays($array1[$key], $value);
+                continue;
+            }
+
+            $array1[$key] = $value;
+        }
+
+        return $array1;
     }
 
     /**
