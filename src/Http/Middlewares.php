@@ -44,9 +44,8 @@ class Middlewares
             $dirname = $path . DIRECTORY_SEPARATOR . $file;
             $class = ClassName::getClassNameFromFile($dirname);
             if (empty($class)) continue;
-            $middlewareKey = "luthier:" . lcfirst($class);
             $namespacePath = "Luthier\\Http\\Middlewares\\" . $class;
-            self::$middlewares[$middlewareKey] = $namespacePath;
+            self::$middlewares[$namespacePath] = $namespacePath;
         }
     }
 
@@ -65,9 +64,9 @@ class Middlewares
             $class = ClassName::getClassNameFromFile($dirname);
             $namespace = ClassName::getClassnamespaceFromFile($dirname);
             if (empty($class) || empty($namespace)) continue;
-            $middlewareKey = lcfirst($class);
+            $middlewareKey = $class;
             $namespacePath = $namespace . "\\" . $class;
-            self::$middlewares[$middlewareKey] = $namespacePath;
+            self::$middlewares[$namespacePath] = $namespacePath;
         }
     }
 
